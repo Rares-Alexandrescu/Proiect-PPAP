@@ -1,0 +1,63 @@
+﻿@page
+@model PPAP_Proiect.Pages.User.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Creare cont utilizator</h2>
+
+        <form method="post">
+            @if (Model.ModelState["eroareBazaDeDate"]?.Errors.Count > 0)
+            {
+                <div class="form-group">
+                    <span class="text-danger">@Model.ModelState["eroareBazaDeDate"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                </div>
+            }
+
+            <div class="form-group">
+                <label>Nume:</label>
+                <input asp-for="userNou.Nume" placeholder="Introdu numele" />
+                <span class="text-danger">@Model.ModelState["eroareNume"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+
+            <div class="form-group">
+                <label>Prenume:</label>
+                <input asp-for="userNou.Prenume" placeholder="Introdu prenumele" />
+                <span class="text-danger">@Model.ModelState["eroarePrenume"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+
+            <div class="form-group">
+                <label>Email:</label>
+                <input asp-for="userNou.Email" type="email" placeholder="email@exemplu.ro" />
+                <span class="text-danger">@Model.ModelState["eroareEmail"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+
+            <div class="form-group">
+                <label>CNP:</label>
+                <input asp-for="userNou.Cnp" placeholder="Cod Numeric Personal" />
+                <span class="text-danger">@Model.ModelState["eroareCNP"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+
+            <div class="form-group">
+                <label>Parolă:</label>
+                <input asp-for="userNou.Parola" type="password" placeholder="••••••••" />
+                <span class="text-danger">@Model.ModelState["eroareParola"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+
+            <div class="form-group">
+                <label>Confirmare parolă:</label>
+                <input asp-for="parolaConfirmare" type="password" placeholder="••••••••" />
+                <span class="text-danger">@Model.ModelState["eroareParolaConfirmare"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+
+            <button type="submit" class="btn-primary">Creează cont</button>
+
+            <div class="auth-footer">
+                <span>Ai deja un cont?</span>
+                <a asp-page="/User/Login" class="auth-link">Autentifică-te</a>
+            </div>
+        </form>
+    </div>
+</div>

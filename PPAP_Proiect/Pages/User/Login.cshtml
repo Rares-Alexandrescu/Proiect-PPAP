@@ -1,0 +1,47 @@
+﻿@page
+@model PPAP_Proiect.Pages.User.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Autentificare</h2>
+
+        <form method="post">
+            @if (Model.ModelState["eroareLogin"]?.Errors.Count > 0)
+            {
+                <div class="form-group">
+                    <span class="text-danger">@Model.ModelState["eroareLogin"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                </div>
+            }
+
+            @if (Model.ModelState["mesajSucces"] != null)
+            {
+                <div class="form-group">
+                    <span class="text-success" style="color: green; font-weight: bold;">
+                        @Model.ModelState["mesajSucces"]?.Errors.FirstOrDefault()?.ErrorMessage
+                    </span>
+                </div>
+            }
+            <div class="form-group">
+                <label>Email sau CNP:</label>
+                <input asp-for="EmailsauCNP" type="text" placeholder="nume@exemplu.ro / 1231231231231" />
+                <span class="text-danger">@Model.ModelState["eroareEmailCNP"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+
+            <div class="form-group">
+                <label>Parolă:</label>
+                <input asp-for="parola" type="password" placeholder="••••••••" />
+                <span class="text-danger">@Model.ModelState["eroareParola"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+
+            <button type="submit" class="btn-primary">Intră în cont</button>
+
+            <div class="auth-footer">
+                <span>Nu ai cont?</span>
+                <a asp-page="/User/Register" class="auth-link">Înregistrează-te</a>
+            </div>
+        </form>
+    </div>
+</div>
