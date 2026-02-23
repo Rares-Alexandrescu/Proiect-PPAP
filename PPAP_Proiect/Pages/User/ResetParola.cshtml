@@ -1,0 +1,58 @@
+﻿@page
+@model PPAP_Proiect.Pages.User.ResetParolaModel
+@{
+    ViewData["Title"] = "Resetare Parolă";
+}
+
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>@ViewData["Title"]</h2>
+
+        @if (!ModelState.IsValid)
+        {
+            <div class="text-danger" style="text-align: center; margin-bottom: 1rem; font-size: 0.9rem;">
+                <div asp-validation-summary="ModelOnly"></div>
+                <span>@Html.ValidationMessage("mesajEroare")</span>
+            </div>
+        }
+
+        @if (string.IsNullOrEmpty(Model.tokenResetare))
+        {
+            <form method="post">
+                <div class="form-group">
+                    <label for="emailsaucnp">Email sau CNP</label>
+                    <input type="text" id="emailsaucnp" name="emailsaucnp" placeholder="Introdu adresa de email sau CNP-ul" />
+                    <span class="text-danger">@Html.ValidationMessage("mesajEroareCNPsauEmail")</span>
+                </div>
+
+                <button type="submit" class="btn-primary">Trimite Link Resetare</button>
+            </form>
+        }
+        else
+        {
+            <form method="post" asp-page-handler="Resetare">
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="tokenResetare" />
+
+                <div class="form-group">
+                    <label asp-for="parolaSchimbare">Parola Nouă</label>
+                    <input asp-for="parolaSchimbare" type="password" placeholder="Introdu parola nouă" required />
+                    <span class="text-danger">@Html.ValidationMessage("eroareParola")</span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="parolaSchimbareConfirmare">Confirmă Parola Nouă</label>
+                    <input asp-for="parolaSchimbareConfirmare" type="password" placeholder="Confirmă parola" required />
+                    <span class="text-danger">@Html.ValidationMessage("eroareParolaConfirmare")</span>
+                </div>
+
+                <button type="submit" class="btn-primary">Salvează Noua Parolă</button>
+            </form>
+        }
+
+        <div class="auth-footer">
+            <a href="/User/Login" class="auth-link">Înapoi la Autentificare</a>
+        </div>
+    </div>
+</div>

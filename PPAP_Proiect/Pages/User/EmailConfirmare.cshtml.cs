@@ -81,7 +81,7 @@ namespace PPAP_Proiect.Pages.User
             if(token != tokenFormat)
             {
 				HttpContext.Session.SetString("mesajEroare", "Tokenul dat de tine nu este bun! Incearca din nou pe noul mail trimis!");
-
+                Console.WriteLine(HttpContext.Session.GetString("mesajEroare"));
 				return RedirectToPage("/Index");
             }
             else {
@@ -101,6 +101,7 @@ namespace PPAP_Proiect.Pages.User
                         catch(Exception e)
                         {
 							HttpContext.Session.SetString("mesajEroare", "Eroare : " + e.Message);
+                            Console.WriteLine(e.Message);
 							return RedirectToPage("/Index");
                         }
                     }
@@ -108,7 +109,8 @@ namespace PPAP_Proiect.Pages.User
             }
 
 			HttpContext.Session.SetString("mesajSucces", "Cont confirmat cu succes!");
-			return RedirectToPage("/Index");
+            Console.WriteLine("Ura");
+            return RedirectToPage("/Index");
 		}
     }
 }

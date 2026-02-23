@@ -153,5 +153,56 @@ namespace PPAP_Proiect.Data
 			}
 
 		}
-	}
+
+        public Utilizator GetUserByEmailsauCNP(string emailsaucnp)
+        {
+            using (SqlConnection conn = _db.GetConnection())
+            {
+                if (conn.State == System.Data.ConnectionState.Closed)
+                    conn.Open();
+
+                using (SqlCommand cmd = new SqlCommand("sp_Utilizator_getbyEmailsauCNP", conn))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@emailsaucnp", emailsaucnp);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                            return null;
+
+                        return new Utilizator
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Nume = reader.GetString(reader.GetOrdinal("nume")),
+                            Prenume = reader.GetString(reader.GetOrdinal("prenume")),
+                            Email = reader.GetString(reader.GetOrdinal("email")),
+                            Cnp = reader.GetString(reader.GetOrdinal("cnp")),
+                            RolId = reader.IsDBNull(reader.GetOrdinal("rol_id"))
+                                ? 0
+                                : reader.GetInt32(reader.GetOrdinal("rol_id")),
+                            CompanieId = reader.IsDBNull(reader.GetOrdinal("companie_id"))
+                                ? 0
+                                : reader.GetInt32(reader.GetOrdinal("companie_id")),
+
+                            ContVerificat = !reader.IsDBNull(reader.GetOrdinal("cont_verificat"))
+                                && reader.GetBoolean(reader.GetOrdinal("cont_verificat")),
+
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at"))
+                                ? DateTime.Now
+                                : reader.GetDateTime(reader.GetOrdinal("created_at")),
+
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at"))
+                                ? (DateTime?)null
+                                : reader.GetDateTime(reader.GetOrdinal("updated_at"))
+
+
+                        };
+                    }
+                }
+
+            }
+
+        }
+    }
 }

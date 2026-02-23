@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36811.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPAP_Proiect", "PPAP_Proiect\PPAP_Proiect.csproj", "{BF9F47D9-2454-4C89-9FAA-CCCE57CD2C68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PPAP_Proiect", "PPAP_Proiect\PPAP_Proiect.csproj", "{BF9F47D9-2454-4C89-9FAA-CCCE57CD2C68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

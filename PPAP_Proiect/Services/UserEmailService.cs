@@ -16,7 +16,7 @@
 			var template = _templateService.GetTemplate("User_ResetareParola");
 
 			template = template.Replace("{{Nume}}", numeUser);
-			template = template.Replace("{{LinkResetare}}", linkResetare);
+			template = template.Replace("{{linkResetare}}", linkResetare);
 
 			await _emailSender.SendEmailAsync(numeUser, emailUser, "Resetare Parola PPAP!", template);
 		}

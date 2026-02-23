@@ -2,6 +2,14 @@
 @model PPAP_Proiect.Pages.User.LoginModel
 @{
     ViewData["Title"] = "Login";
+    string mesajSucces = HttpContext.Session.GetString("mesajSucces");
+    string eroareLogin = HttpContext.Session.GetString("eroareLogin");
+
+    if(mesajSucces != null)
+        HttpContext.Session.Remove("mesajSucces");
+
+    if (eroareLogin != null)
+        HttpContext.Session.Remove("eroareLogin");
 }
 
 <div class="auth-wrapper">
@@ -9,18 +17,18 @@
         <h2>Autentificare</h2>
 
         <form method="post">
-            @if (Model.ModelState["eroareLogin"]?.Errors.Count > 0)
+            @if (Model.ModelState["eroareLogin"]?.Errors.Count > 0 || eroareLogin != null)
             {
                 <div class="form-group">
-                    <span class="text-danger">@Model.ModelState["eroareLogin"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                    <span class="text-danger">@(Model.ModelState["eroareLogin"]?.Errors.FirstOrDefault()?.ErrorMessage ?? eroareLogin)</span>
                 </div>
             }
 
-            @if (Model.ModelState["mesajSucces"] != null)
+            @if (Model.ModelState["mesajSucces"] != null || mesajSucces != null)
             {
                 <div class="form-group">
                     <span class="text-success" style="color: green; font-weight: bold;">
-                        @Model.ModelState["mesajSucces"]?.Errors.FirstOrDefault()?.ErrorMessage
+                        @(Model.ModelState["mesajSucces"]?.Errors.FirstOrDefault()?.ErrorMessage ?? mesajSucces)
                     </span>
                 </div>
             }
@@ -38,9 +46,15 @@
 
             <button type="submit" class="btn-primary">Intră în cont</button>
 
+
             <div class="auth-footer">
                 <span>Nu ai cont?</span>
                 <a asp-page="/User/Register" class="auth-link">Înregistrează-te</a>
+            </div>
+
+            <div class="auth-footer" style="margin-top: 0.5rem;">
+                <span>Ai uitat parola?</span>
+                <a asp-page="/User/ResetParola" class="auth-link">Resetează aici</a>
             </div>
         </form>
     </div>
