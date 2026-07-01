@@ -1,0 +1,46 @@
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+
+    <div class="antet-card">
+      <h2>Autentificare</h2>
+      <p>Nu ai cont încă? <a routerLink="/register">Înregistrează-te</a></p>
+    </div>
+
+    <div class="alerta-succes" *ngIf="afiseazaSuccesConfirmare">
+      Contul tău a fost activat cu succes! Acum te poți loga.
+    </div>
+
+    <div class="alerta-eroare" *ngIf="mesajEroare">
+      {{ mesajEroare }}
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+
+      <div class="grup-formular">
+        <label>Email sau CNP</label>
+        <input type="text"
+               formControlName="identificator"
+               [class.invalid]="loginForm.get('identificator')?.invalid && loginForm.get('identificator')?.touched">
+      </div>
+
+      <div class="grup-formular">
+        <div class="sub-antet-parola">
+          <label>Parolă</label>
+          <a class="link-uitat">Ai uitat parola?</a>
+        </div>
+        <input type="password"
+               formControlName="parola"
+               [class.invalid]="loginForm.get('parola')?.invalid && loginForm.get('parola')?.touched">
+      </div>
+
+      <button type="submit"
+              class="buton-principal"
+              [disabled]="loginForm.invalid || isLoading">
+
+        {{ isLoading ? 'Se conectează...' : 'Conectare' }}
+
+      </button>
+    </form>
+
+  </div>
+</div>

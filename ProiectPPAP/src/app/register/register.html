@@ -1,0 +1,70 @@
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+
+    <div class="antet-card">
+      <h2>Creare Cont</h2>
+      <p>Ai deja cont? <a routerLink="/login">Loghează-te aici</a></p>
+    </div>
+
+    <div class="alerta-eroare" *ngIf="mesajEroareGenerala">
+      {{ mesajEroareGenerala }}
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+
+      <div class="rand-formular">
+        <div class="grup-formular">
+          <label>Nume</label>
+          <input type="text"
+                 formControlName="nume"
+                 [class.invalid]="registerForm.get('nume')?.hasError('serverErrors')">
+          <small class="text-eroare" *ngFor="let err of registerForm.get('nume')?.getError('serverErrors')">{{ err }}</small>
+        </div>
+
+        <div class="grup-formular">
+          <label>Prenume</label>
+          <input type="text"
+                 formControlName="prenume"
+                 [class.invalid]="registerForm.get('prenume')?.hasError('serverErrors')">
+          <small class="text-eroare" *ngFor="let err of registerForm.get('prenume')?.getError('serverErrors')">{{ err }}</small>
+        </div>
+      </div>
+
+      <div class="grup-formular">
+        <label>Email</label>
+        <input type="email"
+               formControlName="email"
+               [class.invalid]="registerForm.get('email')?.hasError('serverErrors')">
+        <small class="text-eroare" *ngFor="let err of registerForm.get('email')?.getError('serverErrors')">{{ err }}</small>
+      </div>
+
+      <div class="grup-formular">
+        <label>CNP</label>
+        <input type="text"
+               formControlName="cnp"
+               [class.invalid]="registerForm.get('cnp')?.hasError('serverErrors')">
+        <small class="text-eroare" *ngFor="let err of registerForm.get('cnp')?.getError('serverErrors')">{{ err }}</small>
+      </div>
+
+      <div class="grup-formular">
+        <label>Parolă</label>
+        <input type="password"
+               formControlName="parola"
+               [class.invalid]="registerForm.get('parola')?.hasError('serverErrors')">
+
+        <ul class="lista-erori" *ngIf="registerForm.get('parola')?.hasError('serverErrors')">
+          <li *ngFor="let err of registerForm.get('parola')?.getError('serverErrors')">{{ err }}</li>
+        </ul>
+      </div>
+
+      <button type="submit"
+              class="buton-principal"
+              [disabled]="registerForm.invalid || isLoading">
+
+        {{ isLoading ? 'Se creează contul...' : 'Creare Cont' }}
+
+      </button>
+    </form>
+
+  </div>
+</div>
