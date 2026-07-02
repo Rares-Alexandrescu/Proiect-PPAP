@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 
-// Magia pentru URL-ul dinamic
+
 import { environment } from '../../environments/environment';
 
 
@@ -32,8 +32,25 @@ export class RegisterComponent {
     prenume: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     cnp: ['', Validators.required],
-    parola: ['', Validators.required]
+    parola: ['', Validators.required],
+    parolaConfirmare: ['', Validators.required]
   });
+
+  ngOnInit() {
+    Object.keys(this.registerForm.controls).forEach(key => {
+      const control = this.registerForm.get(key);
+
+      control?.valueChanges.subscribe(() => {
+        if (control.hasError('serverErrors')) {
+          const eroriCurente = control.errors;
+          if (eroriCurente) {
+            delete eroriCurente['serverErrors'];
+            control.setErrors(Object.keys(eroriCurente).length > 0 ? eroriCurente : null);
+          }
+        }
+      });
+    });
+  }
 
   onRegister() {
     if (this.registerForm.invalid) return;
@@ -41,7 +58,6 @@ export class RegisterComponent {
     this.isLoading = true;
     this.mesajEroareGenerala = null;
 
-    // Aici folosim apiUrl din environment
     this.http.post(`${environment.apiUrl}/register`, this.registerForm.value)
       .subscribe({
         next: (response: any) => {

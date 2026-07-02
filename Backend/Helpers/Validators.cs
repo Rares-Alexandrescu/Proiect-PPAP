@@ -42,5 +42,10 @@ namespace Backend.Helpers
         {
             return !string.IsNullOrWhiteSpace(cnp) && cnp.Length == 13 && cnp.All(char.IsDigit);
         }
+
+        public static bool ParoleleCoincid(string parolaConfirmare, string parola)
+        {
+            return string.Equals(parola, parolaConfirmare);
+        }
     }
 }

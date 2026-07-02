@@ -8,7 +8,7 @@ using Backend.Services;
 
 namespace Backend.Endpoints
 {
-    public record RegisterRequest(string Nume, string Prenume, string Email, string Cnp, string Parola);
+    public record RegisterRequest(string Nume, string Prenume, string Email, string Cnp, string Parola, string ParolaConfirmare);
 
     public static class RegisterEndpoint
     {
@@ -31,6 +31,7 @@ namespace Backend.Endpoints
                 if (!Validators.EsteParolaLunga(req.Parola)) AdaugaEroare("parola", "Minim 8 caractere.");
                 if (!Validators.AreParolaCaracterMare(req.Parola)) AdaugaEroare("parola", "Trebuie să conțină o majusculă.");
                 if (!Validators.AreParolaCifra(req.Parola)) AdaugaEroare("parola", "Trebuie să conțină o cifră.");
+                if (!Validators.ParoleleCoincid(req.ParolaConfirmare, req.Parola)) AdaugaEroare("parolaConfirmare", "Parolele nu coincid!");
 
                 if (erori.Count > 0)
                 {

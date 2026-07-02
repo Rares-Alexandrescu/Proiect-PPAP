@@ -57,6 +57,17 @@
         </ul>
       </div>
 
+      <div class="grup-formular">
+        <label>Confirmă Parolă</label>
+        <input type="password"
+               formControlName="parolaConfirmare"
+               [class.invalid]="registerForm.get('parolaConfirmare')?.hasError('serverErrors')">
+
+        <ul class="lista-erori" *ngIf="registerForm.get('parolaConfirmare')?.hasError('serverErrors')">
+          <li *ngFor="let err of registerForm.get('parolaConfirmare')?.getError('serverErrors')">{{ err }}</li>
+        </ul>
+      </div>
+
       <button type="submit"
               class="buton-principal"
               [disabled]="registerForm.invalid || isLoading">
