@@ -21,24 +21,29 @@ namespace Backend.Services
 
         public async Task TrimiteEmailWelcomeAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat)
         {
+            string backendUrl = _config["Backend:BaseUrl"] ?? "http://localhost:5298";
             string frontendUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:4200";
             string anulCurent = DateTime.Now.Year.ToString();
             Console.WriteLine("Nu ajungem dupa caleTemplate");
             string caleTemplate = Path.Combine(AppContext.BaseDirectory, "EmailTemplates", "WelcomeEmail.html");
-            Console.WriteLine("PATH: " + caleTemplate);
-            Console.WriteLine("EXISTS: " + File.Exists(caleTemplate));
-            string htmlBrut = await File.ReadAllTextAsync(caleTemplate);
 
             Console.WriteLine("PATH TEMPLATE EMAIL:");
             Console.WriteLine(caleTemplate);
             Console.WriteLine("EXISTS: " + File.Exists(caleTemplate));
+            
+            if (!File.Exists(caleTemplate))
+            {
+                throw new FileNotFoundException($"Template-ul de email nu a fost gasit la {caleTemplate}");
+            }
+            string htmlBrut = await File.ReadAllTextAsync(caleTemplate);
 
             string htmlPersonalizat = htmlBrut
                 .Replace("{{Nume}}", nume)
                 .Replace("{{Prenume}}", prenume)
-                .Replace("{{LinkConfirmare}}", frontendUrl)
+                .Replace("{{LinkConfirmare}}", $"{backendUrl}/confirmare-cont?token={Uri.EscapeDataString(tokenSecurizat)}")
                 .Replace("{{AnulCurent}}", anulCurent);
-            
+
+            Console.WriteLine("tokenul lu peste " + tokenSecurizat + " si vreau si frontend " + backendUrl);
             await TrimiteEmailBazaAsync(emailDestinatar, "Bine ai venit! Cont creat cu succes", htmlPersonalizat);
         }
 

@@ -10,11 +10,18 @@ namespace Backend.Endpoints
     {
         public static void MapConfirmEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGet("/confirm", async ([FromQuery] string token, IConfiguration config, IDataProtectionProvider dataProtector) =>
+            app.MapGet("/confirmare-cont", async ([FromQuery] string token, IConfiguration config, IDataProtectionProvider dataProtector) =>
             {
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     return Results.BadRequest("Link-ul de confirmare este invalid sau lipsește.");
+                }
+
+                string frontendUrl = config["Frontend:BaseUrl"] ?? "http://localhost:4200";
+
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    return Results.Redirect($"{frontendUrl}/login?eroare=token_lipsa");
                 }
 
                 int idDecriptat;
@@ -22,14 +29,14 @@ namespace Backend.Endpoints
                 try
                 {
                     var protector = dataProtector.CreateProtector("VerificareCont");
-
                     string idText = protector.Unprotect(token);
                     idDecriptat = int.Parse(idText);
                 }
                 catch
                 {
-                    return Results.BadRequest("Link-ul de confirmare este corupt sau a expirat.");
+                    return Results.Redirect($"{frontendUrl}/login?eroare=token_invalid");
                 }
+
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
                 try
@@ -52,7 +59,6 @@ namespace Backend.Endpoints
                     return Results.Problem("A apărut o eroare la server. Te rugăm să încerci din nou mai târziu.");
                 }
 
-                string frontendUrl = config["Frontend:BaseUrl"] ?? "http://localhost:4200";
 
                 return Results.Redirect($"{frontendUrl}/login?confirmat=true");
             });

@@ -34,9 +34,21 @@ export class LoginComponent implements OnInit {
   });
 
   ngOnInit() {
+    if (this.auth.isLoggedIn()) {
+      this.router.navigate(['/'], { queryParams: this.route.snapshot.queryParams });
+    }
     this.route.queryParams.subscribe(params => {
       if (params['confirmat'] === 'true') {
         this.afiseazaSuccesConfirmare = true;
+      }
+     const eroare = params['eroare'];
+      if (eroare) {
+        if (eroare === 'token_lipsa' || eroare === 'token_invalid') {
+          this.mesajEroare = 'Link-ul de confirmare este invalid sau a expirat. Te rugăm să încerci din nou.';
+        }
+        else {
+          this.mesajEroare = 'A apărut o problemă la confirmarea contului.';
+        }
       }
     });
   }
@@ -66,12 +78,28 @@ export class LoginComponent implements OnInit {
           user.token 
         );
 
-        //alert(`Autentificare reușită! Salut, ${user.nume}.`);
+
         this.router.navigate(['/']);
       },
       error: (err) => {
         this.isLoading = false;
-        this.mesajEroare = err.error.message || 'A apărut o eroare la conectare.';
+
+        console.error('Eroare detaliată de la server:', err);
+        if (typeof err.error === 'string') {
+          this.mesajEroare = err.error;
+        }
+
+        else if (err.error && err.error.message) {
+          this.mesajEroare = err.error.message;
+        }
+
+        else if (err.error && err.error.title) {
+          this.mesajEroare = err.error.title;
+        }
+
+        else {
+          this.mesajEroare = 'A apărut o eroare la conectare. Te rugăm să încerci din nou.';
+        }
       }
     });
   }

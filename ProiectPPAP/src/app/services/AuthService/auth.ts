@@ -4,7 +4,7 @@ export interface UtilizatorSesiune {
   nume: string;
   prenume: string;
   email?: string;
-  [key: string]: any; // pentru orice alt câmp venit din backend
+  [key: string]: any;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -30,5 +30,9 @@ export class AuthService {
   private citesteDinStorage(): UtilizatorSesiune | null {
     const raw = localStorage.getItem('utilizator');
     return raw ? JSON.parse(raw) : null;
+  }
+  public isLoggedIn(): boolean {
+    const utilizator = this.citesteDinStorage();
+    return utilizator !== null;
   }
 }
