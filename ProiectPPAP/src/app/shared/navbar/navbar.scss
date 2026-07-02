@@ -19,7 +19,7 @@ $primary-hover: #2563eb;
   align-items: center;
   padding: 1.5rem 4rem;
   background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px); 
+  backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   border-bottom: 1px solid #f3f4f6;
@@ -45,42 +45,3 @@ $primary-hover: #2563eb;
 }
 
 
-
-.hero-section {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8rem 2rem;
-  text-align: center;
-
-  .hero-content {
-    max-width: 48rem;
-  }
-
-  .title {
-    font-size: 4rem;
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.05em;
-    margin-bottom: 1.5rem;
-
-    .text-gradient {
-      background: linear-gradient(to right, #3b82f6, #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-  }
-
-  .subtitle {
-    font-size: 1.25rem;
-    color: $text-muted;
-    margin-bottom: 2.5rem;
-    line-height: 1.6;
-  }
-
-  .cta-group {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-  }
-}

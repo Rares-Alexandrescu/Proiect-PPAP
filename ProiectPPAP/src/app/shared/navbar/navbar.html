@@ -1,0 +1,18 @@
+<nav class="navbar">
+  <div class="logo">
+    <span class="logo-icon">▲</span>
+    <a routerLink="/" class="logo-text" style="text-decoration: none; color: inherit;">PROIECT</a>
+  </div>
+  <div class="nav-actions">
+    @if (!authService.utilizatorSesiune()) {
+    <button class="btn btn-ghost" routerLink="/login">Login</button>
+    <button class="btn btn-primary" routerLink="/register">Register</button>
+    }
+    @if (authService.utilizatorSesiune(); as utilizator) {
+    <span style="margin-right: 15px; font-weight: 500;">
+      Salut, <b>{{ utilizator.nume }}</b>!
+    </span>
+    <button class="btn btn-primary" style="background-color: #ef4444;" (click)="onLogout()">Logout</button>
+    }
+  </div>
+</nav>

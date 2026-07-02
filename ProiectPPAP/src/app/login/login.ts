@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { AuthService } from '../services/AuthService/auth';
 
-// Magia pentru URL-ul dinamic
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
+  private auth = inject(AuthService);
   isLoading = false;
   mesajEroare: string | null = null;
   afiseazaSuccesConfirmare = false;
@@ -53,12 +53,21 @@ export class LoginComponent implements OnInit {
       parola: this.loginForm.value.parola
     };
 
-    // Aici folosim apiUrl din environment
     this.http.post(`${environment.apiUrl}/login`, loginPayload).subscribe({
       next: (user: any) => {
         this.isLoading = false;
-        alert(`Autentificare reușită! Salut, ${user.nume}.`);
-        this.router.navigate(['/dashboard']);
+
+        this.auth.login(
+          {
+            id: user.id,
+            nume: user.nume,
+            prenume: user.prenume
+          },
+          user.token 
+        );
+
+        //alert(`Autentificare reușită! Salut, ${user.nume}.`);
+        this.router.navigate(['/']);
       },
       error: (err) => {
         this.isLoading = false;
