@@ -38,8 +38,9 @@ namespace Backend.Endpoints
                     return Results.BadRequest(new { eroriCampuri = erori });
                 }
 
-                string parolaHash = SecurityHelper.CripteazaParola(req.Parola);
-                string cnpHash = SecurityHelper.CripteazaCNP(req.Cnp);
+
+                string parolaHash = SecurityHelper.CripteazaParola(req.Parola.Trim());
+                string cnpHash = SecurityHelper.CripteazaCNP(req.Cnp.Trim());
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
                 int rezultatSql = 0;

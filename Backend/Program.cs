@@ -35,7 +35,7 @@ app.UseHttpsRedirection();
 app.MapRegisterEndpoint();
 app.MapLoginEndpoint();
 app.MapConfirmEndpoint();
-
+app.MapResetPasswordEndpoint();
 
 app.Run();
 

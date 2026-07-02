@@ -5,6 +5,7 @@ namespace Backend.Services
 {
     public interface IEmailService
     {
+        Task TrimiteEmailResetareParolaAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat);
         Task TrimiteEmailWelcomeAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat);
     }
 
@@ -17,10 +18,9 @@ namespace Backend.Services
             _config = configuration;
         }
 
-
-
         public async Task TrimiteEmailWelcomeAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat)
         {
+
             string backendUrl = _config["Backend:BaseUrl"] ?? "http://localhost:5298";
             string frontendUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:4200";
             string anulCurent = DateTime.Now.Year.ToString();
@@ -47,9 +47,39 @@ namespace Backend.Services
             await TrimiteEmailBazaAsync(emailDestinatar, "Bine ai venit! Cont creat cu succes", htmlPersonalizat);
         }
 
+        public async Task TrimiteEmailResetareParolaAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat)
+        {
+            string frontendUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:4200";
+            string anulCurent = DateTime.Now.Year.ToString();
+
+            string caleTemplate = Path.Combine(AppContext.BaseDirectory, "EmailTemplates", "ResetPasswordEmail.html");
+
+            Console.WriteLine("PATH TEMPLATE EMAIL RESETARE:");
+            Console.WriteLine(caleTemplate);
+            Console.WriteLine("EXISTS: " + File.Exists(caleTemplate));
+
+            if (!File.Exists(caleTemplate))
+            {
+                throw new FileNotFoundException($"Template-ul de email nu a fost gasit la {caleTemplate}");
+            }
+
+            string htmlBrut = await File.ReadAllTextAsync(caleTemplate);
+
+            string linkResetare = $"{frontendUrl}/resetare-parola?token={Uri.EscapeDataString(tokenSecurizat)}";
+
+            string htmlPersonalizat = htmlBrut
+                .Replace("{{Nume}}", nume)
+                .Replace("{{Prenume}}", prenume)
+                .Replace("{{LinkResetare}}", linkResetare)
+                .Replace("{{AnulCurent}}", anulCurent);
+
+            Console.WriteLine("Link resetare generat: " + linkResetare);
+
+            await TrimiteEmailBazaAsync(emailDestinatar, "Cerere de resetare a parolei", htmlPersonalizat);
+        }
 
 
-        
+
         private async Task TrimiteEmailBazaAsync(string emailDestinatar, string subiect, string mesajHtml)
         {
             var mailtrap = _config.GetSection("Mailtrap");

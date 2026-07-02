@@ -1,0 +1,88 @@
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+
+    <div class="alerta-eroare" *ngIf="mesajEroareGenerala">
+      {{ mesajEroareGenerala }}
+    </div>
+    
+    <div class="alerta-succes" *ngIf="mesajSucces">
+      {{ mesajSucces }}
+    </div>
+
+    <div *ngIf="!tokenDinUrl">
+      
+      <div class="antet-card">
+        <h2>Resetare Parolă</h2>
+        <p>Introdu adresa de email sau CNP-ul pentru a primi link-ul de resetare.</p>
+      </div>
+
+      <form [formGroup]="cerereForm" (ngSubmit)="onCereResetare()">
+
+        <div class="grup-formular">
+          <label>Email sau CNP</label>
+          <input type="text"
+                 formControlName="identificator"
+                 [class.invalid]="cerereForm.get('identificator')?.invalid && cerereForm.get('identificator')?.touched">
+        </div>
+
+        <span class="text-eroare" *ngIf="cerereForm.get('identificator')?.invalid && cerereForm.get('identificator')?.touched">
+          Introdu un email sau un CNP valid pentru a continua.
+        </span>
+
+        <button type="submit"
+                class="buton-principal"
+                [disabled]="cerereForm.invalid || isLoading">
+          {{ isLoading ? 'Se trimite...' : 'Trimite Link' }}
+        </button>
+
+      </form>
+
+      <div style="margin-top: 1.5rem; text-align: center;">
+        <p style="font-size: 0.875rem;"><a routerLink="/login" style="color: #6b7280; text-decoration: none;">&larr; Înapoi la Autentificare</a></p>
+      </div>
+      
+    </div>
+
+
+    <div *ngIf="tokenDinUrl">
+      
+      <div class="antet-card">
+        <h2>Alege o nouă parolă</h2>
+        <p>Introdu mai jos noua ta parolă și confirm-o.</p>
+      </div>
+
+      <form [formGroup]="resetareForm" (ngSubmit)="onSalveazaParola()">
+        
+        <div class="grup-formular">
+          <label>Parolă Nouă</label>
+          <input type="password" 
+                 formControlName="parola"
+                 [class.invalid]="resetareForm.get('parola')?.hasError('serverErrors')">
+                 
+          <ul class="lista-erori" *ngIf="resetareForm.get('parola')?.hasError('serverErrors')">
+            <li *ngFor="let err of resetareForm.get('parola')?.getError('serverErrors')">{{ err }}</li>
+          </ul>
+        </div>
+
+        <div class="grup-formular">
+          <label>Confirmă Parola Nouă</label>
+          <input type="password" 
+                 formControlName="parolaConfirmare"
+                 [class.invalid]="resetareForm.get('parolaConfirmare')?.hasError('serverErrors')">
+
+          <ul class="lista-erori" *ngIf="resetareForm.get('parolaConfirmare')?.hasError('serverErrors')">
+            <li *ngFor="let err of resetareForm.get('parolaConfirmare')?.getError('serverErrors')">{{ err }}</li>
+          </ul>
+        </div>
+
+        <button type="submit" 
+                class="buton-principal" 
+                [disabled]="resetareForm.invalid || isLoading">
+          {{ isLoading ? 'Se salvează...' : 'Schimbă Parola' }}
+        </button>
+        
+      </form>
+    </div>
+
+  </div>
+</div>
