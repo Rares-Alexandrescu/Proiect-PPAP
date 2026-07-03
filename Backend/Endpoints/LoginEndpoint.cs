@@ -16,8 +16,8 @@ namespace Backend.Endpoints
             app.MapPost("/login", async ([FromBody] LoginRequest req, IConfiguration config) =>
             {
                 var connectionString = config.GetConnectionString("DefaultConnection");
-                string cnpCriptat = SecurityHelper.CripteazaCNP(req.Cnp);
-
+                string cnpCriptat = SecurityHelper.CripteazaCNP(req.Cnp.Trim());
+                Console.WriteLine(cnpCriptat + " " + req.Email);
                 using (var connection = new SqlConnection(connectionString))
                 {
                     var parametrii = new DynamicParameters();
@@ -29,6 +29,20 @@ namespace Backend.Endpoints
                         parametrii,
                         commandType: CommandType.StoredProcedure
                     );
+                    
+                    var parametriiVerificare = new DynamicParameters();
+                    parametriiVerificare.Add("@cnp", cnpCriptat);
+                    parametriiVerificare.Add("@rezultat", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+                    await connection.ExecuteAsync(
+                        "sp_Utilizator_Exista_CNP",
+                        parametriiVerificare,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    int rezultatSql = parametriiVerificare.Get<int>("@rezultat");
+
+                    Console.WriteLine("Rezultatul din procedura stocată este: " + rezultatSql);
 
                     if (utilizator == null)
                     {
@@ -41,9 +55,10 @@ namespace Backend.Endpoints
                     {
                         return Results.BadRequest(new { message = "Parola sau Email/CNP incorect!" });
                     }
+                    string tokenGenerat = SecurityHelper.CreareJWTLogin(utilizator, config);
+                    utilizator.JWT = tokenGenerat;
 
-
-                    return Results.Ok(new { utilizator.Id, utilizator.Email, utilizator.Nume });
+                    return Results.Ok(new { utilizator.Id, utilizator.Email, utilizator.Nume, utilizator.Prenume, utilizator.JWT });
                 }
             });
         }

@@ -1,30 +1,31 @@
 import { Injectable, signal } from '@angular/core';
 
 export interface UtilizatorSesiune {
+  
   nume: string;
   prenume: string;
+  id?: number;
+  jwt: string;
   email?: string;
-  [key: string]: any;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   utilizatorSesiune = signal<UtilizatorSesiune | null>(this.citesteDinStorage());
 
-  login(user: UtilizatorSesiune, token: string): void {
+  login(user: UtilizatorSesiune): void {
     this.utilizatorSesiune.set(user);
-    localStorage.setItem('token', token);
     localStorage.setItem('utilizator', JSON.stringify(user));
   }
 
   logout(): void {
     this.utilizatorSesiune.set(null);
-    localStorage.removeItem('token');
     localStorage.removeItem('utilizator');
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    const utilizatorCurent = this.utilizatorSesiune();
+    return utilizatorCurent ? utilizatorCurent.jwt : null;
   }
 
   private citesteDinStorage(): UtilizatorSesiune | null {

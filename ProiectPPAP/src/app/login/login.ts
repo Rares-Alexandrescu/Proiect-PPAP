@@ -73,9 +73,9 @@ export class LoginComponent implements OnInit {
           {
             id: user.id,
             nume: user.nume,
-            prenume: user.prenume
+            prenume: user.prenume,
+            jwt: user.jwt
           },
-          user.token 
         );
 
 
