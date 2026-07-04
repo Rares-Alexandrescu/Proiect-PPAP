@@ -56,12 +56,12 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
 
-            app.MapPut("/edit-account", async({FromBody} EditAccountRequest req, ClaimsPrincipal user, IConfiguration config) =>)
-            {
+            app.MapPut("/edit-account", async([FromBody] EditAccountRequest req, ClaimsPrincipal user, IConfiguration config) => { 
+
                 var connectionString = config.GetConnectionString("DefaultConnection");
                 var idString = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                string? cmpNouCriptat = null;
+                string? cnpNouCriptat = null;
                 string? parolaNouaHash = null;
 
                 if (!int.TryParse(idString, out int idUtilizatorLogat)) return Results.Unauthorized();
@@ -87,7 +87,7 @@ namespace Backend.Endpoints
                 }
                 else
                 {
-                    cmpNouCriptat = SecurityHelpers.CripteazaCNP(req.cnpNou);
+                    cnpNouCriptat = !string.IsNullOrWhiteSpace(req.cnpNou) ? SecurityHelper.CripteazaCNP(req.cnpNou) : null;
                 }
 
                 if (req.parolaVeche != null && req.parolaNoua != null) {
@@ -98,14 +98,68 @@ namespace Backend.Endpoints
 
                     if (!Validators.ParoleleCoincid(req.parolaNouaConfirmare, req.parolaNoua)) AdaugaEroare("parolaConfirmare", "Parolele nu coincid!");
 
+                    using(var connection = new SqlConnection(connectionString))
+                    {
+                        var parametrii = new DynamicParameters();
+                        parametrii.Add("@id", idUtilizatorLogat);
 
-                
+                        var utilizator = await connection.QueryFirstOrDefaultAsync<Utilizator>(
+                        "sp_Utilizator_getByID",
+                        parametrii,
+                        commandType: CommandType.StoredProcedure);
+
+
+                        if (utilizator == null)
+                        {
+                            AdaugaEroare("eroare", "Contul nu exista / Eroare la baza de date!");
+                        }
+                        else if (!SecurityHelper.VerificaParola(req.parolaVeche, utilizator.parola))
+                        {
+                            AdaugaEroare("parolaVeche", "Parola veche nu este buna!");
+                        }
+
+                    }
+                }
+                else if(string.IsNullOrWhiteSpace(req.parolaVeche) && !string.IsNullOrWhiteSpace(req.parolaNoua))
+                {
+                    AdaugaEroare("parola", "Nu poti sa modifici parola fara sa o introduci pe cea veche!");
+                }
+                else if (!string.IsNullOrWhiteSpace(req.parolaVeche) && string.IsNullOrWhiteSpace(req.parolaNoua))
+                {
+                    Console.WriteLine("Deci a pus parola veche, dar nu a pus nimic in parola noua, ceea ce ar trebui sa insemne ca parola noua e null!");
                 }
 
+                if (erori.Count > 0)
+                {
+                    return Results.BadRequest(new { eroriCampuri = erori });
+                }
+                else
+                {
+                    using (var connection = new SqlConnection(connectionString))
+                    {
+                        parolaNouaHash = !string.IsNullOrWhiteSpace(req.parolaNoua) ? SecurityHelper.CripteazaParola(req.parolaNoua) : null;
 
 
-            }
+                        var parametrii = new DynamicParameters();
+                        parametrii.Add("@cnp", cnpNouCriptat);
+                        parametrii.Add("@nume", req.nume);
+                        parametrii.Add("@prenume", req.prenume);
+                        parametrii.Add("@parola", parolaNouaHash);
+                        parametrii.Add("@userId", idUtilizatorLogat);
+                        parametrii.Add("@email", req.emailNou);
+
+                        await connection.ExecuteAsync(
+                            "sp_Utilizator_Edit",
+                            parametrii,
+                            commandType: CommandType.StoredProcedure
+                    );
+                    }
+
+                    //IMI TREBUIE SI CEVA EMAIL SERVICE, MACAR SA VERIFIC DACA MERGE EDITUL CUM TREBUIE 
+                    return Results.Ok(new { message = "Datele au fost salvate cu succes!" });
+                }).RequireAuthorization();
         }
     }
 }
+
             
