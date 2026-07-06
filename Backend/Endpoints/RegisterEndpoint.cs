@@ -80,9 +80,9 @@ namespace Backend.Endpoints
                 try
                 {
                     Console.WriteLine("1");
-                    var protector = dataProtector.CreateProtector("VerificareCont");
+                    var protector = dataProtector.CreateProtector("VerificareCont").ToTimeLimitedDataProtector();
                     Console.WriteLine("2");
-                    string tokenSecurizat = protector.Protect(rezultatSql.ToString());
+                    string tokenSecurizat = protector.Protect(rezultatSql.ToString(), TimeSpan.FromMinutes(15));
                     Console.WriteLine("3");
                     await emailService.TrimiteEmailWelcomeAsync(req.Email, req.Nume, req.Prenume, tokenSecurizat);
                 }

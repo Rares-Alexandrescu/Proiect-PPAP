@@ -28,7 +28,8 @@ namespace Backend.Endpoints
 
                 try
                 {
-                    var protector = dataProtector.CreateProtector("VerificareCont");
+                    //sa bag aici ceva de limitare de timp ca la resetare parola
+                    var protector = dataProtector.CreateProtector("VerificareCont").ToTimeLimitedDataProtector();
                     string idText = protector.Unprotect(token);
                     idDecriptat = int.Parse(idText);
                 }
