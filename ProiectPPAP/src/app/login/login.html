@@ -6,12 +6,12 @@
       <p>Nu ai cont încă? <a routerLink="/register">Înregistrează-te</a></p>
     </div>
 
-    <div class="alerta-succes" *ngIf="afiseazaSuccesConfirmare">
+    <div class="alerta-succes" *ngIf="afiseazaSuccesConfirmare()">
       Contul tău a fost activat cu succes! Acum te poți loga.
     </div>
 
-    <div class="alerta-eroare" *ngIf="mesajEroare">
-      {{ mesajEroare }}
+    <div class="alerta-eroare" *ngIf="mesajEroare()">
+      {{ mesajEroare() }}
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
@@ -35,9 +35,9 @@
 
       <button type="submit"
               class="buton-principal"
-              [disabled]="loginForm.invalid || isLoading">
+              [disabled]="loginForm.invalid || isLoading()">
 
-        {{ isLoading ? 'Se conectează...' : 'Conectare' }}
+        {{ isLoading() ? 'Se conectează...' : 'Conectare' }}
 
       </button>
     </form>

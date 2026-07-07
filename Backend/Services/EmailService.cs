@@ -79,7 +79,6 @@ namespace Backend.Services
         }
 
 
-
         private async Task TrimiteEmailBazaAsync(string emailDestinatar, string subiect, string mesajHtml)
         {
             var mailtrap = _config.GetSection("Mailtrap");

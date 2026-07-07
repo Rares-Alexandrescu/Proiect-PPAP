@@ -16,8 +16,21 @@ namespace Backend.Endpoints
             app.MapPost("/login", async ([FromBody] LoginRequest req, IConfiguration config) =>
             {
                 var connectionString = config.GetConnectionString("DefaultConnection");
-                string cnpCriptat = SecurityHelper.CripteazaCNP(req.Cnp.Trim());
-                Console.WriteLine(cnpCriptat + " " + req.Email);
+
+                string cnpCriptat = null;
+               
+                string input = req.Cnp?.Trim() ?? "";
+
+                if (input.Length == 13 && input.All(char.IsDigit))
+                {
+                    cnpCriptat = SecurityHelper.CripteazaCNP(input);
+                    Console.WriteLine("Am criptat CNP-ul: " + cnpCriptat);
+                }
+                else
+                {
+                    Console.WriteLine("Nu e CNP, căutăm doar după Email: " + req.Email);
+                }
+
                 using (var connection = new SqlConnection(connectionString))
                 {
                     var parametrii = new DynamicParameters();

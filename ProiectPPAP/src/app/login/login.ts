@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -24,9 +24,10 @@ export class LoginComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
-  isLoading = false;
-  mesajEroare: string | null = null;
-  afiseazaSuccesConfirmare = false;
+
+  isLoading = signal<boolean>(false);
+  mesajEroare = signal<string | null>(null);
+  afiseazaSuccesConfirmare = signal<boolean>(false);
 
   loginForm: FormGroup = this.fb.group({
     identificator: ['', Validators.required],
@@ -39,15 +40,15 @@ export class LoginComponent implements OnInit {
     }
     this.route.queryParams.subscribe(params => {
       if (params['confirmat'] === 'true') {
-        this.afiseazaSuccesConfirmare = true;
+        this.afiseazaSuccesConfirmare.set(true);
       }
      const eroare = params['eroare'];
       if (eroare) {
         if (eroare === 'token_lipsa' || eroare === 'token_invalid') {
-          this.mesajEroare = 'Link-ul de confirmare este invalid sau a expirat. Te rugăm să încerci din nou.';
+          this.mesajEroare.set('Link-ul de confirmare este invalid sau a expirat. Te rugăm să încerci din nou.');
         }
         else {
-          this.mesajEroare = 'A apărut o problemă la confirmarea contului.';
+          this.mesajEroare.set('A apărut o problemă la confirmarea contului.');
         }
       }
     });
@@ -56,8 +57,8 @@ export class LoginComponent implements OnInit {
   onLogin() {
     if (this.loginForm.invalid) return;
 
-    this.isLoading = true;
-    this.mesajEroare = null;
+    this.isLoading.set(true);
+    this.mesajEroare.set(null);
 
     const loginPayload = {
       email: this.loginForm.value.identificator,
@@ -67,7 +68,7 @@ export class LoginComponent implements OnInit {
 
     this.http.post(`${environment.apiUrl}/login`, loginPayload).subscribe({
       next: (user: any) => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         console.log('Date primite de la C#:', user);
         this.auth.login(
           {
@@ -82,25 +83,25 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/']);
       },
       error: (err) => {
-        this.isLoading = false;
+        this.isLoading.set(false);
 
         console.error('Eroare detaliată de la server:', err);
         if (typeof err.error === 'string') {
-          this.mesajEroare = err.error;
+          this.mesajEroare.set(err.error);
         }
 
         else if (err.error && err.error.message) {
-          this.mesajEroare = err.error.message;
+          this.mesajEroare.set(err.error.message);
         }
 
         else if (err.error && err.error.title) {
-          this.mesajEroare = err.error.title;
+          this.mesajEroare.set(err.error.title);
         }
 
         else {
-          this.mesajEroare = 'A apărut o eroare la conectare. Te rugăm să încerci din nou.';
+          this.mesajEroare.set('A apărut o eroare la conectare. Te rugăm să încerci din nou.');
         }
       }
     });
-  }
-}
+        }
+      }

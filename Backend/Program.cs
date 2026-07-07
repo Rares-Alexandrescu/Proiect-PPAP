@@ -59,6 +59,7 @@ app.MapLoginEndpoint();
 app.MapConfirmEndpoint();
 app.MapResetPasswordEndpoint();
 app.MapEditAccountEndpoint();
+app.MapDashboardEndpoint();
 
 app.Run();
 
