@@ -68,7 +68,7 @@ export class LoginComponent implements OnInit {
     this.http.post(`${environment.apiUrl}/login`, loginPayload).subscribe({
       next: (user: any) => {
         this.isLoading = false;
-
+        console.log('Date primite de la C#:', user);
         this.auth.login(
           {
             id: user.id,

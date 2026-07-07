@@ -13,6 +13,6 @@ namespace Backend.DBClasses
         public DateTime created_at { get; set; } 
         public bool cont_verificat { get; set; } = false;
         public DateTime updated_at { get; set; }
-        public string JWT; //ASTA NU E IN BAZA DE DATE
+        public string? JWT; //ASTA NU E IN BAZA DE DATE
     }
 }

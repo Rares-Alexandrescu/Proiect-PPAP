@@ -1,0 +1,120 @@
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+
+    <div class="antet-card">
+      <h2>Editare Cont</h2>
+      <p>Actualizează datele tale personale.</p>
+    </div>
+
+    <div *ngIf="mesajSucces()" class="alerta-succes">
+      {{ mesajSucces() }}
+    </div>
+
+    <div *ngIf="eroriBackend()['eroare']" class="alerta-eroare">
+      <div *ngFor="let err of eroriBackend()['eroare']">{{ err }}</div>
+    </div>
+
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+
+      <div class="rand-formular">
+        <div class="grup-formular">
+          <label>Nume</label>
+          <input type="text" formControlName="nume"
+                 [ngClass]="{'invalid': eroriBackend()['nume']}" />
+
+          <div class="text-eroare" *ngIf="eroriBackend()['nume']">
+            <div *ngFor="let err of eroriBackend()['nume']">
+              • {{ err }}
+            </div>
+          </div>
+        </div>
+
+        <div class="grup-formular">
+          <label>Prenume</label>
+          <input type="text" formControlName="prenume"
+                 [ngClass]="{'invalid': eroriBackend()['prenume']}" />
+
+          <div class="text-eroare" *ngIf="eroriBackend()['prenume']">
+            <div *ngFor="let err of eroriBackend()['prenume']">
+              • {{ err }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grup-formular">
+        <label>Email</label>
+        <input type="email" formControlName="emailNou"
+               [ngClass]="{'invalid': eroriBackend()['email'] || eroriBackend()['emailNou']}" />
+
+        <div class="text-eroare" *ngIf="eroriBackend()['email'] || eroriBackend()['emailNou']">
+          <div *ngFor="let err of (eroriBackend()['email'] || eroriBackend()['emailNou'])">
+            • {{ err }}
+          </div>
+        </div>
+      </div>
+
+      <div class="grup-formular">
+        <label>Schimbă CNP (Opțional)</label>
+        <input type="text" formControlName="cnpNou" placeholder="Lasă gol dacă nu modifici..."
+               [ngClass]="{'invalid': eroriBackend()['cnp'] || eroriBackend()['cnpNou']}" />
+
+        <div class="text-eroare" *ngIf="eroriBackend()['cnp'] || eroriBackend()['cnpNou']">
+          <div *ngFor="let err of (eroriBackend()['cnp'] || eroriBackend()['cnpNou'])">
+            • {{ err }}
+          </div>
+        </div>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 1.5rem 0;">
+
+      <div class="antet-card" style="margin-bottom: 1rem; text-align: left;">
+        <h2 style="font-size: 1.2rem;">Securitate</h2>
+        <p style="font-size: 0.85rem;">Completează aici doar dacă dorești schimbarea parolei.</p>
+      </div>
+
+      <div class="grup-formular">
+        <label>Parola Veche</label>
+        <input type="password" formControlName="parolaVeche"
+               [ngClass]="{'invalid': eroriBackend()['parolaVeche']}" />
+
+        <div class="text-eroare" *ngIf="eroriBackend()['parolaVeche']">
+          <div *ngFor="let err of eroriBackend()['parolaVeche']">
+            • {{ err }}
+          </div>
+        </div>
+      </div>
+
+      <div class="rand-formular">
+        <div class="grup-formular">
+          <label>Parola Nouă</label>
+          <input type="password" formControlName="parolaNoua"
+                 [ngClass]="{'invalid': eroriBackend()['parola'] || eroriBackend()['parolaNoua']}" />
+
+          <div class="text-eroare" *ngIf="eroriBackend()['parola'] || eroriBackend()['parolaNoua']">
+            <div *ngFor="let err of (eroriBackend()['parola'] || eroriBackend()['parolaNoua'])">
+              • {{ err }}
+            </div>
+          </div>
+        </div>
+
+        <div class="grup-formular">
+          <label>Confirmare Parolă</label>
+          <input type="password" formControlName="parolaNouaConfirmare"
+                 [ngClass]="{'invalid': eroriBackend()['parolaConfirmare']}" />
+
+          <div class="text-eroare" *ngIf="eroriBackend()['parolaConfirmare']">
+            <div *ngFor="let err of eroriBackend()['parolaConfirmare']">
+              • {{ err }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="buton-principal" [disabled]="editForm.invalid">
+        Salvează Modificările
+      </button>
+
+    </form>
+  </div>
+</div>
