@@ -42,20 +42,6 @@ namespace Backend.Endpoints
                         parametrii,
                         commandType: CommandType.StoredProcedure
                     );
-                    
-                    var parametriiVerificare = new DynamicParameters();
-                    parametriiVerificare.Add("@cnp", cnpCriptat);
-                    parametriiVerificare.Add("@rezultat", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
-
-                    await connection.ExecuteAsync(
-                        "sp_Utilizator_Exista_CNP",
-                        parametriiVerificare,
-                        commandType: CommandType.StoredProcedure
-                    );
-
-                    int rezultatSql = parametriiVerificare.Get<int>("@rezultat");
-
-                    Console.WriteLine("Rezultatul din procedura stocată este: " + rezultatSql);
 
                     if (utilizator == null)
                     {
