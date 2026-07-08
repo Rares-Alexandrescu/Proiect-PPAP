@@ -13,7 +13,7 @@ namespace Backend.Endpoints
         //tre sa fac si ceva de filtrare etc!
         public static void MapAdminGestioneazaCompaniileEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGet("/admin/companii", async (ClaimPrincipal admin, IConfiguration config) =>
+            app.MapGet("/admin/vezi-companii", async (ClaimPrincipal admin, IConfiguration config) =>
             {
                 var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -98,6 +98,27 @@ namespace Backend.Endpoints
                         AdaugaEroare("cnp", "CNP inexistent! Asigura-te ca utilizatorul exista!");
                     }
                 }
+                //trebuie aici procedura stocata ca sa se retina in db
+            }).RequireAuthorization();
+
+
+            app.MapGet("/admin/edit-companie/{id:int}", async(
+                int id,
+                ClaimsPrincipal admin,
+                IConfiguration config
+                ) =>
+            {
+                //Sa populez formularu cu datele companiei
+            }).RequireAuthorization();
+
+            app.MapPut("/admin/edit-companie/{id:int}", async (
+                int id,
+                ClaimsPrincipal admin,
+                IConfiguration config,
+                [FromBody] Companie companieEditata 
+            ) =>
+            {
+                //Sa updatez intrarea pusa aici
             }).RequireAuthorization();
         }
     }
