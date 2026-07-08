@@ -1,11 +1,17 @@
-import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable, Injector } from '@angular/core';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
+import { AuthService } from '../AuthService/auth';
 @Injectable()
 export class InterceptorService implements HttpInterceptor {
 
-  constructor() { }
+  constructor(
+    private router: Router,
+    private injector: Injector
+  ) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string | null = null;
@@ -23,14 +29,27 @@ export class InterceptorService implements HttpInterceptor {
     }
 
     if (token) {
-      const clonedRequest = request.clone({
+      request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
         }
       });
-      return next.handle(clonedRequest);
     }
 
-    return next.handle(request);
+    return next.handle(request).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          console.warn('Sesiunea a expirat. Utilizatorul este delogat automat.');
+
+          const authService = this.injector.get(AuthService);
+
+          authService.logout();
+
+          this.router.navigate(['/login']);
+        }
+
+        return throwError(() => error);
+      })
+    );
   }
 }

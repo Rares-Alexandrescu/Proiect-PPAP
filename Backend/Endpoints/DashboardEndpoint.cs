@@ -30,16 +30,6 @@ namespace Backend.Endpoints
                         parametrii,
                         commandType: CommandType.StoredProcedure);
 
-                    var parametru = new DynamicParameters();
-
-                    parametru.Add("@id", idUtilizatorLogat);
-
-                    string? rolUtilizator = await connection.QueryFirstOrDefaultAsync<string>(
-                        "sp_Utilizator_Get_Rol",
-                        parametru,
-                        commandType: CommandType.StoredProcedure
-                        );
-
                     if (utilizator != null)
                     {
                         string jsonUtilizator = JsonSerializer.Serialize(utilizator, new JsonSerializerOptions { WriteIndented = true });
@@ -52,10 +42,37 @@ namespace Backend.Endpoints
                         Console.WriteLine("Utilizatorul nu a fost găsit în baza de date!");
                     }
 
+
+                    string? rolUtilizator = await connection.QueryFirstOrDefaultAsync<string>(
+                        "sp_Utilizator_Get_Rol",
+                        parametrii,
+                        commandType: CommandType.StoredProcedure
+                        );
+
+                   
+                    var companieUtilizator = await connection.QueryFirstOrDefaultAsync<Companie>(
+                        "sp_Utilizator_Get_Companie",
+                        parametrii,
+                        commandType: CommandType.StoredProcedure
+                        );
+
+                    if (companieUtilizator != null)
+                    {
+                        string jsonCompanie = JsonSerializer.Serialize(companieUtilizator, new JsonSerializerOptions { WriteIndented = true });
+                        Console.WriteLine("=== DATE COMPANIE EXTRASE DIN BAZA DE DATE ===");
+                        Console.WriteLine(jsonCompanie);
+                        Console.WriteLine("================================================");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Compania nu a fost găsit în baza de date!");
+                    }
+
                     return Results.Ok(new
                     {
                         Utilizator = utilizator,
-                        Rol = rolUtilizator != null ? rolUtilizator.ToString() : "N/A"
+                        Rol = rolUtilizator != null ? rolUtilizator.ToString() : "N/A",
+                        Companie = companieUtilizator
                     });
 
                 }
