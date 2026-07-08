@@ -4,40 +4,61 @@
     <p>Aici vezi toate informațiile tale extrase direct din baza de date.</p>
   </header>
 
+  @if (mesajSuccesVerificat()) {
+  <div class="alert success-state">
+    <strong>Felicitări!</strong> Contul tău a fost verificat cu succes. Bine ai venit!
+  </div>
+  }
+
   @if (loading()) {
   <div class="alert loading-state">Se încarcă datele...</div>
   }
-
   @if (eroare()) {
   <div class="alert error-state">{{ eroare() }}</div>
   }
 
   @if (dateDashboard(); as data) {
   <div class="dashboard-grid">
-
     <div class="dashboard-card">
       <h3>Date Profil</h3>
       <ul>
         <li><strong>Nume:</strong> {{ data.utilizator?.nume || data.utilizator?.Nume }}</li>
-        <li><strong>Preume:</strong> {{ data.utilizator?.nume || data.utilizator?.Nume }}</li>
+        <li><strong>Prenume:</strong> {{ data.utilizator?.prenume || data.utilizator?.Prenume }}</li>
         <li><strong>Email:</strong> {{ data.utilizator?.email || data.utilizator?.Email }}</li>
         <li><strong>Rol:</strong> {{ data.rol }}</li>
       </ul>
+
+      @if (data.utilizator?.cont_verificat === false || data.utilizator?.Cont_verificat === false) {
+      <div class="unverified-alert">
+        <p class="unverified-alert__text">
+          Contul tău nu este verificat! Te rugăm să îți confirmi adresa de email pentru a avea acces complet.
+        </p>
+        <button class="btn-resend"
+                (click)="retrimiteEmail()"
+                [disabled]="loadingEmail()">
+          {{ loadingEmail() ? 'Se trimite...' : 'Retrimite Email-ul' }}
+        </button>
+        @if (mesajEmail(); as msg) {
+        <p class="email-feedback" [class.email-feedback--success]="msg.tip === 'succes'" [class.email-feedback--error]="msg.tip !== 'succes'">
+          {{ msg.text }}
+        </p>
+        }
+      </div>
+      }
     </div>
 
-
+    @if (data.rol !== 'AdminGeneral') {
     <div class="dashboard-card">
       <h3>Companie Asociată</h3>
-      @if (data.Companie) {
+      @if (data.companie || data.Companie) {
       <ul>
         <li><strong>Companie:</strong> {{ data.companie?.nume || data.companie?.Nume }}</li>
-        <li><strong>CUI:</strong> {{ data.companie?.cui || data.companie?.Cui }}</li>
       </ul>
       } @else {
       <p class="text-muted">Momentan nu ești asociat cu nicio companie.</p>
       }
     </div>
-
+    }
   </div>
   }
 </div>

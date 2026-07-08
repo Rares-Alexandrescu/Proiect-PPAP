@@ -19,16 +19,11 @@ namespace Backend.Endpoints
 
                 string frontendUrl = config["Frontend:BaseUrl"] ?? "http://localhost:4200";
 
-                if (string.IsNullOrWhiteSpace(token))
-                {
-                    return Results.Redirect($"{frontendUrl}/login?eroare=token_lipsa");
-                }
 
                 int idDecriptat;
 
                 try
                 {
-                    //sa bag aici ceva de limitare de timp ca la resetare parola
                     var protector = dataProtector.CreateProtector("VerificareCont").ToTimeLimitedDataProtector();
                     string idText = protector.Unprotect(token);
                     idDecriptat = int.Parse(idText);

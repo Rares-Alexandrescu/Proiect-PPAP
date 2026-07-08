@@ -105,5 +105,64 @@
       color: #ef4444;
       border: 1px solid #fca5a5;
     }
+
+    &.success-state {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      border-left: 4px solid #10b981;
+
+      strong {
+        font-weight: 700;
+      }
+    }
+  }
+ 
+  .unverified-alert {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed #e5e7eb;
+
+    &__text {
+      margin: 0 0 0.85rem 0;
+      font-size: 0.9rem;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+  }
+
+  .btn-resend {
+    padding: 0.5rem 1.25rem;
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: #2563eb;
+    }
+
+    &:disabled {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+  }
+
+  .email-feedback {
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+    font-weight: 600;
+
+    &--success {
+      color: #10b981;
+    }
+
+    &--error {
+      color: #ef4444;
+    }
   }
 }

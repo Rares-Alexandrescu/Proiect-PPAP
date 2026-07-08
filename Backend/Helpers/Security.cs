@@ -49,7 +49,9 @@ namespace Backend.Helpers
                 {
                             new Claim(ClaimTypes.NameIdentifier, utilizator.Id.ToString()),
                             new Claim(ClaimTypes.Email, utilizator.Email),
-                            new Claim(ClaimTypes.Name, utilizator.Nume)
+                            new Claim(ClaimTypes.Name, utilizator.Nume),
+
+                            new Claim("Prenume", utilizator.Prenume)
                         }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(
@@ -61,5 +63,17 @@ namespace Backend.Helpers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+    }
+
+    public static async Task<string?> GetRol(int utilizatorId, string connectionString)
+    {
+        using var connection = new SqlConnection(connectionString);
+        var parametrii = new DynamicParameters();
+        parametrii.Add("@id", utilizatorId);
+
+        return await connection.QueryFirstOrDefaultAsync<string>(
+            "sp_Utilizator_Get_Rol",
+            parametrii,
+            commandType: CommandType.StoredProcedure);
     }
 }

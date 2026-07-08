@@ -9,4 +9,5 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'resetare-parola', component: ResetareParolaComponent },
   { path: 'edit-account', component: EditAccountComponent },
-{ path: 'dashboard', component: DashboardComponent}]
+  { path: 'dashboard', component: DashboardComponent },
+]

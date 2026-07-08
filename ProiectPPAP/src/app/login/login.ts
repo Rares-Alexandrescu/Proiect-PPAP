@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     if (this.auth.isLoggedIn()) {
-      this.router.navigate(['/'], { queryParams: this.route.snapshot.queryParams });
+      this.router.navigate(['/dashboard'], { queryParams: this.route.snapshot.queryParams });
     }
     this.route.queryParams.subscribe(params => {
       if (params['confirmat'] === 'true') {

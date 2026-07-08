@@ -28,6 +28,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+//doar acuma local si etc
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermiteAngular", policy =>
@@ -60,7 +61,7 @@ app.MapConfirmEndpoint();
 app.MapResetPasswordEndpoint();
 app.MapEditAccountEndpoint();
 app.MapDashboardEndpoint();
-
+app.MapResendConfirmareEndpoint();
 
 app.Run();
 

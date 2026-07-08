@@ -7,6 +7,7 @@ namespace Backend.Services
     {
         Task TrimiteEmailResetareParolaAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat);
         Task TrimiteEmailWelcomeAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat);
+        Task TrimiteEmailConfirmAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat);
     }
 
     public class EmailService : IEmailService
@@ -31,6 +32,35 @@ namespace Backend.Services
             Console.WriteLine(caleTemplate);
             Console.WriteLine("EXISTS: " + File.Exists(caleTemplate));
             
+            if (!File.Exists(caleTemplate))
+            {
+                throw new FileNotFoundException($"Template-ul de email nu a fost gasit la {caleTemplate}");
+            }
+            string htmlBrut = await File.ReadAllTextAsync(caleTemplate);
+
+            string htmlPersonalizat = htmlBrut
+                .Replace("{{Nume}}", nume)
+                .Replace("{{Prenume}}", prenume)
+                .Replace("{{LinkConfirmare}}", $"{backendUrl}/confirmare-cont?token={Uri.EscapeDataString(tokenSecurizat)}")
+                .Replace("{{AnulCurent}}", anulCurent);
+
+            Console.WriteLine("tokenul lu peste " + tokenSecurizat + " si vreau si frontend " + backendUrl);
+            await TrimiteEmailBazaAsync(emailDestinatar, "Email de confirmare a contului!", htmlPersonalizat);
+        }
+
+        public async Task TrimiteEmailConfirmAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat)
+        {
+
+            string backendUrl = _config["Backend:BaseUrl"] ?? "http://localhost:5298";
+            string frontendUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:4200";
+            string anulCurent = DateTime.Now.Year.ToString();
+            Console.WriteLine("Nu ajungem dupa caleTemplate");
+            string caleTemplate = Path.Combine(AppContext.BaseDirectory, "EmailTemplates", "ConfirmAccountEmail.html");
+
+            Console.WriteLine("PATH TEMPLATE EMAIL:");
+            Console.WriteLine(caleTemplate);
+            Console.WriteLine("EXISTS: " + File.Exists(caleTemplate));
+
             if (!File.Exists(caleTemplate))
             {
                 throw new FileNotFoundException($"Template-ul de email nu a fost gasit la {caleTemplate}");

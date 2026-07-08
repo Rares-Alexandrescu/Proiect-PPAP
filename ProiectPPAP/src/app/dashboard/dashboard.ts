@@ -22,11 +22,22 @@ export class DashboardComponent implements OnInit {
   loading = signal<boolean>(true);
   eroare = signal<string>('');
 
+  mesajSuccesVerificat = signal(false);
+  loadingEmail = signal(false);
+  mesajEmail = signal<{ text: string, tip: 'succes' | 'eroare' } | null>(null);
+
   ngOnInit() {
 
     if (!this.auth.isLoggedIn()) {
       this.router.navigate(['/login'], { queryParams: this.route.snapshot.queryParams });
       return;
+    }
+
+    const aFostConfirmat = this.route.snapshot.queryParamMap.get('confirmat') === 'true';
+
+    if (aFostConfirmat) {
+      this.mesajSuccesVerificat.set(true);
+      this.router.navigate([], { replaceUrl: true });
     }
     this.incarcaDate();
   }
@@ -45,5 +56,21 @@ export class DashboardComponent implements OnInit {
           this.loading.set(false);
         }
       });
+  }
+
+  retrimiteEmail() {
+    this.loadingEmail.set(true);
+    this.mesajEmail.set(null);
+
+    this.http.post(`${environment.apiUrl}/resend-confirmare`, {}).subscribe({
+      next: (response: any) => {
+        this.loadingEmail.set(false);
+        this.mesajEmail.set({ text: response.mesaj || "Email retrimis cu succes!", tip: 'succes' });
+      },
+      error: (err) => {
+        this.loadingEmail.set(false);
+        this.mesajEmail.set({ text: "A apărut o eroare la trimiterea emailului.", tip: 'eroare' });
+      }
+    });
   }
 }
