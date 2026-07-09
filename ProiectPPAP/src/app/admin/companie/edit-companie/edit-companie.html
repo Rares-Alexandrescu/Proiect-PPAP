@@ -1,0 +1,80 @@
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+
+    <div class="antet-card">
+      <h2>Editează Compania</h2>
+      <p>Actualizează datele companiei selectate.</p>
+    </div>
+
+    <div class="alerta-eroare" *ngIf="mesajEroareGenerala">
+      {{ mesajEroareGenerala }}
+    </div>
+    <div class="alerta-succes" *ngIf="mesajSucces">
+      {{ mesajSucces }}
+    </div>
+
+    <form [formGroup]="editCompanieForm" (ngSubmit)="onSave()">
+
+      <div class="grup-formular">
+        <label>Nume Companie</label>
+        <input type="text"
+               formControlName="nume_Companie"
+               [class.invalid]="editCompanieForm.get('nume_Companie')?.invalid && editCompanieForm.get('nume_Companie')?.touched">
+        <small class="text-eroare" *ngIf="editCompanieForm.get('nume_Companie')?.hasError('required') && editCompanieForm.get('nume_Companie')?.touched">
+          Numele companiei este obligatoriu.
+        </small>
+        <small class="text-eroare" *ngFor="let err of editCompanieForm.get('nume_Companie')?.getError('serverErrors')">{{ err }}</small>
+      </div>
+
+      <div class="rand-formular">
+        <div class="grup-formular">
+          <label>Email</label>
+          <input type="email"
+                 formControlName="email"
+                 [class.invalid]="editCompanieForm.get('email')?.invalid && editCompanieForm.get('email')?.touched">
+          <small class="text-eroare" *ngFor="let err of editCompanieForm.get('email')?.getError('serverErrors')">{{ err }}</small>
+        </div>
+
+        <div class="grup-formular">
+          <label>Telefon</label>
+          <input type="text"
+                 formControlName="numar_Telefon"
+                 [class.invalid]="editCompanieForm.get('numar_Telefon')?.invalid && editCompanieForm.get('numar_Telefon')?.touched">
+          <small class="text-eroare" *ngFor="let err of editCompanieForm.get('numar_Telefon')?.getError('serverErrors')">{{ err }}</small>
+        </div>
+      </div>
+
+      <div class="rand-formular">
+        <div class="grup-formular">
+          <label>Nume Admin Local</label>
+          <input type="text"
+                 formControlName="numeAdminLocal"
+                 [class.invalid]="editCompanieForm.get('numeAdminLocal')?.invalid && editCompanieForm.get('numeAdminLocal')?.touched">
+          <small class="text-eroare" *ngFor="let err of editCompanieForm.get('numeAdminLocal')?.getError('serverErrors')">{{ err }}</small>
+        </div>
+
+        <div class="grup-formular">
+          <label>Prenume Admin Local</label>
+          <input type="text"
+                 formControlName="prenumeAdminLocal"
+                 [class.invalid]="editCompanieForm.get('prenumeAdminLocal')?.invalid && editCompanieForm.get('prenumeAdminLocal')?.touched">
+          <small class="text-eroare" *ngFor="let err of editCompanieForm.get('prenumeAdminLocal')?.getError('serverErrors')">{{ err }}</small>
+        </div>
+      </div>
+
+      <button type="submit"
+              class="buton-principal"
+              [disabled]="editCompanieForm.invalid || seIncarca">
+        {{ seIncarca ? 'Se salvează modificările...' : 'Salvează Modificările' }}
+      </button>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a routerLink="/admin/companii" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
+          &larr; Înapoi la lista de companii
+        </a>
+      </div>
+
+    </form>
+
+  </div>
+</div>

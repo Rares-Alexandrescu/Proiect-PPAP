@@ -1,0 +1,52 @@
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Gestionare Companii</h2>
+      <p>Aici poți vizualiza, edita sau șterge companiile din platformă.</p>
+    </div>
+    <button class="buton-principal buton-adauga" (click)="adaugaCompanie()">+ Adaugă Companie</button>
+  </div>
+
+  <div class="card-admin">
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <td>ID Companie</td>
+            <th>Nume Companie</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>Nume Admin Local</th>
+            <th>Prenume Admin Local</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (companie of companii; track companie.nume_Companie) {
+          <tr>
+            <td><strong>{{ companie.companie_Id}}</strong></td>
+            <td><strong>{{ companie.nume_Companie }}</strong></td>
+            <td>{{ companie.email }}</td>
+            <td>{{ companie.numar_Telefon }}</td>
+            <td>{{ companie.numeAdminLocal ? companie.numeAdminLocal : 'N/A' }}</td>
+            <td>{{ companie.prenumeAdminLocal ? companie.prenumeAdminLocal : 'N/A' }}</td>
+            <td>
+              <div class="actiuni-tabel">
+                <button class="buton-actiune buton-edit" (click)="editeazaCompanie(companie.companie_Id)>Editează</button>
+                <button class="buton-actiune buton-delete" (click)="stergeCompanie(companie.companie_Id)">Șterge</button>
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există nicio companie înregistrată momentan.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens; 
 using System.IdentityModel.Tokens.Jwt; 
 using System.Security.Claims;
@@ -75,5 +75,73 @@ namespace Backend.Helpers
             "sp_Utilizator_Get_Rol",
             parametrii,
             commandType: CommandType.StoredProcedure);
+    }
+
+    public static async Task<IResult?> VerificaAdminGeneral(ClaimsPrincipal admin, IConfiguration config)
+    {
+        var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(idString, out int idAdmin))
+            return Results.Unauthorized();
+
+        var connectionString = config.GetConnectionString("DefaultConnection");
+        var rolAdmin = await GetRol(idAdmin, connectionString);
+        if (rolAdmin != "AdminGeneral")
+            return Results.Forbid();
+
+        return null;
+    }
+
+    public static void AdaugaEroare(Dictionary<string, List<string>> erori, string camp, string mesaj)
+    {
+        if (!erori.ContainsKey(camp)) erori[camp] = new List<string>();
+        erori[camp].Add(mesaj);
+    }
+
+    public static Dictionary<string, List<string>> ValideazaDateCompanie(Companie companie)
+    {
+        var erori = new Dictionary<string, List<string>>();
+
+        if (!EsteEmailValid(companie.Email))
+            AdaugaEroare(erori, "email", "Email-ul nu are formatul corect!");
+
+        if (!EsteNumarTelefonValid(companie.Numar_Telefon))
+            AdaugaEroare(erori, "numar_telefon", "Numarul de telefon trebuie sa contina fix 10 cifre!");
+
+        if (!EsteNumePrenumeValid(companie.Nume_Companie))
+            AdaugaEroare(erori, "nume_companie", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
+
+        return erori;
+    }
+
+    public static (string? emailCautare, int? idCautare, string? cnpHash) ParseazaIdentificatorCompanie(string identificator, Dictionary<string, List<string>> erori)
+    {
+        string? emailCautare = null;
+        int? idCautare = null;
+        string? cnpHash = null;
+
+        if (string.IsNullOrWhiteSpace(identificator) || identificator.Contains("***"))
+            return (emailCautare, idCautare, cnpHash);
+
+        if (identificator.Contains("@"))
+        {
+            if (!EsteEmailValid(identificator))
+                AdaugaEroare(erori, "identificator", "Email-ul introdus nu are un format valid!");
+            else
+                emailCautare = identificator;
+        }
+        else if (int.TryParse(identificator, out int idParsat))
+        {
+            idCautare = idParsat;
+        }
+        else
+        {
+            if (!EsteCnpValid(identificator))
+                AdaugaEroare(erori, "identificator", "Identificatorul trebuie să fie un Email, un ID valid sau un CNP de 13 cifre!");
+            else
+                cnpHash = CripteazaCNP(identificator);
+        }
+
+        return (emailCautare, idCautare, cnpHash);
     }
 }

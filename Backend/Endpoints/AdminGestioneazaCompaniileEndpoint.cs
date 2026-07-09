@@ -13,18 +13,12 @@ namespace Backend.Endpoints
         //tre sa fac si ceva de filtrare etc!
         public static void MapAdminGestioneazaCompaniileEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGet("/admin/vezi-companii", async (ClaimPrincipal admin, IConfiguration config) =>
+            app.MapGet("/admin/vezi-companii", async (ClaimsPrincipal admin, IConfiguration config) =>
             {
-                var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (!int.TryParse(idString, out int idAdmin)) return Results.Unauthorized();
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
-
-                var rolAdmin = await SecurityHelper.GetRol(idAdmin, connectionString);
-
-                if (rolAdmin != "AdminGeneral")
-                    return Results.Forbid();
 
                 using (var connection = new SqlConnection(connectionString))
                 {
@@ -42,83 +36,242 @@ namespace Backend.Endpoints
                 IConfiguration config,
                 [FromBody] Companie companieNoua) =>
             {
-                var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (!int.TryParse(idString, out int idAdmin)) return Results.Unauthorized();
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
-                var rolAdmin = await SecurityHelper.GetRol(idAdmin, connectionString);
-
-                if (rolAdmin != "AdminGeneral")
-                    return Results.Forbid();
-
                 var erori = new Dictionary<string, List<string>>();
 
-                void AdaugaEroare(string camp, string mesaj)
-                {
-                    if (!erori.ContainsKey(camp)) erori[camp] = new List<string>();
-                    erori[camp].Add(mesaj);
-                }
+                string identificator = companieNoua.CnpAdminLocal?.Trim() ?? "";
+                var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(identificator, erori);
 
-                if(!SecurityHelper.EsteEmailValid(companieNoua.Email))
-                {
-                    AdaugaEroare("email", "Email-ul nu are formatul corect!");
-                }
-
-                if(!SecurityHelper.EsteCnpValid(companieNoua.CnpAdminLocal))
-                {
-                    AdaugaEroare("cnp", "CNP-ul trebuie sa contina fix 13 cifre!");
-                }
-
-                if (!SecurityHelper.EsteNumarTelefonValid(companieNoua.NumarTelefonAdminLocal))
-                {
-                    AdaugaEroare("numar_telefon", "Numarul de telefon trebuie sa contina fix 10 cifre!");
-                }
-
+                if (erori.Count > 0)
+                    return Results.BadRequest(new { eroriCampuri = erori });
 
                 using (var connection = new SqlConnection(connectionString))
                 {
-                    var parametruCnp = new DynamicParameters();
+                    string? cnpRealDinDb = null;
+                    if (!string.IsNullOrWhiteSpace(identificator))
+                    {
+                        var paramCautare = new DynamicParameters();
+                        paramCautare.Add("@Email", emailCautare);
+                        paramCautare.Add("@Id", idCautare);
+                        paramCautare.Add("@CnpHash", cnpHash);
 
-                    parametruCnp.Add("@cnp", cnpHash);
-                    parametruCnp..Add("@rezultat", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+                        cnpRealDinDb = await connection.QueryFirstOrDefaultAsync<string>(
+                                    "sp_Utilizator_GetCnpByIdentificator",
+                                    paramCautare,
+                                    commandType: CommandType.StoredProcedure);
+
+
+                        if (string.IsNullOrEmpty(cnpRealDinDb))
+                        {
+                            SecurityHelper.AdaugaEroare(erori, "identificator", "Nu am găsit niciun utilizator cu aceste date!");
+                            return Results.BadRequest(new { eroriCampuri = erori });
+                        }
+
+                        var paramVerificare = new DynamicParameters();
+                        paramVerificare.Add("@emailsaucnp", cnpRealDinDb);
+
+                        var userAdmin = await connection.QueryFirstOrDefaultAsync<Utilizator>(
+                                    "sp_Utilizator_getbyEmailsauCNP",
+                                    paramVerificare,
+                                    commandType: CommandType.StoredProcedure);
+
+                        if (userAdmin == null && userAdmin.companie_id != null)
+                        {
+                            SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
+                            return Results.BadRequest(new { eroriCampuri = erori });
+                        }
+                    }
+
+                    var parametriiCompanie = new DynamicParameters();
+
+                    parametriiCompanie.Add("@NumeCompanie", companieNoua.Nume_Companie);
+                    parametriiCompanie.Add("@CnpAdminLocal", cnpRealDinDb);
+                    parametriiCompanie.Add("@Email", companieNoua.Email);
+                    parametriiCompanie.Add("@NumarTelefon", companieNoua.Numar_Telefon);
+
 
                     await connection.ExecuteAsync(
-                        "sp_Utilizator_Exista_CNP",
-                        parametruCnp,
+                        "sp_Companie_AddCompanie",
+                         parametriiCompanie,
                         commandType: CommandType.StoredProcedure
-                    );
+                    ); //aici se atribuie utilziatorul ca si admin!
 
-                    int rezultatCnp = parametruEmail.Get<int>("@rezultat");
-                    Console.WriteLine("Rezultatul Email din procedura stocată este: " + rezultatSql);
-
-                    if(rezultatCnp == 0)
-                    {
-                        AdaugaEroare("cnp", "CNP inexistent! Asigura-te ca utilizatorul exista!");
-                    }
+                    return Results.Ok(new { message = "Compania a fost adăugată cu succes!" });
                 }
                 //trebuie aici procedura stocata ca sa se retina in db
             }).RequireAuthorization();
 
 
-            app.MapGet("/admin/edit-companie/{id:int}", async(
-                int id,
+            app.MapGet("/admin/edit-companie/{idCompanie:int}", async (
+                int idCompanie,
                 ClaimsPrincipal admin,
                 IConfiguration config
                 ) =>
             {
-                //Sa populez formularu cu datele companiei
+                //Sa populez formularu cu datele companiei, dar tre sa vad ce fac cu utilizatorul ala ca cnp - ul e criptat
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametrii = new DynamicParameters();
+                    parametrii.Add("@idCompanie", idCompanie);
+
+                    var companieDB = await connection.QueryFirstOrDefaultAsync<Companie>(
+                        "sp_Companie_getByID",
+                        parametrii,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (companieDB == null)
+                    {
+                        return Results.BadRequest(new { message = "ID inexistent! Cerere proasta!" });
+                    }
+
+                    companieDB.CnpAdminLocal = "***";
+                    return Results.Ok(new
+                    {
+                        companie = companieDB,
+                    });
+
+                }
+
             }).RequireAuthorization();
 
-            app.MapPut("/admin/edit-companie/{id:int}", async (
-                int id,
+            app.MapPut("/admin/edit-companie/{idCompanie:int}", async (
+                int idCompanie,
                 ClaimsPrincipal admin,
                 IConfiguration config,
-                [FromBody] Companie companieEditata 
+                [FromBody] Companie companieEditata
             ) =>
             {
-                //Sa updatez intrarea pusa aici
+
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                var erori = SecurityHelper.ValideazaDateCompanie(companieEditata);
+
+                string identificator = companieEditata.CnpAdminLocal?.Trim() ?? "";
+                bool editAdmin = !string.IsNullOrWhiteSpace(identificator) && !identificator.Contains("***");
+
+                var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(editAdmin ? identificator : "", erori);
+
+                if (erori.Count > 0)
+                    return Results.BadRequest(new { eroriCampuri = erori });
+
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string? cnpRealDinDb = null;
+                    if (editAdmin)
+                    {
+                        var paramCautare = new DynamicParameters();
+                        paramCautare.Add("@Email", emailCautare);
+                        paramCautare.Add("@Id", idCautare);
+                        paramCautare.Add("@CnpHash", cnpHash);
+
+                        cnpRealDinDb = await connection.QueryFirstOrDefaultAsync<string>(
+                                    "sp_Utilizator_GetCnpByIdentificator",
+                                    paramCautare,
+                                    commandType: CommandType.StoredProcedure);
+
+
+                        if (string.IsNullOrEmpty(cnpRealDinDb))
+                        {
+                            SecurityHelper.AdaugaEroare(erori, "identificator", "Nu am găsit niciun utilizator cu aceste date!");
+                            return Results.BadRequest(new { eroriCampuri = erori });
+                        }
+
+                        var paramVerificare = new DynamicParameters();
+                        paramVerificare.Add("@emailsaucnp", cnpRealDinDb);
+
+                        var userAdmin = await connection.QueryFirstOrDefaultAsync<Utilizator>(
+                                    "sp_Utilizator_getbyEmailsauCNP",
+                                    paramVerificare,
+                                    commandType: CommandType.StoredProcedure);
+
+                        if userAdmin != null && userAdmin.companie_id != null && userAdmin.companie_id != idCompanie)
+                        {
+                            SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
+                            return Results.BadRequest(new { eroriCampuri = erori });
+                        }
+                    }
+
+                    else if (string.IsNullOrWhiteSpace(identificator))
+                    {
+                        cnpRealDinDb = "STERGE_ADMIN";
+                    }
+
+                    var parametriiCompanie = new DynamicParameters();
+
+                    parametriiCompanie.Add("@NumeCompanie", companieEditata.Nume_Companie);
+                    parametriiCompanie.Add("@CnpAdminLocal", cnpRealDinDb);
+                    parametriiCompanie.Add("@Email", companieEditata.Email);
+                    parametriiCompanie.Add("@NumarTelefon", companieEditata.Numar_Telefon);
+                    parametriiCompanie.Add("@idCompanie", idCompanie);
+
+                    await connection.ExecuteAsync(
+                        "sp_Companie_EditCompanie",
+                         parametriiCompanie,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    return Results.Ok(new { message = "Compania a fost editata cu succes!" });
+                }
+            }).RequireAuthorization();
+
+            //si mai am de facut delete-ul, dar nu stiu cum sa l fac acuma sa mearga cat mai bine
+            app.MapDelete("/admin/delete-companie/{idCompanie:int}", async (
+                int idCompanie,
+                ClaimsPrincipal admin,
+                IConfiguration config
+
+            ) =>
+            {
+                //DE MODIFICAT STERGEREA ODATA CE MAI ADAUGAM CHESTII
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                var erori = new Dictionary<string, List<string>>();
+
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametru = new DynamicParameters();
+                    parametru.Add("@id", idCompanie);
+
+                    var companieDeSters = await connection.QueryFirstOrDefaultAsync<Companie>(
+                        "sp_Companie_getbyID",
+                        param: parametru,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (companieDeSters == null)
+                    {
+                        SecurityHelper.AdaugaEroare(erori, "companie-delete", "Nu exista aceasta companie");
+                        return Results.BadRequest(new { eroriCampuri = erori });
+                    }
+
+
+                    var parametrii = new DynamicParameters();
+                    parametrii.Add("@idCompanie", idCompanie);
+
+                    await connection.ExecuteAsync(
+                        "sp_Companie_DeleteCompanie",
+                        param: parametrii,
+                        commandType: CommandType.StoredProcedure);
+                }
+
+                return Results.NoContent();
+
             }).RequireAuthorization();
         }
     }
