@@ -69,86 +69,142 @@ namespace Backend.Helpers
         }
 
 
-    public static async Task<string?> GetRol(int utilizatorId, string connectionString)
-    {
-        using var connection = new SqlConnection(connectionString);
-        var parametrii = new DynamicParameters();
-        parametrii.Add("@id", utilizatorId);
+        public static async Task<string?> GetRol(int utilizatorId, string connectionString)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var parametrii = new DynamicParameters();
+            parametrii.Add("@id", utilizatorId);
 
-        return await connection.QueryFirstOrDefaultAsync<string>(
-            "sp_Utilizator_Get_Rol",
-            parametrii,
-            commandType: CommandType.StoredProcedure);
-    }
+            return await connection.QueryFirstOrDefaultAsync<string>(
+                "sp_Utilizator_Get_Rol",
+                parametrii,
+                commandType: CommandType.StoredProcedure);
+        }
 
-    public static async Task<IResult?> VerificaAdminGeneral(ClaimsPrincipal admin, IConfiguration config)
-    {
-        var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        public static async Task<Companie?> GetCompanie(int utilizatorId, string connectionString)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var parametrii = new DynamicParameters();
+            parametrii.Add("@id", utilizatorId);
 
-        if (!int.TryParse(idString, out int idAdmin))
-            return Results.Unauthorized();
+            return await connection.QueryFirstOrDefaultAsync<Companie>(
+                "sp_Utilizator_Get_Companie",
+                parametrii,
+                commandType: CommandType.StoredProcedure);
+        }
+    
+        public static async Task<IResult?> VerificaAdminGeneral(ClaimsPrincipal admin, IConfiguration config)
+        {
+            var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var connectionString = config.GetConnectionString("DefaultConnection");
-        var rolAdmin = await GetRol(idAdmin, connectionString);
+            if (!int.TryParse(idString, out int idAdmin))
+                return Results.Unauthorized();
 
-        Console.WriteLine("Rolul pe care toti il asteptam este " + rolAdmin);
-        if (rolAdmin != "AdminGeneral")
-            return Results.Forbid();
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            var rolAdmin = await GetRol(idAdmin, connectionString);
 
-        return null;
-    }
+            Console.WriteLine("Rolul pe care toti il asteptam este " + rolAdmin);
+            if (rolAdmin != "AdminGeneral")
+                return Results.Forbid();
 
-    public static void AdaugaEroare(Dictionary<string, List<string>> erori, string camp, string mesaj)
-    {
-        if (!erori.ContainsKey(camp)) erori[camp] = new List<string>();
-        erori[camp].Add(mesaj);
-    }
+            return null;
+        }
 
-    public static Dictionary<string, List<string>> ValideazaDateCompanie(Companie companie)
-    {
-        var erori = new Dictionary<string, List<string>>();
 
-        if (!Validators.EsteEmailValid(companie.Email))
-            AdaugaEroare(erori, "email", "Email-ul nu are formatul corect!");
+        public static async Task<IResult?> VerificaAdminCompanie(ClaimsPrincipal admin, IConfiguration config)
+        {
+            var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (!Validators.EsteNumarTelefonValid(companie.Numar_Telefon))
-            AdaugaEroare(erori, "numar_telefon", "Numarul de telefon trebuie sa contina fix 10 cifre!");
+            if (!int.TryParse(idString, out int idAdmin))
+                return Results.Unauthorized();
 
-        if (!Validators.EsteNumeCompanieValid(companie.Nume_Companie))
-            AdaugaEroare(erori, "nume_companie", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            var rolAdmin = await GetRol(idAdmin, connectionString);
 
-        return erori;
-    }
+            Console.WriteLine("Rolul pe care toti il asteptam este " + rolAdmin);
+            if (rolAdmin != "AdminCompanie")
+                return Results.Forbid();
 
-    public static (string? emailCautare, int? idCautare, string? cnpHash) ParseazaIdentificatorCompanie(string identificator, Dictionary<string, List<string>> erori)
-    {
-        string? emailCautare = null;
-        int? idCautare = null;
-        string? cnpHash = null;
+            return null;
+        }
 
-        if (string.IsNullOrWhiteSpace(identificator) || identificator.Contains("***"))
+            public static void AdaugaEroare(Dictionary<string, List<string>> erori, string camp, string mesaj)
+        {
+            if (!erori.ContainsKey(camp)) erori[camp] = new List<string>();
+            erori[camp].Add(mesaj);
+        }
+
+        public static Dictionary<string, List<string>> ValideazaDateCompanie(Companie companie)
+        {
+            var erori = new Dictionary<string, List<string>>();
+
+            if (!Validators.EsteEmailValid(companie.Email))
+                AdaugaEroare(erori, "email", "Email-ul nu are formatul corect!");
+
+            if (!Validators.EsteNumarTelefonValid(companie.Numar_Telefon))
+                AdaugaEroare(erori, "numar_telefon", "Numarul de telefon trebuie sa contina fix 10 cifre!");
+
+            if (!Validators.EsteNumeCompanieValid(companie.Nume_Companie))
+                AdaugaEroare(erori, "nume_companie", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
+
+            return erori;
+        }
+
+        public static (string? emailCautare, int? idCautare, string? cnpHash) ParseazaIdentificatorCompanie(string identificator, Dictionary<string, List<string>> erori)
+        {
+            string? emailCautare = null;
+            int? idCautare = null;
+            string? cnpHash = null;
+
+            if (string.IsNullOrWhiteSpace(identificator) || identificator.Contains("***"))
+                return (emailCautare, idCautare, cnpHash);
+
+            if (identificator.Contains("@"))
+            {
+                if (!Validators.EsteEmailValid(identificator))
+                    AdaugaEroare(erori, "identificator", "Email-ul introdus nu are un format valid!");
+                else
+                    emailCautare = identificator;
+            }
+            else if (int.TryParse(identificator, out int idParsat))
+            {
+                idCautare = idParsat;
+            }
+            else
+            {
+                if (!Validators.EsteCnpValid(identificator))
+                    AdaugaEroare(erori, "identificator", "Identificatorul trebuie să fie un Email, un ID valid sau un CNP de 13 cifre!");
+                else
+                    cnpHash = CripteazaCNP(identificator);
+            }
+
             return (emailCautare, idCautare, cnpHash);
-
-        if (identificator.Contains("@"))
-        {
-            if (!Validators.EsteEmailValid(identificator))
-                AdaugaEroare(erori, "identificator", "Email-ul introdus nu are un format valid!");
-            else
-                emailCautare = identificator;
-        }
-        else if (int.TryParse(identificator, out int idParsat))
-        {
-            idCautare = idParsat;
-        }
-        else
-        {
-            if (!Validators.EsteCnpValid(identificator))
-                AdaugaEroare(erori, "identificator", "Identificatorul trebuie să fie un Email, un ID valid sau un CNP de 13 cifre!");
-            else
-                cnpHash = CripteazaCNP(identificator);
         }
 
-        return (emailCautare, idCautare, cnpHash);
-    }
+        public static async Task<(IResult? Eroare, Companie? CompanieGasita)> ObtineCompanieAdminLocal(ClaimsPrincipal admin, string connectionString)
+        {
+            var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(idString, out int idAdmin))
+                return (Results.Unauthorized(), null);
+
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var parametruCompanie = new DynamicParameters();
+                parametruCompanie.Add("@id", idAdmin);
+
+                var companieLocalAdmin = await connection.QueryFirstOrDefaultAsync<Companie>(
+                    "sp_Utilizator_Get_Companie",
+                    parametruCompanie,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                if (companieLocalAdmin == null)
+                    return (Results.BadRequest(new { message = "Acest utilizator nu are nicio companie atribuită!" }), null);
+
+                return (null, companieLocalAdmin);
+            }
+        }
     }
 }
