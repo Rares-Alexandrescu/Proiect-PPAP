@@ -81,13 +81,23 @@ namespace Backend.Endpoints
                                     paramVerificare,
                                     commandType: CommandType.StoredProcedure);
 
-                        if (userAdmin == null && userAdmin.companie_id != null)
+                        if (userAdmin != null)
                         {
-                            SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
-                            return Results.BadRequest(new { eroriCampuri = erori });
+                            if (userAdmin.companie_id != int.MaxValue)
+                            {
+                                Console.WriteLine("Asta este companie id " + userAdmin.companie_id);
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
+                                return Results.BadRequest(new { eroriCampuri = erori });
+                            }
+                            var rolUtilizator = await SecurityHelper.GetRol(userAdmin.Id, connectionString);
+                            if (rolUtilizator == "AdminGeneral")
+                            {
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin General ca Admin Local al unei companii!");
+                                return Results.BadRequest(new { eroriCampuri = erori });
+                            }
                         }
                     }
-
+                    //trebuie aici procedura stocata ca sa se retina in db
                     var parametriiCompanie = new DynamicParameters();
 
                     parametriiCompanie.Add("@NumeCompanie", companieNoua.Nume_Companie);
@@ -104,7 +114,7 @@ namespace Backend.Endpoints
 
                     return Results.Ok(new { message = "Compania a fost adăugată cu succes!" });
                 }
-                //trebuie aici procedura stocata ca sa se retina in db
+                
             }).RequireAuthorization();
 
 
@@ -191,6 +201,7 @@ namespace Backend.Endpoints
                             return Results.BadRequest(new { eroriCampuri = erori });
                         }
 
+
                         var paramVerificare = new DynamicParameters();
                         paramVerificare.Add("@emailsaucnp", cnpRealDinDb);
 
@@ -199,10 +210,21 @@ namespace Backend.Endpoints
                                     paramVerificare,
                                     commandType: CommandType.StoredProcedure);
 
-                        if (userAdmin != null && userAdmin.companie_id != null && userAdmin.companie_id != idCompanie)
+
+                        if (userAdmin != null)
                         {
-                            SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
-                            return Results.BadRequest(new { eroriCampuri = erori });
+                            if (userAdmin.companie_id != int.MaxValue && userAdmin.companie_id != idCompanie)
+                            {
+                                Console.WriteLine("Asta este companie id " + userAdmin.companie_id);
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
+                                return Results.BadRequest(new { eroriCampuri = erori });
+                            }
+                            var rolUtilizator = await SecurityHelper.GetRol(userAdmin.Id, connectionString);
+                            if (rolUtilizator == "AdminGeneral")
+                            {
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin General ca Admin Local al unei companii!");
+                                return Results.BadRequest(new { eroriCampuri = erori });
+                            }
                         }
                     }
 
