@@ -90,6 +90,8 @@ namespace Backend.Helpers
 
         var connectionString = config.GetConnectionString("DefaultConnection");
         var rolAdmin = await GetRol(idAdmin, connectionString);
+
+        Console.WriteLine("Rolul pe care toti il asteptam este " + rolAdmin);
         if (rolAdmin != "AdminGeneral")
             return Results.Forbid();
 
@@ -112,7 +114,7 @@ namespace Backend.Helpers
         if (!Validators.EsteNumarTelefonValid(companie.Numar_Telefon))
             AdaugaEroare(erori, "numar_telefon", "Numarul de telefon trebuie sa contina fix 10 cifre!");
 
-        if (!Validators.EsteNumePrenumeValid(companie.Nume_Companie))
+        if (!Validators.EsteNumeCompanieValid(companie.Nume_Companie))
             AdaugaEroare(erori, "nume_companie", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
 
         return erori;

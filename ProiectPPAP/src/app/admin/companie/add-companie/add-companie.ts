@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -11,7 +11,7 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   templateUrl: './add-companie.html',
   styleUrls: ['./add-companie.scss'],
-  imports: [CommonModule, ReactiveFormsModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
 export class AdaugaCompanieComponent implements OnInit, OnDestroy {
   adaugaCompanieForm!: FormGroup;
@@ -98,11 +98,10 @@ export class AdaugaCompanieComponent implements OnInit, OnDestroy {
 
         this.adaugaCompanieForm.reset();
 
-        setTimeout(() => {
-          this.router.navigate(['/admin/vezi-companii'], {
-            state: { mesajSucces: 'Compania a fost adăugată cu succes!' }
-          });
-        }, 1500);
+        this.router.navigate(['/admin/vezi-companii'], {
+          state: { mesajSucces: 'Compania a fost adăugată cu succes!' }
+        });
+  
       },
       error: (err) => {
         this.seIncarca.set(false);

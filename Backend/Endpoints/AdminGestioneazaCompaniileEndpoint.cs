@@ -16,8 +16,10 @@ namespace Backend.Endpoints
             app.MapGet("/admin/vezi-companii", async (ClaimsPrincipal admin, IConfiguration config) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
-                if (eroareAutentificare != null) return eroareAutentificare;
 
+                Console.WriteLine("Deci intra aici");
+                if (eroareAutentificare != null) return eroareAutentificare;
+                Console.WriteLine("Si iese de aici");
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
                 using (var connection = new SqlConnection(connectionString))
@@ -41,7 +43,7 @@ namespace Backend.Endpoints
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
-                var erori = new Dictionary<string, List<string>>();
+                var erori = SecurityHelper.ValideazaDateCompanie(companieNoua);
 
                 string identificator = companieNoua.CnpAdminLocal?.Trim() ?? "";
                 var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(identificator, erori);
@@ -117,11 +119,11 @@ namespace Backend.Endpoints
                 if (eroareAutentificare != null) return eroareAutentificare;
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
-
+                Console.WriteLine("id-ul companiei este " + idCompanie);
                 using (var connection = new SqlConnection(connectionString))
                 {
                     var parametrii = new DynamicParameters();
-                    parametrii.Add("@idCompanie", idCompanie);
+                    parametrii.Add("@id", idCompanie);
 
                     var companieDB = await connection.QueryFirstOrDefaultAsync<Companie>(
                         "sp_Companie_getByID",

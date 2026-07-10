@@ -9,9 +9,6 @@
     <div class="alerta-eroare" *ngIf="eroriBackend()['eroareGenerala']">
       {{ eroriBackend()['eroareGenerala'] }}
     </div>
-    <div class="alerta-succes" *ngIf="mesajSucces()">
-      {{ mesajSucces() }}
-    </div>
 
     <form [formGroup]="adaugaCompanieForm" (ngSubmit)="onSave()">
 
@@ -20,7 +17,7 @@
         <input type="text"
                formControlName="nume_Companie"
                [class.invalid]="adaugaCompanieForm.get('nume_Companie')?.invalid && adaugaCompanieForm.get('nume_Companie')?.touched">
-        <small class="text-eroare" *ngFor="let err of eroriBackend()['Nume_Companie'] || eroriBackend()['nume_Companie']">{{ err }}</small>
+        <small class="text-eroare" *ngFor="let err of eroriBackend()['Nume_Companie'] || eroriBackend()['nume_companie']">{{ err }}</small>
       </div>
 
       <div class="rand-formular">
@@ -37,7 +34,7 @@
           <input type="text"
                  formControlName="numar_Telefon"
                  [class.invalid]="adaugaCompanieForm.get('numar_Telefon')?.invalid && adaugaCompanieForm.get('numar_Telefon')?.touched">
-          <small class="text-eroare" *ngFor="let err of eroriBackend()['Numar_Telefon'] || eroriBackend()['numar_Telefon']">{{ err }}</small>
+          <small class="text-eroare" *ngFor="let err of eroriBackend()['Numar_Telefon'] || eroriBackend()['numar_telefon']">{{ err }}</small>
         </div>
       </div>
 
@@ -59,7 +56,7 @@
       </button>
 
       <div style="text-align: center; margin-top: 1.5rem;">
-        <a routerLink="/admin/companii" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
+        <a routerLink="/admin/vezi-companii" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
           &larr; Înapoi la lista de companii
         </a>
       </div>

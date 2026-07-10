@@ -22,7 +22,7 @@ export interface Companie {
 })
 export class VeziCompaniiComponent implements OnInit {
 
-  companii: Companie[] = [];
+  companii = signal<Companie[]>([]);
   private http = inject(HttpClient);
   private router = inject(Router);
 
@@ -41,6 +41,7 @@ export class VeziCompaniiComponent implements OnInit {
       setTimeout(() => {
         this.alertaSucces.set('');
       }, 3000);
+      window.history.replaceState({}, document.title);
     }
 
     if (stareNavigare && stareNavigare.mesajEroare) {
@@ -48,13 +49,19 @@ export class VeziCompaniiComponent implements OnInit {
       setTimeout(() => {
         this.alertaEroare.set('');
       }, 3000);
+      window.history.replaceState({}, document.title);
     }
   }
 
   incarcaCompanii(): void {
     this.http.get<Companie[]>(`${environment.apiUrl}/admin/vezi-companii`).subscribe({
       next: (dateDinBackend) => {
-        this.companii = dateDinBackend;
+        console.log('1. Date primite de la server:', dateDinBackend);
+        console.log('2. Este listă (Array)?:', Array.isArray(dateDinBackend));
+
+        this.companii.set(dateDinBackend);
+        console.log('3. Variabila this.companii are acum:', this.companii.length, 'elemente.');
+
       },
       error: (eroare) => {
         if (eroare.status === 401) {

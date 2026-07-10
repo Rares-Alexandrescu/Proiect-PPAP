@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -11,7 +11,7 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   templateUrl: './edit-companie.html',
   styleUrls: ['./edit-companie.scss'],
-  imports: [CommonModule, ReactiveFormsModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
 export class EditCompanieComponent implements OnInit, OnDestroy {
   editCompanieForm!: FormGroup;
@@ -35,7 +35,7 @@ export class EditCompanieComponent implements OnInit, OnDestroy {
     if (idParam) {
       this.companieId = +idParam;
     } else {
-      this.router.navigate(['/admin/companii']);
+      this.router.navigate(['/admin/vezi-companii']);
       return;
     }
 
@@ -125,14 +125,11 @@ export class EditCompanieComponent implements OnInit, OnDestroy {
     this.http.put<any>(`${environment.apiUrl}/admin/edit-companie/${this.companieId}`, formData).subscribe({
       next: (response) => {
         this.seIncarca.set(false);
-        this.mesajSucces.set(response.message || 'Compania a fost actualizată cu succes!');
         console.log("Succes:", response);
 
-        setTimeout(() => {
-          this.router.navigate(['/admin/companii'], {
-            state: { mesajSucces: 'Compania a fost editată cu succes!' }
-          });
-        }, 1500);
+        this.router.navigate(['/admin/vezi-companii'], {
+          state: { mesajSucces: 'Compania a fost editată cu succes!' }
+        });
       },
       error: (err) => {
         this.seIncarca.set(false);

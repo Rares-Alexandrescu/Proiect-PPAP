@@ -7,12 +7,20 @@
     <button class="buton-principal buton-adauga" (click)="adaugaCompanie()">+ Adaugă Companie</button>
   </div>
 
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;" *ngIf="alertaSucces()">
+    {{ alertaSucces() }}
+  </div>
+
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;" *ngIf="alertaEroare()">
+    {{ alertaEroare() }}
+  </div>
+
   <div class="card-admin">
     <div class="tabel-responsive">
       <table class="tabel-admin">
         <thead>
           <tr>
-            <td>ID Companie</td>
+            <th>ID Companie</th>
             <th>Nume Companie</th>
             <th>Email</th>
             <th>Telefon</th>
@@ -22,9 +30,9 @@
           </tr>
         </thead>
         <tbody>
-          @for (companie of companii; track companie.nume_Companie) {
+          @for (companie of companii(); track companie.companie_Id) {
           <tr>
-            <td><strong>{{ companie.companie_Id}}</strong></td>
+            <td><strong>{{ companie.companie_Id }}</strong></td>
             <td><strong>{{ companie.nume_Companie }}</strong></td>
             <td>{{ companie.email }}</td>
             <td>{{ companie.numar_Telefon }}</td>
@@ -40,7 +48,7 @@
           }
           @empty {
           <tr>
-            <td colspan="4" style="text-align: center; padding: 2rem; color: #6b7280;">
+            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
               Nu există nicio companie înregistrată momentan.
             </td>
           </tr>

@@ -20,6 +20,13 @@ namespace Backend.Helpers
 
         }
 
+        public static bool EsteNumeCompanieValid(string numeCompanie)
+        {
+            Console.WriteLine($"[DEBUG] Numele primit pentru validare este: " + numeCompanie);
+            if (string.IsNullOrWhiteSpace(numeCompanie)) return false;
+            return Regex.IsMatch(numeCompanie.Trim(), @"^[\p{L}\s]+$");
+        }
+
         public static bool EsteParolaLunga(string parola)
         {
             if (string.IsNullOrWhiteSpace(parola) || parola.Length < 8) return false;
