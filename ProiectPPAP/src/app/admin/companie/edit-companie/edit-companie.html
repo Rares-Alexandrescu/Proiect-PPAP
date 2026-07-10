@@ -6,11 +6,11 @@
       <p>Actualizează datele companiei selectate.</p>
     </div>
 
-    <div class="alerta-eroare" *ngIf="mesajEroareGenerala">
-      {{ mesajEroareGenerala }}
+    <div class="alerta-eroare" *ngIf="eroriBackend()['eroareGenerala']">
+      {{ eroriBackend()['eroareGenerala'] }}
     </div>
-    <div class="alerta-succes" *ngIf="mesajSucces">
-      {{ mesajSucces }}
+    <div class="alerta-succes" *ngIf="mesajSucces()">
+      {{ mesajSucces() }}
     </div>
 
     <form [formGroup]="editCompanieForm" (ngSubmit)="onSave()">
@@ -20,19 +20,16 @@
         <input type="text"
                formControlName="nume_Companie"
                [class.invalid]="editCompanieForm.get('nume_Companie')?.invalid && editCompanieForm.get('nume_Companie')?.touched">
-        <small class="text-eroare" *ngIf="editCompanieForm.get('nume_Companie')?.hasError('required') && editCompanieForm.get('nume_Companie')?.touched">
-          Numele companiei este obligatoriu.
-        </small>
-        <small class="text-eroare" *ngFor="let err of editCompanieForm.get('nume_Companie')?.getError('serverErrors')">{{ err }}</small>
+        <small class="text-eroare" *ngFor="let err of eroriBackend()['Nume_Companie'] || eroriBackend()['nume_Companie']">{{ err }}</small>
       </div>
 
       <div class="rand-formular">
         <div class="grup-formular">
-          <label>Email</label>
+          <label>Email Companie</label>
           <input type="email"
                  formControlName="email"
                  [class.invalid]="editCompanieForm.get('email')?.invalid && editCompanieForm.get('email')?.touched">
-          <small class="text-eroare" *ngFor="let err of editCompanieForm.get('email')?.getError('serverErrors')">{{ err }}</small>
+          <small class="text-eroare" *ngFor="let err of eroriBackend()['Email'] || eroriBackend()['email']">{{ err }}</small>
         </div>
 
         <div class="grup-formular">
@@ -40,32 +37,25 @@
           <input type="text"
                  formControlName="numar_Telefon"
                  [class.invalid]="editCompanieForm.get('numar_Telefon')?.invalid && editCompanieForm.get('numar_Telefon')?.touched">
-          <small class="text-eroare" *ngFor="let err of editCompanieForm.get('numar_Telefon')?.getError('serverErrors')">{{ err }}</small>
+          <small class="text-eroare" *ngFor="let err of eroriBackend()['Numar_Telefon'] || eroriBackend()['numar_Telefon']">{{ err }}</small>
         </div>
       </div>
 
-      <div class="rand-formular">
-        <div class="grup-formular">
-          <label>Nume Admin Local</label>
-          <input type="text"
-                 formControlName="numeAdminLocal"
-                 [class.invalid]="editCompanieForm.get('numeAdminLocal')?.invalid && editCompanieForm.get('numeAdminLocal')?.touched">
-          <small class="text-eroare" *ngFor="let err of editCompanieForm.get('numeAdminLocal')?.getError('serverErrors')">{{ err }}</small>
-        </div>
-
-        <div class="grup-formular">
-          <label>Prenume Admin Local</label>
-          <input type="text"
-                 formControlName="prenumeAdminLocal"
-                 [class.invalid]="editCompanieForm.get('prenumeAdminLocal')?.invalid && editCompanieForm.get('prenumeAdminLocal')?.touched">
-          <small class="text-eroare" *ngFor="let err of editCompanieForm.get('prenumeAdminLocal')?.getError('serverErrors')">{{ err }}</small>
-        </div>
+      <div class="grup-formular">
+        <label>Identificator Admin Local (ID / Email / CNP)</label>
+        <input type="text"
+               formControlName="cnpAdminLocal"
+               [class.invalid]="editCompanieForm.get('cnpAdminLocal')?.invalid && editCompanieForm.get('cnpAdminLocal')?.touched">
+        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 0.3rem;">
+          Lasă <strong>***</strong> pentru a nu schimba adminul curent. Lasă <strong>câmpul gol</strong> pentru a șterge adminul.
+        </p>
+        <small class="text-eroare" *ngFor="let err of eroriBackend()['identificator'] || eroriBackend()['CnpAdminLocal']">{{ err }}</small>
       </div>
 
       <button type="submit"
               class="buton-principal"
-              [disabled]="editCompanieForm.invalid || seIncarca">
-        {{ seIncarca ? 'Se salvează modificările...' : 'Salvează Modificările' }}
+              [disabled]="editCompanieForm.invalid || seIncarca()">
+        {{ seIncarca() ? 'Se salvează modificările...' : 'Salvează Modificările' }}
       </button>
 
       <div style="text-align: center; margin-top: 1.5rem;">

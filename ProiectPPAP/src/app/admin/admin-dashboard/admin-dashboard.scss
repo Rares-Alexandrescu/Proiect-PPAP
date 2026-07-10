@@ -1,0 +1,100 @@
+.dashboard-container {
+  padding: 3rem 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.antet-dashboard {
+  text-align: center;
+  margin-bottom: 3.5rem;
+
+  h2 {
+    font-size: 2.2rem;
+    color: #111827;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    color: #6b7280;
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
+.grila-module {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.card-modul {
+  background: #ffffff;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #f3f4f6;
+
+  &:hover:not(.inactiv) {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+
+  &.inactiv {
+    opacity: 0.6;
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    box-shadow: none;
+  }
+
+  .iconita {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  h3 {
+    color: #1f2937;
+    font-size: 1.4rem;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+  }
+
+  p {
+    color: #6b7280;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0 0 2rem 0;
+    flex-grow: 1;
+  }
+
+  .buton-principal {
+    width: 100%;
+    background: #3b82f6;
+    border: none;
+    padding: 1rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+    transition: all 0.2s ease-in-out;
+
+    &:hover:not(:disabled) {
+      background: #2563eb;
+    }
+
+    &:disabled {
+      background: #9ca3af;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+  }
+}

@@ -40,12 +40,13 @@ export class InterceptorService implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
           console.warn('Sesiunea a expirat. Utilizatorul este delogat automat.');
-
           const authService = this.injector.get(AuthService);
-
           authService.logout();
-
           this.router.navigate(['/login']);
+        }
+        else if (error.status === 403) {
+          console.warn('Acces respins! Nu ai drepturi de administrator.');
+          this.router.navigate(['/dashboard']);
         }
 
         return throwError(() => error);

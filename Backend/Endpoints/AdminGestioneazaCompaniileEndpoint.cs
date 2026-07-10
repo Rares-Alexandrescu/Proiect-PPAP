@@ -197,7 +197,7 @@ namespace Backend.Endpoints
                                     paramVerificare,
                                     commandType: CommandType.StoredProcedure);
 
-                        if userAdmin != null && userAdmin.companie_id != null && userAdmin.companie_id != idCompanie)
+                        if (userAdmin != null && userAdmin.companie_id != null && userAdmin.companie_id != idCompanie)
                         {
                             SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
                             return Results.BadRequest(new { eroriCampuri = erori });

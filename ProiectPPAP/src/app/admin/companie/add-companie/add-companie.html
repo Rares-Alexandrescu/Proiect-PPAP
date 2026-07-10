@@ -1,1 +1,70 @@
-<p>add-companie works!</p>
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+
+    <div class="antet-card">
+      <h2>Adaugă Companie</h2>
+      <p>Creează o nouă companie în platformă.</p>
+    </div>
+
+    <div class="alerta-eroare" *ngIf="eroriBackend()['eroareGenerala']">
+      {{ eroriBackend()['eroareGenerala'] }}
+    </div>
+    <div class="alerta-succes" *ngIf="mesajSucces()">
+      {{ mesajSucces() }}
+    </div>
+
+    <form [formGroup]="adaugaCompanieForm" (ngSubmit)="onSave()">
+
+      <div class="grup-formular">
+        <label>Nume Companie</label>
+        <input type="text"
+               formControlName="nume_Companie"
+               [class.invalid]="adaugaCompanieForm.get('nume_Companie')?.invalid && adaugaCompanieForm.get('nume_Companie')?.touched">
+        <small class="text-eroare" *ngFor="let err of eroriBackend()['Nume_Companie'] || eroriBackend()['nume_Companie']">{{ err }}</small>
+      </div>
+
+      <div class="rand-formular">
+        <div class="grup-formular">
+          <label>Email Companie</label>
+          <input type="email"
+                 formControlName="email"
+                 [class.invalid]="adaugaCompanieForm.get('email')?.invalid && adaugaCompanieForm.get('email')?.touched">
+          <small class="text-eroare" *ngFor="let err of eroriBackend()['Email'] || eroriBackend()['email']">{{ err }}</small>
+        </div>
+
+        <div class="grup-formular">
+          <label>Telefon</label>
+          <input type="text"
+                 formControlName="numar_Telefon"
+                 [class.invalid]="adaugaCompanieForm.get('numar_Telefon')?.invalid && adaugaCompanieForm.get('numar_Telefon')?.touched">
+          <small class="text-eroare" *ngFor="let err of eroriBackend()['Numar_Telefon'] || eroriBackend()['numar_Telefon']">{{ err }}</small>
+        </div>
+      </div>
+
+      <div class="grup-formular">
+        <label>Identificator Admin Local (ID / Email / CNP)</label>
+        <input type="text"
+               formControlName="cnpAdminLocal"
+               [class.invalid]="adaugaCompanieForm.get('cnpAdminLocal')?.invalid && adaugaCompanieForm.get('cnpAdminLocal')?.touched">
+        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 0.3rem;">
+          Lasă <strong>câmpul gol</strong> dacă dorești să creezi compania fără admin local momentan.
+        </p>
+        <small class="text-eroare" *ngFor="let err of eroriBackend()['identificator'] || eroriBackend()['CnpAdminLocal']">{{ err }}</small>
+      </div>
+
+      <button type="submit"
+              class="buton-principal"
+              [disabled]="adaugaCompanieForm.invalid || seIncarca()">
+        {{ seIncarca() ? 'Se creează compania...' : 'Adaugă Compania' }}
+      </button>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a routerLink="/admin/companii" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
+          &larr; Înapoi la lista de companii
+        </a>
+      </div>
+
+    </form>
+
+  </div>
+</div>

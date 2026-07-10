@@ -52,7 +52,7 @@ export class VeziCompaniiComponent implements OnInit {
   }
 
   incarcaCompanii(): void {
-    this.http.get<Companie[]>(`${environment.apiUrl}/vezi-companii`).subscribe({
+    this.http.get<Companie[]>(`${environment.apiUrl}/admin/vezi-companii`).subscribe({
       next: (dateDinBackend) => {
         this.companii = dateDinBackend;
       },
@@ -78,7 +78,7 @@ export class VeziCompaniiComponent implements OnInit {
   stergeCompanie(id: number): void {
     if (confirm('Ești sigur că vrei să ștergi această companie? Toate datele vor fi pierdute!')) {
 
-      this.http.delete(`${environment.apiUrl}/delete-companie/${id}`).subscribe({
+      this.http.delete(`${environment.apiUrl}/admin/delete-companie/${id}`).subscribe({
         next: () => {
           this.alertaSucces.set('Compania a fost ștearsă cu succes!');
           this.incarcaCompanii();

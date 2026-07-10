@@ -19,8 +19,6 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
 
   login(user: UtilizatorSesiune): void {
-
-
     this.utilizatorSesiune.set(user);
     localStorage.setItem('utilizator', JSON.stringify(user));
   }

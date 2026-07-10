@@ -4,6 +4,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Backend.DBClasses;
+using Microsoft.Data.SqlClient;
+using Dapper;
+using System.Data;
+using System.Text.RegularExpressions;
+
 namespace Backend.Helpers
 {
     public static class SecurityHelper
@@ -50,7 +55,6 @@ namespace Backend.Helpers
                             new Claim(ClaimTypes.NameIdentifier, utilizator.Id.ToString()),
                             new Claim(ClaimTypes.Email, utilizator.Email),
                             new Claim(ClaimTypes.Name, utilizator.Nume),
-
                             new Claim("Prenume", utilizator.Prenume)
                         }),
                 Expires = DateTime.UtcNow.AddHours(2),
@@ -63,7 +67,7 @@ namespace Backend.Helpers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-    }
+
 
     public static async Task<string?> GetRol(int utilizatorId, string connectionString)
     {
@@ -102,13 +106,13 @@ namespace Backend.Helpers
     {
         var erori = new Dictionary<string, List<string>>();
 
-        if (!EsteEmailValid(companie.Email))
+        if (!Validators.EsteEmailValid(companie.Email))
             AdaugaEroare(erori, "email", "Email-ul nu are formatul corect!");
 
-        if (!EsteNumarTelefonValid(companie.Numar_Telefon))
+        if (!Validators.EsteNumarTelefonValid(companie.Numar_Telefon))
             AdaugaEroare(erori, "numar_telefon", "Numarul de telefon trebuie sa contina fix 10 cifre!");
 
-        if (!EsteNumePrenumeValid(companie.Nume_Companie))
+        if (!Validators.EsteNumePrenumeValid(companie.Nume_Companie))
             AdaugaEroare(erori, "nume_companie", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
 
         return erori;
@@ -125,7 +129,7 @@ namespace Backend.Helpers
 
         if (identificator.Contains("@"))
         {
-            if (!EsteEmailValid(identificator))
+            if (!Validators.EsteEmailValid(identificator))
                 AdaugaEroare(erori, "identificator", "Email-ul introdus nu are un format valid!");
             else
                 emailCautare = identificator;
@@ -136,12 +140,13 @@ namespace Backend.Helpers
         }
         else
         {
-            if (!EsteCnpValid(identificator))
+            if (!Validators.EsteCnpValid(identificator))
                 AdaugaEroare(erori, "identificator", "Identificatorul trebuie să fie un Email, un ID valid sau un CNP de 13 cifre!");
             else
                 cnpHash = CripteazaCNP(identificator);
         }
 
         return (emailCautare, idCautare, cnpHash);
+    }
     }
 }
