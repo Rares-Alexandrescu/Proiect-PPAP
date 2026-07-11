@@ -16,6 +16,7 @@ export interface Companie {
 
 @Component({
   selector: 'app-vezi-companii',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './vezi-companii.html',
   styleUrl: './vezi-companii.scss',

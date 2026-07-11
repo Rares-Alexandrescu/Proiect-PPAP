@@ -1,0 +1,58 @@
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Panou Companie: {{ companie()?.nume_Companie || 'Se încarcă...' }}</h2>
+      <p>Aici poți vizualiza și gestiona angajații din compania ta.</p>
+    </div>
+    <button class="buton-principal buton-adauga" (click)="adaugaAngajat()">+ Adaugă Angajat</button>
+  </div>
+
+
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;" *ngIf="alertaSucces()">
+    {{ alertaSucces() }}
+  </div>
+
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;" *ngIf="alertaEroare()">
+    {{ alertaEroare() }}
+  </div>
+
+  <div class="card-admin">
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nume</th>
+            <th>Prenume</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (angajat of angajati(); track angajat.id) {
+          <tr>
+            <td><strong>#{{ angajat.id }}</strong></td>
+            <td><strong>{{ angajat.nume }}</strong></td>
+            <td><strong>{{ angajat.prenume }}</strong></td>
+            <td>{{ angajat.email }}</td>
+            <td>{{ angajat.numar_Telefon || 'N/A' }}</td>
+            <td>
+              <div class="actiuni-tabel">
+                <button class="buton-actiune buton-delete" (click)="stergeAngajat(angajat.id)">Elimină</button>
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există niciun angajat înregistrat în compania ta momentan.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

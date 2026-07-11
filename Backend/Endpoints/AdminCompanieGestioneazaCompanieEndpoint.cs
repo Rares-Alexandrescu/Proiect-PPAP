@@ -20,12 +20,11 @@ namespace Backend.Endpoints
             var eroareAutentificare = await SecurityHelper.VerificaAdminCompanie(admin, config);
             var connectionString = config.GetConnectionString("DefaultConnection");
 
-            if (eroareAutentificare != null)
-            {
-                return eroareAutentificare;
-            }
+            if (eroareAutentificare != null) return eroareAutentificare;
 
-            var (eroareAutentificare, companieLocalAdmin) = await SecurityHelper.ObtineCompanieAdminLocal(admin, connectionString);
+            var (eroareCompanie, companieLocalAdmin) = await SecurityHelper.ObtineCompanieAdminLocal(admin, connectionString);
+
+            if (eroareCompanie != null) return eroareCompanie;
 
             using (var connection = new SqlConnection(connectionString)) {
 
@@ -58,7 +57,9 @@ namespace Backend.Endpoints
 
             
             var connectionString = config.GetConnectionString("DefaultConnection");
-            var (eroareAutentificare, companieLocalAdmin) = await SecurityHelper.ObtineCompanieAdminLocal(admin, connectionString);
+            var (eroareCompanie, companieLocalAdmin) = await SecurityHelper.ObtineCompanieAdminLocal(admin, connectionString);
+
+            if (eroareCompanie != null) return eroareCompanie;
 
             var erori = new Dictionary<string, List<string>>();
             var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(req.identificatorAngajat, erori);
@@ -107,6 +108,11 @@ namespace Backend.Endpoints
                     SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poti sa adaugi un Admin General in companie!");
                 }
 
+                if(utilizatorDeAdaugat.companie_id == companieLocalAdmin.Companie_Id)
+                {
+                    SecurityHelper.AdaugaEroare(erori, "identificator", "Utilizatorul acesta este deja in compania dumneavoastra!");
+                }
+
                 if (erori.Count > 0)
                     return Results.BadRequest(new { eroriIdentificator = erori });
 
@@ -120,13 +126,49 @@ namespace Backend.Endpoints
                     commandType: CommandType.StoredProcedure
                     );
             }
+
+            return Results.Ok(new { message = "Utilizator a fost adaugat cu succes!" });
         }).RequireAuthorization();
 
         app.MapDelete("/admin-companie/sterge-angajat/{idAngajat:int}",
-            int idAngajat,
-            async (ClaimsPrincipal admin,
+            async (int idAngajat, 
+            ClaimsPrincipal admin,
             IConfiguration config) =>
         {
+
+            var connectionString = config.GetConnectionString("DefaultConnection");
+
+            var eroareAutentificare = await SecurityHelper.VerificaAdminLocal(admin, config);
+            if (eroareAutentificare != null) return eroareAutentificare;
+
+            var (eroareCompanie, companieLocalAdmin) = await SecurityHelper.ObtineCompanieAdminLocal(admin, connectionString);
+            
+            if (eroareCompanie != null) return eroareCompanie;
+
+            var erori = new Dictionary<string, List<string>>();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var parametrii = new DynamicParameters();
+                parametrii.Add("@idUtilizator", idAngajat);
+                parametrii.Add("@idCompanie", companieLocalAdmin.Companie_Id);
+
+                int randuriModificate = await connection.QueryFirstOrDefaultAsync<int>(
+                    "sp_Companie_DeleteUtilizator",
+                    parametrii,
+                    commandType: CommandType.StoredProcedure);
+
+                if (randuriModificate == 0)
+                {
+
+                    SecurityHelper.AdaugaEroare(erori, "mesajEroare", "Utilizatorul nu a putut fi sters! Ori nu exista, ori nu e din compania ta!");
+                    return Results.BadRequest(new { eroriIdentificator = erori });
+
+                }
+
+            }
+
+            return Results.Ok(new { message = "Utilizator a fost sters cu succes!" });
 
         }).RequireAuthorization();
     }
