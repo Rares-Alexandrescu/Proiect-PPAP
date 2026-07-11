@@ -73,4 +73,22 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+
+  isAdminGeneral(): boolean {
+    return this.dateDashboard()?.rol == "AdminGeneral";
+  }
+
+  isAdminLocal(): boolean {
+    return this.dateDashboard()?.rol === "AdminCompanie";
+  }
+
+  mergiLaPanouAdminGeneral(): void {
+    console.log('Redirecționare către panoul general...');
+    this.router.navigate(['/admin']);
+  }
+
+  mergiLaPanouCompanie(): void {
+    console.log('Redirecționare către panoul companiei locale...');
+    this.router.navigate(['/admin-companie/vezi-companie']);
+  }
 }

@@ -25,7 +25,6 @@
             <th>Nume</th>
             <th>Prenume</th>
             <th>Email</th>
-            <th>Telefon</th>
             <th>Acțiuni</th>
           </tr>
         </thead>
@@ -36,7 +35,6 @@
             <td><strong>{{ angajat.nume }}</strong></td>
             <td><strong>{{ angajat.prenume }}</strong></td>
             <td>{{ angajat.email }}</td>
-            <td>{{ angajat.numar_Telefon || 'N/A' }}</td>
             <td>
               <div class="actiuni-tabel">
                 <button class="buton-actiune buton-delete" (click)="stergeAngajat(angajat.id)">Elimină</button>
