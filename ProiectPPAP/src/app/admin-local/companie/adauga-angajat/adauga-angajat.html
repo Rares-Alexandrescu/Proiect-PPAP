@@ -1,1 +1,52 @@
-<p>adauga-angajat works!</p>
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+
+    <div class="antet-card">
+      <h2>Adaugă Angajat Nou</h2>
+      <p>Introdu datele utilizatorului pe care vrei să îl asignezi companiei tale.</p>
+    </div>
+
+    <div class="alerta-eroare" *ngIf="mesajEroareGeneral()">
+      {{ mesajEroareGeneral() }}
+    </div>
+
+    <form [formGroup]="adaugaAngajatForm" (ngSubmit)="onSave()">
+
+      <div class="grup-formular">
+        <label>CNP sau Adresă de Email sau ID-ul utilizatorului</label>
+        <input type="text"
+               formControlName="identificatorAngajat"
+               placeholder="ex: 1980101... sau angajat@email.ro"
+               [class.invalid]="adaugaAngajatForm.get('identificatorAngajat')?.invalid && adaugaAngajatForm.get('identificatorAngajat')?.touched">
+
+        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 0.3rem;">
+          Utilizatorul trebuie să aibă deja un cont creat pe platformă pentru a putea fi adăugat.
+        </p>
+
+
+        <small class="text-eroare" *ngIf="adaugaAngajatForm.get('identificatorAngajat')?.invalid && adaugaAngajatForm.get('identificatorAngajat')?.touched">
+          Acest câmp este obligatoriu.
+        </small>
+
+        <small class="text-eroare" *ngFor="let err of eroriBackend()['identificator'] || eroriBackend()['identificatorAngajat']">
+          {{ err }}
+        </small>
+      </div>
+
+      <button type="submit"
+              class="buton-principal"
+              style="width: 100%; margin-top: 1rem;"
+              [disabled]="adaugaAngajatForm.invalid || seIncarca()">
+        {{ seIncarca() ? 'Se verifică și se adaugă...' : 'Adaugă în Companie' }}
+      </button>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a routerLink="/admin-companie/vezi-companie" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
+          &larr; Înapoi la lista de angajați
+        </a>
+      </div>
+
+    </form>
+
+  </div>
+</div>

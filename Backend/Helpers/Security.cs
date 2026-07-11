@@ -111,7 +111,7 @@ namespace Backend.Helpers
         }
 
 
-        public static async Task<IResult?> VerificaAdminCompanie(ClaimsPrincipal admin, IConfiguration config)
+        public static async Task<IResult?> VerificaAdminLocal(ClaimsPrincipal admin, IConfiguration config)
         {
             var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -156,6 +156,8 @@ namespace Backend.Helpers
             int? idCautare = null;
             string? cnpHash = null;
 
+            Console.WriteLine("Identificatorul bagat in functie este " + identificator);
+            Console.WriteLine("Daca e CNP, atunci asta trebuie sa fie adevarata  = " + Validators.EsteCnpValid(identificator) + " si " + identificator.Length);
             if (string.IsNullOrWhiteSpace(identificator) || identificator.Contains("***"))
                 return (emailCautare, idCautare, cnpHash);
 
@@ -166,18 +168,21 @@ namespace Backend.Helpers
                 else
                     emailCautare = identificator;
             }
-            else if (int.TryParse(identificator, out int idParsat))
+            else if (identificator.Trim().Length == 13)
+            {
+                if (!Validators.EsteCnpValid(identificator.Trim()))
+                    AdaugaEroare(erori, "identificator", "CNP-ul introdus nu este valid (trebuie să respecte formatul oficial de 13 cifre)!");
+                else
+                    cnpHash = CripteazaCNP(identificator);
+            }
+            else if (identificator.Length < 10 && int.TryParse(identificator, out int idParsat))
             {
                 idCautare = idParsat;
             }
             else
             {
-                if (!Validators.EsteCnpValid(identificator))
-                    AdaugaEroare(erori, "identificator", "Identificatorul trebuie să fie un Email, un ID valid sau un CNP de 13 cifre!");
-                else
-                    cnpHash = CripteazaCNP(identificator);
+                AdaugaEroare(erori, "identificator", "Trebuie sa introduci un Email, CNP, sau ID de format acceptat!");
             }
-
             return (emailCautare, idCautare, cnpHash);
         }
 

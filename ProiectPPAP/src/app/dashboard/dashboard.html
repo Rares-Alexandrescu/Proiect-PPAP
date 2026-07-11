@@ -52,7 +52,7 @@
       <h3>Companie Asociată</h3>
       @if (data.companie || data.Companie) {
       <ul>
-        <li><strong>Companie:</strong> {{ data.companie?.nume || data.companie?.Nume }}</li>
+        <li><strong>Companie:</strong> {{ data.companie?.nume_Companie || data.companie?.Nume }}</li>
       </ul>
       } @else {
       <p class="text-muted">Momentan nu ești asociat cu nicio companie.</p>

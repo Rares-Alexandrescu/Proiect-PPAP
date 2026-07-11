@@ -63,5 +63,6 @@ app.MapEditAccountEndpoint();
 app.MapDashboardEndpoint();
 app.MapResendConfirmareEndpoint();
 app.MapAdminGestioneazaCompaniileEndpoint();
+app.MapAdminCompanieGestioneazaCompanieEndpoint();
 app.Run();
 

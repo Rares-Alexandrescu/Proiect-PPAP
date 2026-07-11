@@ -184,6 +184,7 @@ namespace Backend.Endpoints
                     string? cnpRealDinDb = null;
                     if (editAdmin)
                     {
+                        Console.WriteLine("Identifiactorul nostru final este unul din asta " + cnpHash + " sau " + emailCautare + " sau " + idCautare);
                         var paramCautare = new DynamicParameters();
                         paramCautare.Add("@Email", emailCautare);
                         paramCautare.Add("@Id", idCautare);
