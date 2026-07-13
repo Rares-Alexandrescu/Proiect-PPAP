@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Backend.DBClasses;
+//using Backend.Endpoints;
 using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
@@ -56,7 +57,7 @@ namespace Backend.Helpers
                             new Claim(ClaimTypes.Email, utilizator.Email),
                             new Claim(ClaimTypes.Name, utilizator.Nume),
                             new Claim("Prenume", utilizator.Prenume)
-                        }),
+                }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(cheieSecreta),
@@ -92,7 +93,8 @@ namespace Backend.Helpers
                 parametrii,
                 commandType: CommandType.StoredProcedure);
         }
-    
+
+    //DE SCURTAT, SA LE FAC SA CONVEARGA DOAR INTR-O SINGURA FUNCTIE PE AMANTREI
         public static async Task<IResult?> VerificaAdminGeneral(ClaimsPrincipal admin, IConfiguration config)
         {
             var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -110,7 +112,7 @@ namespace Backend.Helpers
             return null;
         }
 
-
+        //DE SCURTAT, SA LE FAC SA CONVEARGA DOAR INTR-O SINGURA FUNCTIE PE AMANTREI
         public static async Task<IResult?> VerificaAdminLocal(ClaimsPrincipal admin, IConfiguration config)
         {
             var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -128,7 +130,27 @@ namespace Backend.Helpers
             return null;
         }
 
-            public static void AdaugaEroare(Dictionary<string, List<string>> erori, string camp, string mesaj)
+        //DE SCURTAT, SA LE FAC SA CONVEARGA DOAR INTR-O SINGURA FUNCTIE PE AMANTREI
+        public static async Task<IResult?> VerificaAdminFurnizor(ClaimsPrincipal admin, IConfiguration config)
+        {
+            var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(idString, out int idAdmin))
+                return Results.Unauthorized();
+
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            var rolAdmin = await GetRol(idAdmin, connectionString);
+
+            Console.WriteLine("Rolul pe care toti il asteptam este " + rolAdmin);
+            if (rolAdmin != "AdminFurnizor")
+                return Results.Forbid();
+
+            return null;
+        }
+
+
+
+        public static void AdaugaEroare(Dictionary<string, List<string>> erori, string camp, string mesaj)
         {
             if (!erori.ContainsKey(camp)) erori[camp] = new List<string>();
             erori[camp].Add(mesaj);
@@ -146,6 +168,22 @@ namespace Backend.Helpers
 
             if (!Validators.EsteNumeCompanieValid(companie.Nume_Companie))
                 AdaugaEroare(erori, "nume_companie", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
+
+            return erori;
+        }
+
+        public static Dictionary<string, List<string>> ValideazaDateFurnizor(AdminCompanieGestioneazaFurnizorRequest furnizorNou)
+        {
+            var erori = new Dictionary<string, List<string>>();
+
+            if (!Validators.EsteEmailValid(furnizorNou.email_furnizor))
+                AdaugaEroare(erori, "email", "Email-ul nu are formatul corect!");
+
+            if (!Validators.EsteNumarTelefonValid(furnizorNou.numar_telefon))
+                AdaugaEroare(erori, "numar_telefon", "Numarul de telefon trebuie sa contina fix 10 cifre!");
+
+            if (!Validators.EsteNumeCompanieValid(furnizorNou.nume_furnizor))
+                AdaugaEroare(erori, "nume_furnizor", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
 
             return erori;
         }

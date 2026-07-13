@@ -49,12 +49,25 @@ namespace Backend.Endpoints
                         commandType: CommandType.StoredProcedure
                         );
 
-                   
-                    var companieUtilizator = await connection.QueryFirstOrDefaultAsync<Companie>(
-                        "sp_Utilizator_Get_Companie",
-                        parametrii,
-                        commandType: CommandType.StoredProcedure
-                        );
+                    Companie? companieUtilizator = null;
+
+                    if (rolUtilizator != "AdminFurnizor")
+                    {
+                        companieUtilizator = await connection.QueryFirstOrDefaultAsync<Companie>(
+                            "sp_Utilizator_Get_Companie",
+                            parametrii,
+                            commandType: CommandType.StoredProcedure
+                            );
+                    }
+                    else
+                    {
+                        //SI TRE SA MODIFIC SI IN FRONTEND SA MI INTRE LA AMDIN-FURNIZOR SI NU LA ADMIN-COMPANIE
+                        companieUtilizator = await connection.QueryFirstOrDefaultAsync<Companie>(
+                            "sp_Utilizator_Get_Furnizor_As_Companie",
+                            parametrii,
+                            commandType: CommandType.StoredProcedure
+                            );
+                    }
 
                     if (companieUtilizator != null)
                     {

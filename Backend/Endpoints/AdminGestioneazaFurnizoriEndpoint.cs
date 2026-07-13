@@ -8,55 +8,68 @@ using Backend.Helpers;
 
 namespace Backend.Endpoints
 {
-    public static class AdminGestioneazaCompaniileEndpoint
+    public record AdminGestioneazaFurnizorRequest(
+    string? identificatorAngajat = string.Empty,
+    string? numar_telefon,
+    string? email_furnizor,
+    string? nume_furnizor);
+
+    public static class AdminGestioneazaFurnizoriEndpoint(this IEndpointRouteBuilder app)
     {
-        //tre sa fac si ceva de filtrare etc!
-        public static void MapAdminGestioneazaCompaniileEndpoint(this IEndpointRouteBuilder app)
-        {   
+
+        public static void MapAdminGestioneazaFurnizoriEndpoint(this IEndpointRouteBuilder app)
+        {
             //Tre sa vad sa fac filtrarea pentru asta, se aplica peste toate componentele pentru adminGeneral de vezi-....
-            app.MapGet("/admin/vezi-companii", async (ClaimsPrincipal admin, IConfiguration config) =>
+            app.MapGet("/admin/vezi-furnizorii", async(
+                ClaimsPrincipal admin,
+                IConfiguration config) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
 
-                Console.WriteLine("Deci intra aici");
                 if (eroareAutentificare != null) return eroareAutentificare;
-                Console.WriteLine("Si iese de aici");
+
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
-                using (var connection = new SqlConnection(connectionString))
+                using ( var connection = new SqlConnection(connectionString) )
                 {
-                    var companii = await connection.QueryAsync<Companie>(
-                        "sp_Companie_GetAll",
+                    var furnizori = await connection.QueryAsync<Furnizor>(
+                        "sp_Furnizor_GetAll",
                         commandType: CommandType.StoredProcedure);
 
-                    return Results.Ok(companii);
+                    return Results.Ok(furnizori);
                 }
 
             }).RequireAuthorization();
 
-            app.MapPost("/admin/add-companie", async (
+
+            //AM O PROBLEMA, CA TREBUIE SA VAD CE FAC CU ID COMPANIE, HAI CA AM FACUT O SI EU DE OAIE RAU
+            app.MapPost("/admin/adauga-furnizor", async(
+                [FromBody] AdminGestioneazaFurnizorRequest furnizorNou,
                 ClaimsPrincipal admin,
-                IConfiguration config,
-                [FromBody] Companie companieNoua) =>
+                IConfiguration config) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+
                 if (eroareAutentificare != null) return eroareAutentificare;
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
-                var erori = SecurityHelper.ValideazaDateCompanie(companieNoua);
+                var erori = SecurityHelper.ValideazaDateFurnizor(furnizorNou);
 
-                string identificator = companieNoua.CnpAdminLocal?.Trim() ?? "";
-                var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(identificator, erori);
+                if(erori != null)
+                    var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(furnizorNou.identificatorAngajat, erori);
 
                 if (erori.Count > 0)
                     return Results.BadRequest(new { eroriCampuri = erori });
+
+                //stai ca e o problema aici, sa mi aduc aminte care era si sa o rezolv cum trebuie
+                //si anume ce fac cu identificatorul
+                string identificator = furnizorNou.identificatorAngajat?.Trim() ?? "";
 
                 using (var connection = new SqlConnection(connectionString))
                 {
 
                     string? cnpRealDinDb = null;
-
                     if (!string.IsNullOrWhiteSpace(identificator))
                     {
                         var paramCautare = new DynamicParameters();
@@ -68,16 +81,6 @@ namespace Backend.Endpoints
                                     "sp_Utilizator_GetCnpByIdentificator",
                                     paramCautare,
                                     commandType: CommandType.StoredProcedure);
-
-
-                        if (string.IsNullOrEmpty(cnpRealDinDb))
-                        {
-                            SecurityHelper.AdaugaEroare(erori, "identificator", "Nu am găsit niciun utilizator cu aceste date!");
-                            return Results.BadRequest(new { eroriCampuri = erori });
-                        }
-
-                        var paramVerificare = new DynamicParameters();
-                        paramVerificare.Add("@emailsaucnp", cnpRealDinDb);
 
                         var userAdmin = await connection.QueryFirstOrDefaultAsync<Utilizator>(
                                     "sp_Utilizator_getbyEmailsauCNP",
@@ -92,104 +95,130 @@ namespace Backend.Endpoints
                                 SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
                             }
+
                             var rolUtilizator = await SecurityHelper.GetRol(userAdmin.Id, connectionString);
+
                             if (rolUtilizator == "AdminGeneral")
                             {
-                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin General ca Admin Local al unei companii!");
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin General ca Admin Furnizor al unei companii!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
                             }
-                            else if (rolUtilizator == "AdminFurnizor")
+                            else if (rolUtilizator == "AdminLocal" || rolUtilizator == "UtilizatorCompanie")
                             {
-                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin Furnizor ca Admin Local al unei companii!");
+                                Console.WriteLine("Chiar daca e companie id null.... probabil ceva din testare dar mai bine sa fiu sigur");
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
+                                return Results.BadRequest(new { eroriCampuri = erori });
+                            }
+                            else if(rolUtilizator == "AdminFurnizor")
+                            {
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unui alt furnizor inscris!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
                             }
                         }
                     }
-                    //trebuie aici procedura stocata ca sa se retina in db
-                    var parametriiCompanie = new DynamicParameters();
 
-                    parametriiCompanie.Add("@NumeCompanie", companieNoua.Nume_Companie);
-                    parametriiCompanie.Add("@CnpAdminLocal", cnpRealDinDb);
-                    parametriiCompanie.Add("@Email", companieNoua.Email);
-                    parametriiCompanie.Add("@NumarTelefon", companieNoua.Numar_Telefon);
+                    var parametriiFurnizorNou = new DynamicParameters();
 
+                    parametriiFurnizorNou.Add("@cnpAdminFurnizor", cnpRealDinDb);
+                    parametriiFurnizorNou.Add("@numarTelefon", furnizorNou.numar_telefon);
+                    parametriiFurnizorNou.Add("@emailFurnizor", furnizorNou.email_furnizor);
+                    parametriiFurnizorNou.Add("@numeFurnizor", furnizorNou.nume_furnizor);
 
-                    await connection.ExecuteAsync(
-                        "sp_Companie_AddCompanie",
-                         parametriiCompanie,
-                        commandType: CommandType.StoredProcedure
-                    ); //aici se atribuie utilziatorul ca si admin!
+                    parametriiFurnizorNou.Add("@IdReturnat", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+                    //MI AM LUAT TEACA RAU, TRE SA VAD CUM REZOLV FARA SA BUBUI TOT BD-UL
+                    //AM REZOLVAT IN DASHBOARD, DECI E OK, O SA MA TRIMITA OK DIN FRONTEND
+                    //SI O SA MI DEA LINKURILE BINE IN FRONTEND,
+                    //TREBUIE DOAR SA VERIFIC DACA E ADMIN-FURNIZOR DOAR SI DOAR SI DOAR
+                    //DAR ASTA CAND FAC ADMINFURNIZORGESTIONEAAFURNIZORENDPOINT, AICI E OK
+                    //am rezolvat cred, trebuie sa fiu geana
 
-                    return Results.Ok(new { message = "Compania a fost adăugată cu succes!" });
+                    await connection.ExecuteAsync("sp_Furnizor_AddFurnizor", 
+                        parametriiFurnizorNou, 
+                        commandType: CommandType.StoredProcedure);
+
+                    int IdReturnat = parametriiFurnizorNou.Get<int>("@IdReturnat");
+
+                    Console.WriteLine($"=== ID-ul returnat din SQL este: {idNou} ===");
+
+                    if (idNou <= 0)
+                    {
+                        SecurityHelper.AdaugaEroare(erori, "mesajEroare", "Furnizorul nu a fost introdus in baza de date!");
+                        return Results.BadRequest(new { eroriCampuri = erori });
+                    }
+
+                    return Results.Ok(new { message = "Furnizor adaugat cu succes!" });
                 }
-                
             }).RequireAuthorization();
 
+            //o sa mai trebuiasca si delete si edit si am reusit cu furnizorii, tre sa ma uit in .cs de admin + 
+            //dashboard si toate alea, sa nu fie o ciorba. defapt, nu e cazul de ciorba, dar tre sa vedem ce facem si noi
+            //uof bou am fost cand am facut bd-ul
+            //si mi trebuie si un endpoint de AdminFurnizor....
 
-            app.MapGet("/admin/edit-companie/{idCompanie:int}", async (
-                int idCompanie,
+            app.MapGet("/admin/edit-furnizor/{idFurnizor:int}", async (
+                int idFurnizor,
                 ClaimsPrincipal admin,
-                IConfiguration config
-                ) =>
+                IConfiguration config) =>
             {
-                //Sa populez formularu cu datele companiei, dar tre sa vad ce fac cu utilizatorul ala ca cnp - ul e criptat
+
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+
                 if (eroareAutentificare != null) return eroareAutentificare;
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
-                Console.WriteLine("id-ul companiei este " + idCompanie);
+
+                Console.WriteLine("Id-ul furnizorului este " + idFurnizor);
+
                 using (var connection = new SqlConnection(connectionString))
                 {
                     var parametrii = new DynamicParameters();
-                    parametrii.Add("@id", idCompanie);
+                    parametrii.Add("@idFurnizor", idFurnizor);
 
-                    var companieDB = await connection.QueryFirstOrDefaultAsync<Companie>(
-                        "sp_Companie_getByID",
+                    //sa fac metoda asta in bd ---> am facut-o 
+                    var furnizorDB = await connection.QueryFirstOrDefaultAsync<AdminGestioneazaFurnizorRequest>(
+                        "sp_Furnizor_getByID",
                         parametrii,
                         commandType: CommandType.StoredProcedure);
 
-                    if (companieDB == null)
+                    if (furnizorDB == null)
                     {
                         return Results.BadRequest(new { message = "ID inexistent! Cerere proasta!" });
                     }
 
-                    companieDB.CnpAdminLocal = "***";
+                    furnizorDB.identificatorAngajat = "***";
                     return Results.Ok(new
                     {
-                        companie = companieDB,
+                        furnizor = furnizorDB,
                     });
 
                 }
 
             }).RequireAuthorization();
 
-            app.MapPut("/admin/edit-companie/{idCompanie:int}", async (
-                int idCompanie,
+            app.MapPut("/admin/edit-furnizor/{idFurnizor:int}", async (
+                int idFurnizor,
+                [FromBody] AdminGestioneazaFurnizorRequest furnizorEditat,
                 ClaimsPrincipal admin,
-                IConfiguration config,
-                [FromBody] Companie companieEditata
-            ) =>
+                IConfiguration config) =>
             {
-
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
-                var erori = SecurityHelper.ValideazaDateCompanie(companieEditata);
-
-                string identificator = companieEditata.CnpAdminLocal?.Trim() ?? "";
-                bool editAdmin = !string.IsNullOrWhiteSpace(identificator) && !identificator.Contains("***");
-
-                var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(editAdmin ? identificator : "", erori);
-
+                var erori = SecurityHelper.ValideazaDateFurnizor(furnizorEditat);
                 if (erori.Count > 0)
                     return Results.BadRequest(new { eroriCampuri = erori });
+
+                string identificator = furnizorEditat.identificatorAngajat?.Trim() ?? "";
+                bool editAdmin = !string.IsNullOrWhiteSpace(identificator) && !identificator.Contains("***");
+                var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(editAdmin ? identificator : "", erori);
 
 
                 using (var connection = new SqlConnection(connectionString))
                 {
                     string? cnpRealDinDb = null;
+
                     if (editAdmin)
                     {
                         Console.WriteLine("Identifiactorul nostru final este unul din asta " + cnpHash + " sau " + emailCautare + " sau " + idCautare);
@@ -199,9 +228,9 @@ namespace Backend.Endpoints
                         paramCautare.Add("@CnpHash", cnpHash);
 
                         cnpRealDinDb = await connection.QueryFirstOrDefaultAsync<string>(
-                                    "sp_Utilizator_GetCnpByIdentificator",
-                                    paramCautare,
-                                    commandType: CommandType.StoredProcedure);
+                                "sp_Utilizator_GetCnpByIdentificator",
+                                paramCautare,
+                                commandType: CommandType.StoredProcedure);
 
 
                         if (string.IsNullOrEmpty(cnpRealDinDb))
@@ -222,95 +251,86 @@ namespace Backend.Endpoints
 
                         if (userAdmin != null)
                         {
-                            if (userAdmin.companie_id != int.MaxValue && userAdmin.companie_id != idCompanie)
+                            if (userAdmin.companie_id != int.MaxValue)
                             {
                                 Console.WriteLine("Asta este companie id " + userAdmin.companie_id);
                                 SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
                             }
+
                             var rolUtilizator = await SecurityHelper.GetRol(userAdmin.Id, connectionString);
                             if (rolUtilizator == "AdminGeneral")
                             {
-                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin General ca Admin Local al unei companii!");
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin General ca Admin Furnizor al unei companii!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
                             }
-                            if (rolUtilizator == "AdminFurnizor")
+                            if(rolUtilizator == "AdminFurnizor")
                             {
-                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin Furnizor ca Admin Local al unei companii!");
+                                SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin Furnizor ca Admin Furnizor al altei companii!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
                             }
                         }
                     }
-
                     else if (string.IsNullOrWhiteSpace(identificator))
                     {
                         cnpRealDinDb = "STERGE_ADMIN";
                     }
 
-                    var parametriiCompanie = new DynamicParameters();
+                    var parametriiFurnizor = new DynamicParameters();
 
-                    parametriiCompanie.Add("@NumeCompanie", companieEditata.Nume_Companie);
-                    parametriiCompanie.Add("@CnpAdminLocal", cnpRealDinDb);
-                    parametriiCompanie.Add("@Email", companieEditata.Email);
-                    parametriiCompanie.Add("@NumarTelefon", companieEditata.Numar_Telefon);
-                    parametriiCompanie.Add("@idCompanie", idCompanie);
+                    parametriiFurnizor.Add("@NumeFurnizor", furnizorEditat.nume_furnizor);
+                    parametriiFurnizor.Add("@CnpAdminFurnizor", cnpRealDinDb);
+                    parametriiFurnizor.Add("@Email", furnizorEditat.email_furnizor);
+                    parametriiFurnizor.Add("@NumarTelefon", furnizorEditat.numar_telefon);
+                    parametriiFurnizor.Add("@idFurnizor", idFurnizor);
 
                     await connection.ExecuteAsync(
-                        "sp_Companie_EditCompanie",
-                         parametriiCompanie,
+                        "sp_Furnizor_EditFurnizor",
+                         parametriiFurnizor,
                         commandType: CommandType.StoredProcedure
                     );
 
                     return Results.Ok(new { message = "Compania a fost editata cu succes!" });
                 }
+
+
             }).RequireAuthorization();
 
-            //si mai am de facut delete-ul, dar nu stiu cum sa l fac acuma sa mearga cat mai bine
-            app.MapDelete("/admin/delete-companie/{idCompanie:int}", async (
-                int idCompanie,
+            //CA LA COMPANII, TREBUIE DOAR SA FIU ATENT LA STERGEREA DRACU
+            //IN VIITOR, SA NU FAC VREO BUBA PE AICI
+            app.MapDelete("/admin/delete-furnizor/{idFurnizor:int}", async (
+                int idFurnizor,
                 ClaimsPrincipal admin,
-                IConfiguration config
-
-            ) =>
+                IConfiguration config) =>
             {
-                //DE MODIFICAT STERGEREA ODATA CE MAI ADAUGAM CHESTII
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+
                 if (eroareAutentificare != null) return eroareAutentificare;
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
-
                 var erori = new Dictionary<string, List<string>>();
 
-
-                using (var connection = new SqlConnection(connectionString))
                 {
                     var parametru = new DynamicParameters();
-                    parametru.Add("@id", idCompanie);
+                    parametru.Add("@idFurnizor", idFurnizor);
 
-                    var companieDeSters = await connection.QueryFirstOrDefaultAsync<Companie>(
-                        "sp_Companie_getbyID",
+                    var FurnizorDeSters = await connection.QueryFirstOrDefaultAsync<Furnizor>(
+                        "sp_Furnizor_getbyID",
                         param: parametru,
                         commandType: CommandType.StoredProcedure);
 
-                    if (companieDeSters == null)
+                    if (FurnizorDeSters == null)
                     {
-                        SecurityHelper.AdaugaEroare(erori, "companie-delete", "Nu exista aceasta companie");
+                        SecurityHelper.AdaugaEroare(erori, "furnizor-delete", "Nu exista aceasta companie");
                         return Results.BadRequest(new { eroriCampuri = erori });
                     }
 
-
-                    var parametrii = new DynamicParameters();
-                    parametrii.Add("@idCompanie", idCompanie);
-
                     await connection.ExecuteAsync(
-                        "sp_Companie_DeleteCompanie",
+                        "sp_Furnizor_DeleteFurnizor",
                         param: parametrii,
                         commandType: CommandType.StoredProcedure);
                 }
 
-                return Results.Oknew { message = "Compania a fost stearsa cu succes!" };
-
+                return Results.Oknew { message = "Furnizorul a fost sters cu succes!" };
             }).RequireAuthorization();
         }
-    }
-}

@@ -58,7 +58,7 @@
     </div>
     }
 
-    @else if (isAdminLocal()) {
+    @else if (isAdminCompanie()) {
     <div class="dashboard-card card-admin-local">
       <h3>Compania Ta</h3>
 
@@ -67,14 +67,35 @@
         <li><strong>Companie:</strong> {{ dateDashboard().companie?.nume_Companie || dateDashboard().Companie?.nume_Companie }}</li>
       </ul>
       <p style="margin-top: 0.5rem; color: #4b5563; font-size: 0.95rem;">
-        Ai drepturi de administrare asupra acestei companii. Poți adăuga sau elimina angajați.
+        Ai drepturi de administrare asupra acestei companii.
       </p>
 
       <button class="btn-resend" style="margin-top: 1rem;" (click)="mergiLaPanouCompanie()">
         Gestionează Compania &rarr;
       </button>
       } @else {
-      <p class="text-muted">Ești marcat ca Admin Local, dar momentan nu ești asociat cu nicio companie.</p>
+      <p class="text-muted">Ești marcat ca Admin Companie, dar momentan nu ești asociat cu nicio companie.</p>
+      }
+    </div>
+    }
+
+    @else if (isAdminFurnizor()) {
+    <div class="dashboard-card card-admin-local">
+      <h3>Compania Ta</h3>
+
+      @if (dateDashboard().companie || dateDashboard().Companie) {
+      <ul>
+        <li><strong>Companie:</strong> {{ dateDashboard().companie?.nume_Companie || dateDashboard().Companie?.nume_Companie }}</li>
+      </ul>
+      <p style="margin-top: 0.5rem; color: #4b5563; font-size: 0.95rem;">
+        Ai drepturi de administrare asupra acestei companii.
+      </p>
+
+      <button class="btn-resend" style="margin-top: 1rem;" (click)="mergiLaPanouFurnizor()">
+        Gestionează Compania &rarr;
+      </button>
+      } @else {
+      <p class="text-muted">Ești marcat ca Admin Furnizor, dar momentan nu ești asociat cu nicio companie.</p>
       }
     </div>
     }

@@ -116,6 +116,11 @@ namespace Backend.Endpoints
                         SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poti sa adaugi un Admin General in companie!");
                     }
 
+                    if (utilizatorDeAdaugat.rol_id == 5)
+                    {
+                        SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poti sa adaugi un Admin Furnizor in companie!");
+                    }
+
                     if (utilizatorDeAdaugat.companie_id == companieLocalAdmin.Companie_Id)
                     {
                         SecurityHelper.AdaugaEroare(erori, "identificator", "Utilizatorul acesta este deja in compania dumneavoastra!");
@@ -157,9 +162,11 @@ namespace Backend.Endpoints
 
                 using (var connection = new SqlConnection(connectionString))
                 {
+
                     var parametrii = new DynamicParameters();
                     parametrii.Add("@idUtilizator", idAngajat);
                     parametrii.Add("@idCompanie", companieLocalAdmin.Companie_Id);
+
 
                     int randuriModificate = await connection.QueryFirstOrDefaultAsync<int>(
                         "sp_Companie_DeleteUtilizator",

@@ -78,8 +78,12 @@ export class DashboardComponent implements OnInit {
     return this.dateDashboard()?.rol == "AdminGeneral";
   }
 
-  isAdminLocal(): boolean {
+  isAdminCompanie(): boolean {
     return this.dateDashboard()?.rol === "AdminCompanie";
+  }
+
+  isAdminFurnizor(): boolean {
+    return this.dateDashboard()?.rol == "AdminFurnizor";
   }
 
   mergiLaPanouAdminGeneral(): void {
@@ -90,5 +94,10 @@ export class DashboardComponent implements OnInit {
   mergiLaPanouCompanie(): void {
     console.log('Redirecționare către panoul companiei locale...');
     this.router.navigate(['/admin-companie/vezi-companie']);
+  }
+
+  mergiLaPanouFurnizor(): void {
+    console.log('Redirectioneaza catre panoul furnizorului...');
+    //
   }
 }
