@@ -1,0 +1,64 @@
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Gestionare Furnizori</h2>
+      <p>Aici poți vizualiza, edita sau șterge furnizorii de piese din platformă.</p>
+    </div>
+    <button class="buton-principal buton-adauga" (click)="adaugaFurnizor()">+ Adaugă Furnizor</button>
+  </div>
+
+  @if (alertaSucces()) {
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;">
+    {{ alertaSucces() }}
+  </div>
+  }
+
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin">
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID Furnizor</th>
+            <th>Nume Furnizor</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>Nume Admin Furnizor</th>
+            <th>Prenume Admin Furnizor</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (furnizor of furnizori(); track furnizor.furnizor_Id) {
+          <tr>
+            <td><strong>{{ furnizor.furnizor_Id }}</strong></td>
+            <td><strong>{{ furnizor.nume_Furnizor }}</strong></td>
+            <td>{{ furnizor.email_Furnizor }}</td>
+            <td>{{ furnizor.numar_Telefon }}</td>
+            <td>{{ furnizor.nume_Admin_Furnizor ? furnizor.numeAdminLocal : 'N/A' }}</td>
+            <td>{{ furnizor.prenume_Admim_Furnizor ? furnizor.prenumeAdminLocal : 'N/A' }}</td>
+            <td>
+              <div class="actiuni-tabel">
+                <button class="buton-actiune buton-edit" (click)="editeazaFurnizor(furnizor.furnizor_Id)">Editează</button>
+                <button class="buton-actiune buton-delete" (click)="stergeFurnizor(furnizor.furnizor_Id)">Șterge</button>
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există niciun furnizor înregistrat momentan.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

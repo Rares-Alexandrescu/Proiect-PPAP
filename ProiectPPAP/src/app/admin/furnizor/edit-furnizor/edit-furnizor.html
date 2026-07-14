@@ -1,0 +1,81 @@
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+
+    <div class="antet-card">
+      <h2>Editează Furnizorul</h2>
+      <p>Actualizează datele furnizorului selectat.</p>
+    </div>
+
+    @if (eroriBackend()['eroareGenerala']) {
+    <div class="alerta-eroare">
+      {{ eroriBackend()['eroareGenerala'] }}
+    </div>
+    }
+
+    <form [formGroup]="editFurnizorForm" (ngSubmit)="onSave()">
+
+      <div class="grup-formular">
+        <label>Nume Furnizor</label>
+        <input type="text"
+               formControlName="nume_Furnizor"
+               [class.invalid]="editFurnizorForm.get('nume_Furnizor')?.invalid && editFurnizorForm.get('nume_Furnizor')?.touched">
+
+        @for (err of eroriBackend()['Nume_Furnizor'] || eroriBackend()['nume_Furnizor'] || eroriBackend()['nume_furnizor']; track $index) {
+        <small class="text-eroare">{{ err }}</small>
+        }
+      </div>
+
+      <div class="rand-formular">
+        <div class="grup-formular">
+          <label>Email Furnizor</label>
+          <input type="email"
+                 formControlName="email"
+                 [class.invalid]="editFurnizorForm.get('email')?.invalid && editFurnizorForm.get('email')?.touched">
+
+          @for (err of eroriBackend()['Email'] || eroriBackend()['email']; track $index) {
+          <small class="text-eroare">{{ err }}</small>
+          }
+        </div>
+
+        <div class="grup-formular">
+          <label>Telefon</label>
+          <input type="text"
+                 formControlName="numar_Telefon"
+                 [class.invalid]="editFurnizorForm.get('numar_Telefon')?.invalid && editFurnizorForm.get('numar_Telefon')?.touched">
+
+          @for (err of eroriBackend()['Numar_Telefon'] || eroriBackend()['numar_Telefon']; track $index) {
+          <small class="text-eroare">{{ err }}</small>
+          }
+        </div>
+      </div>
+
+      <div class="grup-formular">
+        <label>Identificator Admin Furnizor (ID / Email / CNP)</label>
+        <input type="text"
+               formControlName="identificator"
+               [class.invalid]="editFurnizorForm.get('identificator')?.invalid && editFurnizorForm.get('identificator')?.touched">
+        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 0.3rem;">
+          Lasă <strong>***</strong> pentru a nu schimba adminul curent. Lasă <strong>câmpul gol</strong> pentru a șterge adminul.
+        </p>
+
+        @for (err of eroriBackend()['identificator']; track $index) {
+        <small class="text-eroare">{{ err }}</small>
+        }
+      </div>
+
+      <button type="submit"
+              class="buton-principal"
+              [disabled]="editFurnizorForm.invalid || seIncarca()">
+        {{ seIncarca() ? 'Se salvează modificările...' : 'Salvează Modificările' }}
+      </button>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a routerLink="/admin/vezi-furnizori" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
+          &larr; Înapoi la lista de furnizori
+        </a>
+      </div>
+
+    </form>
+
+  </div>
+</div>

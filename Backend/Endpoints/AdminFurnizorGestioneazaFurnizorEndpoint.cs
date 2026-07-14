@@ -43,20 +43,17 @@ namespace Backend.Endpoints
                 {
                     var parametruAdminFurnizor = new DynamicParameters();
                     parametruAdminFurnizor.Add("@idFurnizor", furnizorLocalAdmin.Furnizor_Id);
+                    var pieseFurnizori = await connection.QueryAsync<Piese>(
+                        "sp_Furnizor_GetPiese",
+                        parametruAdminFurnizor,
+                        commandType: CommandType.StoredProcedure);
 
-                    using (var connection = new SqlConnection(connectionString))
+                    return Results.Ok(new
                     {
-                        var pieseFurnizori = await connection.QueryFirstOrDefaultAsync<Piese>(
-                            "sp_Furnizor_GetPiese",
-                            parametruAdminFurnizor,
-                            commandType: CommandType.StoredProcedure);
-
-                        return Results.Ok(new
-                        {
-                            Piese = pieseFurnizori,
-                            Furnizor = furnizorLocalAdmin
-                        });
-                    }
+                        Piese = pieseFurnizori,
+                        Furnizor = furnizorLocalAdmin
+                    });
+                    
                 }
             }).RequireAuthorization();
 
@@ -116,7 +113,7 @@ namespace Backend.Endpoints
                     var parametrii = new DynamicParameters();
                     parametrii.Add("@idPiesa", idPiesa);
 
-                    var piesaDB = await connection.QueryFirstOrDefaultAsync<Piesa>(
+                    var piesaDB = await connection.QueryFirstOrDefaultAsync<Piese>(
                         "sp_Piesa_FurnizorGetPiesaById",
                         parametrii,
                         commandType: CommandType.StoredProcedure);
@@ -165,7 +162,7 @@ namespace Backend.Endpoints
                     var parametrii = new DynamicParameters();
                     parametrii.Add("@idPiesa", idPiesa);
 
-                    var piesaDB = await connection.QueryFirstOrDefaultAsync<Piesa>(
+                    var piesaDB = await connection.QueryFirstOrDefaultAsync<Piese>(
                         "sp_Piesa_FurnizorGetPiesaById",
                         parametrii,
                         commandType: CommandType.StoredProcedure);
@@ -181,7 +178,7 @@ namespace Backend.Endpoints
                     }
 
                     paramEditarePiesa.Add("@NumePiesa", piesaEditata.Nume_Piesa);
-                    paramEditarePiesa.Add("@PretCumparare", piesaEditata.Pret_Cumparara);
+                    paramEditarePiesa.Add("@PretCumparare", piesaEditata.Pret_Cumparare);
                     paramEditarePiesa.Add("@idPiesa", idPiesa);
 
                     await connection.ExecuteAsync(
@@ -213,7 +210,7 @@ namespace Backend.Endpoints
                     var parametrii = new DynamicParameters();
                     parametrii.Add("@idPiesa", idPiesa);
 
-                    var piesaDB = await connection.QueryFirstOrDefaultAsync<Piesa>(
+                    var piesaDB = await connection.QueryFirstOrDefaultAsync<Piese>(
                         "sp_Piesa_FurnizorGetPiesaById",
                         parametrii,
                         commandType: CommandType.StoredProcedure);

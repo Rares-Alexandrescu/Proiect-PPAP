@@ -1,39 +1,38 @@
-import { Component ,OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
-import { environment } from '../../../../environments/environment'; 
+import { environment } from '../../../../environments/environment';
 
-export interface Companie {
-  companie_Id: number;
-  nume_Companie: string;
-  email: string;
+export interface Furnizor {
+  furnizor_Id: number;
+  nume_Furnizor: string;
+  email_Furnizor: string;
   numar_Telefon: string;
-  numeAdminLocal: string;
-  prenumeAdminLocal: string;
+  nume_Admin_Furnizor: string;
+  prenume_Admin_Furnizor: string;
 }
 
 @Component({
-  selector: 'app-vezi-companii',
+  selector: 'app-vezi-furnizori',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './vezi-companii.html',
-  styleUrl: './vezi-companii.scss',
+  templateUrl: './vezi-furnizori.html',
+  styleUrl: './vezi-furnizori.scss', 
 })
-export class VeziCompaniiComponent implements OnInit {
+export class VeziFurnizoriComponent implements OnInit {
 
-  companii = signal<Companie[]>([]);
+  furnizori = signal<Furnizor[]>([]);
   private http = inject(HttpClient);
   private router = inject(Router);
-
 
   alertaEroare = signal<string>('');
   alertaSucces = signal<string>('');
   seIncarca = signal<boolean>(false);
 
   ngOnInit(): void {
-    this.incarcaCompanii();
+    this.incarcaFurnizori();
 
     const stareNavigare = history.state;
 
@@ -54,42 +53,48 @@ export class VeziCompaniiComponent implements OnInit {
     }
   }
 
-  incarcaCompanii(): void {
-    this.http.get<Companie[]>(`${environment.apiUrl}/admin/vezi-companii`).subscribe({
+  incarcaFurnizori(): void {
+    this.seIncarca.set(true);
+
+    this.http.get<Furnizor[]>(`${environment.apiUrl}/admin/vezi-furnizori`).subscribe({
       next: (dateDinBackend) => {
         console.log('1. Date primite de la server:', dateDinBackend);
         console.log('2. Este listă (Array)?:', Array.isArray(dateDinBackend));
 
-        this.companii.set(dateDinBackend);
-        console.log('3. Variabila this.companii are acum:', this.companii().length, 'elemente.');
+        this.furnizori.set(dateDinBackend);
 
+        console.log('3. Variabila this.furnizori are acum:', this.furnizori().length, 'elemente.');
+
+        this.seIncarca.set(false);
       },
       error: (eroare) => {
+        this.seIncarca.set(false);
         if (eroare.status === 401) {
           console.warn('Acces neautorizat sau sesiune expirată. Te redirecționăm...');
           this.router.navigate(['/dashboard']);
         } else {
-          console.error('Eroare la preluarea companiilor:', eroare);
+          console.error('Eroare la preluarea furnizorilor:', eroare);
+          this.alertaEroare.set('Nu s-au putut încărca furnizorii din baza de date.');
         }
       }
     });
   }
 
-  editeazaCompanie(id: number): void {
-    this.router.navigate(['/admin/edit-companie', id]);
+  editeazaFurnizor(id: number): void {
+    this.router.navigate(['/admin/edit-furnizor', id]);
   }
 
-  adaugaCompanie(): void {
-    this.router.navigate(['/admin/adauga-companie']);
+  adaugaFurnizor(): void {
+    this.router.navigate(['/admin/adauga-furnizor']);
   }
 
-  stergeCompanie(id: number): void {
-    if (confirm('Ești sigur că vrei să ștergi această companie? Toate datele vor fi pierdute!')) {
+  stergeFurnizor(id: number): void {
+    if (confirm('Ești sigur că vrei să ștergi acest furnizor? Toate datele și piesele lui asociate vor fi pierdute!')) {
 
-      this.http.delete(`${environment.apiUrl}/admin/delete-companie/${id}`).subscribe({
+      this.http.delete(`${environment.apiUrl}/admin/delete-furnizor/${id}`).subscribe({
         next: () => {
-          this.alertaSucces.set('Compania a fost ștearsă cu succes!');
-          this.incarcaCompanii();
+          this.alertaSucces.set('Furnizorul a fost șters cu succes!');
+          this.incarcaFurnizori();
 
           setTimeout(() => {
             this.alertaSucces.set('');
@@ -97,10 +102,9 @@ export class VeziCompaniiComponent implements OnInit {
         },
         error: (err) => {
           console.error('A apărut o eroare la ștergere:', err);
-          this.alertaEroare.set('Nu s-a putut șterge compania. Verifică consola.');
+          this.alertaEroare.set('Nu s-a putut șterge furnizorul. Verifică consola.');
         }
       });
     }
-
   }
 }
