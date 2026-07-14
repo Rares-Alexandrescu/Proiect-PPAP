@@ -260,9 +260,10 @@ namespace Backend.Endpoints
                          parametriiCompanie,
                         commandType: CommandType.StoredProcedure
                     );
-
                     return Results.Ok(new { message = "Compania a fost editata cu succes!" });
                 }
+
+                
             }).RequireAuthorization();
 
             //si mai am de facut delete-ul, dar nu stiu cum sa l fac acuma sa mearga cat mai bine
@@ -308,7 +309,7 @@ namespace Backend.Endpoints
                         commandType: CommandType.StoredProcedure);
                 }
 
-                return Results.Oknew { message = "Compania a fost stearsa cu succes!" };
+                return Results.Ok {new message = "Compania a fost stearsa cu succes!" };
 
             }).RequireAuthorization();
         }

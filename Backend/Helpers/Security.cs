@@ -105,7 +105,7 @@ namespace Backend.Helpers
             var connectionString = config.GetConnectionString("DefaultConnection");
             var rolAdmin = await GetRol(idAdmin, connectionString);
 
-            Console.WriteLine("Rolul pe care toti il asteptam este " + rolAdmin);
+            Console.WriteLine("Rolul pe care toti il asteptam este AdminGeneral " + rolAdmin);
             if (rolAdmin != "AdminGeneral")
                 return Results.Forbid();
 
@@ -123,7 +123,7 @@ namespace Backend.Helpers
             var connectionString = config.GetConnectionString("DefaultConnection");
             var rolAdmin = await GetRol(idAdmin, connectionString);
 
-            Console.WriteLine("Rolul pe care toti il asteptam este " + rolAdmin);
+            Console.WriteLine("Rolul pe care toti il asteptam este AdminCompanie " + rolAdmin);
             if (rolAdmin != "AdminCompanie")
                 return Results.Forbid();
 
@@ -141,7 +141,7 @@ namespace Backend.Helpers
             var connectionString = config.GetConnectionString("DefaultConnection");
             var rolAdmin = await GetRol(idAdmin, connectionString);
 
-            Console.WriteLine("Rolul pe care toti il asteptam este " + rolAdmin);
+            Console.WriteLine("Rolul pe care toti il asteptam este AdminFurnizor :" + rolAdmin);
             if (rolAdmin != "AdminFurnizor")
                 return Results.Forbid();
 
@@ -172,6 +172,7 @@ namespace Backend.Helpers
             return erori;
         }
 
+        //daca mi da eroare cand dau dotnet run, sa fiu atent aici, suta la suta crapa si tre sa includ ceva
         public static Dictionary<string, List<string>> ValideazaDateFurnizor(AdminCompanieGestioneazaFurnizorRequest furnizorNou)
         {
             var erori = new Dictionary<string, List<string>>();
@@ -184,6 +185,20 @@ namespace Backend.Helpers
 
             if (!Validators.EsteNumeCompanieValid(furnizorNou.nume_furnizor))
                 AdaugaEroare(erori, "nume_furnizor", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
+
+            return erori;
+        }
+
+        public static Dictionary<string, List<string>> ValideazaDatePiesa(Piese piesaNoua)
+        {
+            var erori = new Dictionary<string, List<string>>();
+
+            
+            if (!Validators.EsteNumeCompanieValid(piesaNoua.Nume_Piesa))
+                AdaugaEroare(erori, "nume_furnizor", "Trebuie sa completezi ceva / Ai voie numai cu litere!");
+
+            if (!Validators.EstePretValid(piesaNoua.Pret_Cumparare))
+                AdaugaEroare(erori, "pret_piesa", "Trebuie sa pui un numar valid, pozitiv, fara litere!");
 
             return erori;
         }
@@ -247,6 +262,32 @@ namespace Backend.Helpers
                     return (Results.BadRequest(new { message = "Acest utilizator nu are nicio companie atribuită!" }), null);
 
                 return (null, companieLocalAdmin);
+            }
+        }
+
+        public static async Task<(IResult? Eroare, Furnizor? FurnizorGasit, int? idAdminFurnizor)> ObtineFurnizorAdminLocal(ClaimsPrincipal admin, string connectionString)
+        {
+            var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(idString, out int idAdmin))
+                return (Results.Unauthorized(), null, null);
+
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var parametruUtilizator = new DynamicParameters();
+                parametruUtilizator.Add("@idAdminFurnizor", idAdmin);
+
+                var companieLocalAdmin = await connection.QueryFirstOrDefaultAsync<Companie>(
+                    "sp_Furnizor_GetFurnizorByAdmin",
+                    parametruUtilizator,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                if (companieLocalAdmin == null)
+                    return (Results.BadRequest(new { message = "Acest utilizator nu are nicio companie atribuită!" }), null);
+
+                return (null, companieLocalAdmin, idAdmin);
             }
         }
     }

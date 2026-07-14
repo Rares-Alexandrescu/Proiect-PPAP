@@ -59,5 +59,16 @@ namespace Backend.Helpers
         {
             return string.Equals(parola, parolaConfirmare);
         }
+
+        public static bool EstePretValid(decimal? pretPiesa)
+        {
+
+            if (pretPiesa == null || decimal.Round(pretPiesa, 2) != pretPiesa || pretPiesa > 99_999_999.99m  || pretPiesa <= 0m)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
