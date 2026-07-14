@@ -74,7 +74,6 @@ namespace Backend.Endpoints
 
                 var (eroareFurnizor, furnizorLocalAdmin, idAdminFurnizor) = await SecurityHelper.ObtineFurnizorAdminLocal(admin, connectionString);
 
-                if
                 using (var connection = new SqlConnection(connectionString))
                 {
                     var parametriiPiesaFurnizor = new DynamicParameters();
@@ -84,7 +83,7 @@ namespace Backend.Endpoints
                     parametriiPiesaFurnizor.Add("@numePiesa", piesaNoua.Nume_Piesa);
 
                     await connection.ExecuteAsync(
-                        "sp_Piesa_FurnizorAdaugaPiesa".
+                        "sp_Piesa_FurnizorAdaugaPiesa",
                         parametriiPiesaFurnizor,
                         commandType: CommandType.StoredProcedure);
 
@@ -177,6 +176,7 @@ namespace Backend.Endpoints
                         return Results.BadRequest(new { message = "Piesa care se vrea editata apartine altui furnizor" });
                     }
 
+                    var paramEditarePiesa = new DynamicParameters();
                     paramEditarePiesa.Add("@NumePiesa", piesaEditata.Nume_Piesa);
                     paramEditarePiesa.Add("@PretCumparare", piesaEditata.Pret_Cumparare);
                     paramEditarePiesa.Add("@idPiesa", idPiesa);
@@ -232,10 +232,7 @@ namespace Backend.Endpoints
 
                     if (randuriModificate == 0)
                     {
-
-                        SecurityHelper.AdaugaEroare(erori, "mesajEroare", "Piesa nu a putut fi stearsa! Ori nu exista, ori nu e a ta!");
-                        return Results.BadRequest(new { eroriIdentificator = erori });
-
+                        return Results.BadRequest(new { message = "Piesa nu a putut fi stearsa! Ori nu exista, ori nu e a ta!" });
                     }
 
                     return Results.Ok(new { message = "Piesa a fost stearsa cu succes!" });

@@ -63,7 +63,7 @@ namespace Backend.Helpers
         public static bool EstePretValid(decimal? pretPiesa)
         {
 
-            if (pretPiesa == null || decimal.Round(pretPiesa, 2) != pretPiesa || pretPiesa > 99_999_999.99m  || pretPiesa <= 0m)
+            if (pretPiesa == null || decimal.Round(pretPiesa.Value, 2) != pretPiesa || pretPiesa > 99_999_999.99m || pretPiesa <= 0m)
             {
                 return false;
             }

@@ -9,18 +9,18 @@ using Backend.Helpers;
 namespace Backend.Endpoints
 {
     public record AdminGestioneazaFurnizorRequest(
-    string? identificatorAngajat = string.Empty,
     string? numar_telefon,
     string? email_furnizor,
-    string? nume_furnizor);
+    string? nume_furnizor,
+    string? identificatorAngajat = "");
 
-    public static class AdminGestioneazaFurnizoriEndpoint(this IEndpointRouteBuilder app)
+    public static class AdminGestioneazaFurnizoriEndpoint
     {
 
         public static void MapAdminGestioneazaFurnizoriEndpoint(this IEndpointRouteBuilder app)
         {
             //Tre sa vad sa fac filtrarea pentru asta, se aplica peste toate componentele pentru adminGeneral de vezi-....
-            app.MapGet("/admin/vezi-furnizorii", async(
+            app.MapGet("/admin/vezi-furnizorii", async (
                 ClaimsPrincipal admin,
                 IConfiguration config) =>
             {
@@ -30,7 +30,7 @@ namespace Backend.Endpoints
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
-                using ( var connection = new SqlConnection(connectionString) )
+                using (var connection = new SqlConnection(connectionString))
                 {
                     var furnizori = await connection.QueryAsync<Furnizor>(
                         "sp_Furnizor_GetAll",
@@ -43,7 +43,7 @@ namespace Backend.Endpoints
 
 
             //AM O PROBLEMA, CA TREBUIE SA VAD CE FAC CU ID COMPANIE, HAI CA AM FACUT O SI EU DE OAIE RAU
-            app.MapPost("/admin/adauga-furnizor", async(
+            app.MapPost("/admin/adauga-furnizor", async (
                 [FromBody] AdminGestioneazaFurnizorRequest furnizorNou,
                 ClaimsPrincipal admin,
                 IConfiguration config) =>
@@ -56,8 +56,7 @@ namespace Backend.Endpoints
 
                 var erori = SecurityHelper.ValideazaDateFurnizor(furnizorNou);
 
-                if(erori != null)
-                    var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(furnizorNou.identificatorAngajat, erori);
+                var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(furnizorNou.identificatorAngajat, erori);
 
                 if (erori.Count > 0)
                     return Results.BadRequest(new { eroriCampuri = erori });
@@ -81,6 +80,16 @@ namespace Backend.Endpoints
                                     "sp_Utilizator_GetCnpByIdentificator",
                                     paramCautare,
                                     commandType: CommandType.StoredProcedure);
+
+
+                        if (string.IsNullOrEmpty(cnpRealDinDb))
+                        {
+                            SecurityHelper.AdaugaEroare(erori, "identificator", "Nu am găsit niciun utilizator cu aceste date!");
+                            return Results.BadRequest(new { eroriCampuri = erori });
+                        }
+
+                        var paramVerificare = new DynamicParameters();
+                        paramVerificare.Add("@emailsaucnp", cnpRealDinDb);
 
                         var userAdmin = await connection.QueryFirstOrDefaultAsync<Utilizator>(
                                     "sp_Utilizator_getbyEmailsauCNP",
@@ -109,7 +118,7 @@ namespace Backend.Endpoints
                                 SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unei alte companii inscrise!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
                             }
-                            else if(rolUtilizator == "AdminFurnizor")
+                            else if (rolUtilizator == "AdminFurnizor")
                             {
                                 SecurityHelper.AdaugaEroare(erori, "identificator", "Acest utilizator este deja atribuit unui alt furnizor inscris!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
@@ -132,15 +141,15 @@ namespace Backend.Endpoints
                     //DAR ASTA CAND FAC ADMINFURNIZORGESTIONEAAFURNIZORENDPOINT, AICI E OK
                     //am rezolvat cred, trebuie sa fiu geana
 
-                    await connection.ExecuteAsync("sp_Furnizor_AddFurnizor", 
-                        parametriiFurnizorNou, 
+                    await connection.ExecuteAsync("sp_Furnizor_AddFurnizor",
+                        parametriiFurnizorNou,
                         commandType: CommandType.StoredProcedure);
 
                     int IdReturnat = parametriiFurnizorNou.Get<int>("@IdReturnat");
 
-                    Console.WriteLine($"=== ID-ul returnat din SQL este: {idNou} ===");
+                    Console.WriteLine($"=== ID-ul returnat din SQL este: {IdReturnat} ===");
 
-                    if (idNou <= 0)
+                    if (IdReturnat <= 0)
                     {
                         SecurityHelper.AdaugaEroare(erori, "mesajEroare", "Furnizorul nu a fost introdus in baza de date!");
                         return Results.BadRequest(new { eroriCampuri = erori });
@@ -185,7 +194,8 @@ namespace Backend.Endpoints
                         return Results.BadRequest(new { message = "ID inexistent! Cerere proasta!" });
                     }
 
-                    furnizorDB.identificatorAngajat = "***";
+                    furnizorDB = furnizorDB with { identificatorAngajat = "***" };
+
                     return Results.Ok(new
                     {
                         furnizor = furnizorDB,
@@ -264,7 +274,7 @@ namespace Backend.Endpoints
                                 SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin General ca Admin Furnizor al unei companii!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
                             }
-                            if(rolUtilizator == "AdminFurnizor")
+                            if (rolUtilizator == "AdminFurnizor")
                             {
                                 SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poți atribui un Admin Furnizor ca Admin Furnizor al altei companii!");
                                 return Results.BadRequest(new { eroriCampuri = erori });
@@ -310,6 +320,7 @@ namespace Backend.Endpoints
                 var connectionString = config.GetConnectionString("DefaultConnection");
                 var erori = new Dictionary<string, List<string>>();
 
+                using (var connection = new SqlConnection(connectionString))
                 {
                     var parametru = new DynamicParameters();
                     parametru.Add("@idFurnizor", idFurnizor);
@@ -327,10 +338,12 @@ namespace Backend.Endpoints
 
                     await connection.ExecuteAsync(
                         "sp_Furnizor_DeleteFurnizor",
-                        param: parametrii,
+                        param: parametru,
                         commandType: CommandType.StoredProcedure);
                 }
 
-                return Results.Oknew { message = "Furnizorul a fost sters cu succes!" };
+                return Results.Ok(new { message = "Furnizor a fost stearsa cu succes!" });
             }).RequireAuthorization();
         }
+    }
+}

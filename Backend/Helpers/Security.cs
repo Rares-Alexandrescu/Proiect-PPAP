@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Backend.DBClasses;
-//using Backend.Endpoints;
+using Backend.Endpoints;
 using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
@@ -173,7 +173,7 @@ namespace Backend.Helpers
         }
 
         //daca mi da eroare cand dau dotnet run, sa fiu atent aici, suta la suta crapa si tre sa includ ceva
-        public static Dictionary<string, List<string>> ValideazaDateFurnizor(AdminCompanieGestioneazaFurnizorRequest furnizorNou)
+        public static Dictionary<string, List<string>> ValideazaDateFurnizor(AdminGestioneazaFurnizorRequest furnizorNou)
         {
             var erori = new Dictionary<string, List<string>>();
 
@@ -278,14 +278,14 @@ namespace Backend.Helpers
                 var parametruUtilizator = new DynamicParameters();
                 parametruUtilizator.Add("@idAdminFurnizor", idAdmin);
 
-                var companieLocalAdmin = await connection.QueryFirstOrDefaultAsync<Companie>(
+                var companieLocalAdmin = await connection.QueryFirstOrDefaultAsync<Furnizor>(
                     "sp_Furnizor_GetFurnizorByAdmin",
                     parametruUtilizator,
                     commandType: CommandType.StoredProcedure
                 );
 
                 if (companieLocalAdmin == null)
-                    return (Results.BadRequest(new { message = "Acest utilizator nu are nicio companie atribuită!" }), null);
+                    return (Results.BadRequest(new { message = "Acest utilizator nu are nicio companie atribuită!" }), null,null);
 
                 return (null, companieLocalAdmin, idAdmin);
             }

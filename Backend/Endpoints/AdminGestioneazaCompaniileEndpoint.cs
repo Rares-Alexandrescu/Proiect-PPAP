@@ -12,7 +12,7 @@ namespace Backend.Endpoints
     {
         //tre sa fac si ceva de filtrare etc!
         public static void MapAdminGestioneazaCompaniileEndpoint(this IEndpointRouteBuilder app)
-        {   
+        {
             //Tre sa vad sa fac filtrarea pentru asta, se aplica peste toate componentele pentru adminGeneral de vezi-....
             app.MapGet("/admin/vezi-companii", async (ClaimsPrincipal admin, IConfiguration config) =>
             {
@@ -122,7 +122,7 @@ namespace Backend.Endpoints
 
                     return Results.Ok(new { message = "Compania a fost adăugată cu succes!" });
                 }
-                
+
             }).RequireAuthorization();
 
 
@@ -263,7 +263,7 @@ namespace Backend.Endpoints
                     return Results.Ok(new { message = "Compania a fost editata cu succes!" });
                 }
 
-                
+
             }).RequireAuthorization();
 
             //si mai am de facut delete-ul, dar nu stiu cum sa l fac acuma sa mearga cat mai bine
@@ -274,42 +274,42 @@ namespace Backend.Endpoints
 
             ) =>
             {
-                //DE MODIFICAT STERGEREA ODATA CE MAI ADAUGAM CHESTII
-                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
-                if (eroareAutentificare != null) return eroareAutentificare;
+            //DE MODIFICAT STERGEREA ODATA CE MAI ADAUGAM CHESTII
+            var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+            if (eroareAutentificare != null) return eroareAutentificare;
 
-                var connectionString = config.GetConnectionString("DefaultConnection");
+            var connectionString = config.GetConnectionString("DefaultConnection");
 
-                var erori = new Dictionary<string, List<string>>();
+            var erori = new Dictionary<string, List<string>>();
 
 
-                using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var parametru = new DynamicParameters();
+                parametru.Add("@id", idCompanie);
+
+                var companieDeSters = await connection.QueryFirstOrDefaultAsync<Companie>(
+                    "sp_Companie_getbyID",
+                    param: parametru,
+                    commandType: CommandType.StoredProcedure);
+
+                if (companieDeSters == null)
                 {
-                    var parametru = new DynamicParameters();
-                    parametru.Add("@id", idCompanie);
-
-                    var companieDeSters = await connection.QueryFirstOrDefaultAsync<Companie>(
-                        "sp_Companie_getbyID",
-                        param: parametru,
-                        commandType: CommandType.StoredProcedure);
-
-                    if (companieDeSters == null)
-                    {
-                        SecurityHelper.AdaugaEroare(erori, "companie-delete", "Nu exista aceasta companie");
-                        return Results.BadRequest(new { eroriCampuri = erori });
-                    }
-
-
-                    var parametrii = new DynamicParameters();
-                    parametrii.Add("@idCompanie", idCompanie);
-
-                    await connection.ExecuteAsync(
-                        "sp_Companie_DeleteCompanie",
-                        param: parametrii,
-                        commandType: CommandType.StoredProcedure);
+                    SecurityHelper.AdaugaEroare(erori, "companie-delete", "Nu exista aceasta companie");
+                    return Results.BadRequest(new { eroriCampuri = erori });
                 }
 
-                return Results.Ok {new message = "Compania a fost stearsa cu succes!" };
+
+                var parametrii = new DynamicParameters();
+                parametrii.Add("@idCompanie", idCompanie);
+
+                await connection.ExecuteAsync(
+                    "sp_Companie_DeleteCompanie",
+                    param: parametrii,
+                    commandType: CommandType.StoredProcedure);
+            }
+
+                return Results.Ok(new { message = "Compania a fost stearsa cu succes!" });
 
             }).RequireAuthorization();
         }
