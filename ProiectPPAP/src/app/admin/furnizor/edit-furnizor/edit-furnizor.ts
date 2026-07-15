@@ -40,10 +40,10 @@ export class EditFurnizorComponent implements OnInit, OnDestroy {
     }
 
     this.editFurnizorForm = this.fb.group({
-      nume_Furnizor: [''],
-      email: [''],
-      numar_Telefon: [''],
-      identificator: ['']
+      nume_furnizor: [''],
+      email_furnizor: [''],
+      numar_telefon: [''],
+      identificatorAngajat: ['']
     });
 
     this.incarcaDateFurnizor();
@@ -60,10 +60,10 @@ export class EditFurnizorComponent implements OnInit, OnDestroy {
         if (dateFurnizor) {
 
           this.editFurnizorForm.patchValue({
-            nume_Furnizor: dateFurnizor.nume_Furnizor,
-            email: dateFurnizor.email,
-            numar_Telefon: dateFurnizor.numar_Telefon,
-            identificator: dateFurnizor.identificator || '***'
+            nume_furnizor: dateFurnizor.nume_furnizor,
+            email_furnizor: dateFurnizor.email_furnizor,
+            numar_telefon: dateFurnizor.numar_telefon,
+            identificatorAngajat: dateFurnizor.identificatorAngajat || '***'
           });
         } else {
           console.warn('Atenție: Proprietatea "furnizor" lipsește din răspunsul JSON!');
@@ -79,10 +79,10 @@ export class EditFurnizorComponent implements OnInit, OnDestroy {
   private curataErorileLaTastare(): void {
 
     const mapareCampuri: { [numeInput: string]: string[] } = {
-      'nume_Furnizor': ['nume_furnizor'],
+      'nume_furnizor': ['nume_furnizor'],
       'email': ['email'],
-      'numar_Telefon': ['numar_telefon'],
-      'identificator': ['identificator']
+      'numar_telefon': ['numar_telefon'],
+      'identificatorAngajat': ['identificatorAngajat']
     };
 
     Object.keys(this.editFurnizorForm.controls).forEach(numeInput => {
@@ -133,7 +133,7 @@ export class EditFurnizorComponent implements OnInit, OnDestroy {
         this.seIncarca.set(false);
         console.log("Succes editare furnizor:", response);
 
-        this.router.navigate(['/admin/vezi-furnizori'], {
+        this.router.navigate(['/admin/vezi-furnizorii'], {
           state: { mesajSucces: 'Furnizorul a fost editat cu succes!' }
         });
       },

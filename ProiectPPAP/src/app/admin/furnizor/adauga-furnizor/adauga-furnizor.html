@@ -17,8 +17,8 @@
       <div class="grup-formular">
         <label>Nume Furnizor</label>
         <input type="text"
-               formControlName="nume_Furnizor"
-               [class.invalid]="adaugaFurnizorForm.get('nume_Furnizor')?.invalid && adaugaFurnizorForm.get('nume_Furnizor')?.touched">
+               formControlName="nume_furnizor"
+               [class.invalid]="adaugaFurnizorForm.get('nume_furnizor')?.invalid && adaugaFurnizorForm.get('nume_furnizor')?.touched">
 
         @for (err of eroriBackend()['Nume_Furnizor'] || eroriBackend()['nume_Furnizor'] || eroriBackend()['nume_furnizor']; track $index) {
         <small class="text-eroare">{{ err }}</small>
@@ -29,8 +29,8 @@
         <div class="grup-formular">
           <label>Email Furnizor</label>
           <input type="email"
-                 formControlName="email"
-                 [class.invalid]="adaugaFurnizorForm.get('email')?.invalid && adaugaFurnizorForm.get('email')?.touched">
+                 formControlName="email_furnizor"
+                 [class.invalid]="adaugaFurnizorForm.get('email_furnizor')?.invalid && adaugaFurnizorForm.get('email_furnizor')?.touched">
 
           @for (err of eroriBackend()['Email'] || eroriBackend()['email']; track $index) {
           <small class="text-eroare">{{ err }}</small>
@@ -40,8 +40,8 @@
         <div class="grup-formular">
           <label>Telefon</label>
           <input type="text"
-                 formControlName="numar_Telefon"
-                 [class.invalid]="adaugaFurnizorForm.get('numar_Telefon')?.invalid && adaugaFurnizorForm.get('numar_Telefon')?.touched">
+                 formControlName="numar_telefon"
+                 [class.invalid]="adaugaFurnizorForm.get('numar_telefon')?.invalid && adaugaFurnizorForm.get('numar_telefon')?.touched">
 
           @for (err of eroriBackend()['Numar_Telefon'] || eroriBackend()['numar_Telefon'] || eroriBackend()['numar_telefon']; track $index) {
           <small class="text-eroare">{{ err }}</small>
@@ -52,8 +52,8 @@
       <div class="grup-formular">
         <label>Identificator Admin Local (ID / Email / CNP)</label>
         <input type="text"
-               formControlName="identificator"
-               [class.invalid]="adaugaFurnizorForm.get('identificator')?.invalid && adaugaFurnizorForm.get('identificator')?.touched">
+               formControlName="identificatorAngajat"
+               [class.invalid]="adaugaFurnizorForm.get('identificatorAngajat')?.invalid && adaugaFurnizorForm.get('identificatorAngajat')?.touched">
         <p style="font-size: 0.8rem; color: #6b7280; margin-top: 0.3rem;">
           Lasă <strong>câmpul gol</strong> dacă dorești să creezi furnizorul fără admin local momentan.
         </p>
@@ -70,7 +70,7 @@
       </button>
 
       <div style="text-align: center; margin-top: 1.5rem;">
-        <a routerLink="/admin/vezi-furnizori" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
+        <a routerLink="/admin/vezi-furnizorii" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
           &larr; Înapoi la lista de furnizori
         </a>
       </div>

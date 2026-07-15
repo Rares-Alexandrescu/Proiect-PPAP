@@ -98,6 +98,6 @@ export class DashboardComponent implements OnInit {
 
   mergiLaPanouFurnizor(): void {
     console.log('Redirectioneaza catre panoul furnizorului...');
-    //
+    this.router.navigate(['/admin-furnizor/vezi-piese']);
   }
 }

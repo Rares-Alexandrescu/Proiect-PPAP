@@ -14,16 +14,18 @@ namespace Backend.Endpoints
     string? nume_furnizor,
     string? identificatorAngajat = "");
 
-    public static class AdminGestioneazaFurnizoriEndpoint
+    public static class AdminGestioneazaFurnizorEndpoint
     {
 
-        public static void MapAdminGestioneazaFurnizoriEndpoint(this IEndpointRouteBuilder app)
+        public static void MapAdminGestioneazaFurnizorEndpoint(this IEndpointRouteBuilder app)
         {
             //Tre sa vad sa fac filtrarea pentru asta, se aplica peste toate componentele pentru adminGeneral de vezi-....
             app.MapGet("/admin/vezi-furnizorii", async (
                 ClaimsPrincipal admin,
                 IConfiguration config) =>
             {
+                Console.WriteLine("Intra aici, nu stiu de ce trebuie sa testez asta :c");
+
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
 
                 if (eroareAutentificare != null) return eroareAutentificare;
@@ -183,8 +185,8 @@ namespace Backend.Endpoints
                     var parametrii = new DynamicParameters();
                     parametrii.Add("@idFurnizor", idFurnizor);
 
-                    //sa fac metoda asta in bd ---> am facut-o 
-                    var furnizorDB = await connection.QueryFirstOrDefaultAsync<AdminGestioneazaFurnizorRequest>(
+                    //sa fac metoda asta in bd ---> am facut-o ----> n-am gandit-o pana la capat
+                    var furnizorDB = await connection.QueryFirstOrDefaultAsync<Furnizor>(
                         "sp_Furnizor_getByID",
                         parametrii,
                         commandType: CommandType.StoredProcedure);
@@ -194,11 +196,16 @@ namespace Backend.Endpoints
                         return Results.BadRequest(new { message = "ID inexistent! Cerere proasta!" });
                     }
 
-                    furnizorDB = furnizorDB with { identificatorAngajat = "***" };
 
                     return Results.Ok(new
                     {
-                        furnizor = furnizorDB,
+                        furnizor = new
+                        {
+                            nume_furnizor = furnizorDB.Nume_Furnizor,
+                            email_furnizor = furnizorDB.Email_Furnizor,
+                            numar_telefon = furnizorDB.Numar_Telefon,
+                            identificatorAngajat = "***",
+                        }
                     });
 
                 }
@@ -217,13 +224,13 @@ namespace Backend.Endpoints
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
                 var erori = SecurityHelper.ValideazaDateFurnizor(furnizorEditat);
-                if (erori.Count > 0)
-                    return Results.BadRequest(new { eroriCampuri = erori });
 
                 string identificator = furnizorEditat.identificatorAngajat?.Trim() ?? "";
                 bool editAdmin = !string.IsNullOrWhiteSpace(identificator) && !identificator.Contains("***");
                 var (emailCautare, idCautare, cnpHash) = SecurityHelper.ParseazaIdentificatorCompanie(editAdmin ? identificator : "", erori);
 
+                if (erori.Count > 0)
+                    return Results.BadRequest(new { eroriCampuri = erori });
 
                 using (var connection = new SqlConnection(connectionString))
                 {
@@ -231,7 +238,7 @@ namespace Backend.Endpoints
 
                     if (editAdmin)
                     {
-                        Console.WriteLine("Identifiactorul nostru final este unul din asta " + cnpHash + " sau " + emailCautare + " sau " + idCautare);
+                        Console.WriteLine("Identificatorul nostru final este unul din asta " + cnpHash + " sau " + emailCautare + " sau " + idCautare);
                         var paramCautare = new DynamicParameters();
                         paramCautare.Add("@Email", emailCautare);
                         paramCautare.Add("@Id", idCautare);

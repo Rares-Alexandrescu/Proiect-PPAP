@@ -15,11 +15,11 @@ export interface Furnizor {
 }
 
 @Component({
-  selector: 'app-vezi-furnizori',
+  selector: 'app-vezi-furnizorii',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './vezi-furnizori.html',
-  styleUrl: './vezi-furnizori.scss', 
+  templateUrl: './vezi-furnizorii.html',
+  styleUrl: './vezi-furnizorii.scss', 
 })
 export class VeziFurnizoriComponent implements OnInit {
 
@@ -56,7 +56,7 @@ export class VeziFurnizoriComponent implements OnInit {
   incarcaFurnizori(): void {
     this.seIncarca.set(true);
 
-    this.http.get<Furnizor[]>(`${environment.apiUrl}/admin/vezi-furnizori`).subscribe({
+    this.http.get<Furnizor[]>(`${environment.apiUrl}/admin/vezi-furnizorii`).subscribe({
       next: (dateDinBackend) => {
         console.log('1. Date primite de la server:', dateDinBackend);
         console.log('2. Este listă (Array)?:', Array.isArray(dateDinBackend));

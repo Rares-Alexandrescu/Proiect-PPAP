@@ -7,10 +7,10 @@ import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 @Component({
-  selector: 'app-add-piesa',
+  selector: 'app-adauga-piesa',
   standalone: true,
-  templateUrl: './add-piesa.html',
-  styleUrls: ['./add-piesa.scss'], 
+  templateUrl: './adauga-piese.html',
+  styleUrls: ['./adauga-piese.scss'], 
   imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
 export class AdaugaPiesaComponent implements OnInit, OnDestroy {
@@ -87,7 +87,7 @@ export class AdaugaPiesaComponent implements OnInit, OnDestroy {
     const formData = this.adaugaPiesaForm.value;
     console.log('Datele care pleacă spre C# (Creare Piesă):', formData);
 
-    this.http.post<any>(`${environment.apiUrl}/admin-furnizor/add-piesa`, formData).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/admin-furnizor/adauga-piesa`, formData).subscribe({
       next: (response) => {
         this.seIncarca.set(false);
         this.mesajSucces.set(response.message || 'Piesa a fost adăugată cu succes!');

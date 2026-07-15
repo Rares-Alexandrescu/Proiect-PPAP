@@ -8,7 +8,7 @@ import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-adauga-furnizor',
-  imports: [],
+  imports: [ReactiveFormsModule],
   templateUrl: './adauga-furnizor.html',
   styleUrl: './adauga-furnizor.scss',
 })
@@ -29,10 +29,10 @@ export class AdaugaFurnizorComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.adaugaFurnizorForm = this.fb.group({
-      nume_Furnizor: [''],
-      email: [''],
-      numar_Telefon: [''],
-      cnpAdminLocal: ['']
+      nume_furnizor: [''],
+      email_furnizor: [''],
+      numar_telefon: [''],
+      identificatorAngajat: ['']
     });
 
     this.curataErorileLaTastare();
@@ -40,10 +40,10 @@ export class AdaugaFurnizorComponent implements OnInit, OnDestroy {
 
   private curataErorileLaTastare(): void {
     const mapareCampuri: { [numeInput: string]: string[] } = {
-      'nume_Furnizor': ['nume_furnizor'],
-      'email': ['email'],
-      'numar_Telefon': [ 'numar_telefon'],
-      'identificator': ['identificator']
+      'nume_furnizor': ['nume_furnizor'],
+      'email_furnizor': ['email_furnizor'],
+      'numar_telefon': [ 'numar_telefon'],
+      'identificatorAngajat': ['identificatorAngajat']
     };
 
     Object.keys(this.adaugaFurnizorForm.controls).forEach(numeInput => {
@@ -89,7 +89,7 @@ export class AdaugaFurnizorComponent implements OnInit, OnDestroy {
     const formData = this.adaugaFurnizorForm.value;
     console.log('Datele care pleacă spre C# (Creare Furnizor):', formData);
 
-    this.http.post<any>(`${environment.apiUrl}/admin/add-furnizor`, formData).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/admin/adauga-furnizor`, formData).subscribe({
       next: (response) => {
         this.seIncarca.set(false);
         this.mesajSucces.set(response.message || 'Furnizorul a fost adăugat cu succes!');
@@ -98,7 +98,7 @@ export class AdaugaFurnizorComponent implements OnInit, OnDestroy {
         this.adaugaFurnizorForm.reset();
 
 
-        this.router.navigate(['/admin/vezi-furnizori'], {
+        this.router.navigate(['/admin/vezi-furnizorii'], {
           state: { mesajSucces: 'Furnizorul a fost adăugat cu succes!' }
         });
       },

@@ -40,8 +40,8 @@
             <td><strong>{{ furnizor.nume_Furnizor }}</strong></td>
             <td>{{ furnizor.email_Furnizor }}</td>
             <td>{{ furnizor.numar_Telefon }}</td>
-            <td>{{ furnizor.nume_Admin_Furnizor ? furnizor.numeAdminLocal : 'N/A' }}</td>
-            <td>{{ furnizor.prenume_Admim_Furnizor ? furnizor.prenumeAdminLocal : 'N/A' }}</td>
+            <td>{{ furnizor.nume_Admin_Furnizor ? furnizor.nume_Admin_Furnizor : 'N/A' }}</td>
+            <td>{{ furnizor.prenume_Admin_Furnizor ? furnizor.prenume_Admin_Furnizor : 'N/A' }}</td>
             <td>
               <div class="actiuni-tabel">
                 <button class="buton-actiune buton-edit" (click)="editeazaFurnizor(furnizor.furnizor_Id)">Editează</button>

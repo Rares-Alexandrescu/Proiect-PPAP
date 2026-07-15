@@ -7,10 +7,10 @@ import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 @Component({
-  selector: 'app-edit-piesa',
+  selector: 'app-edit-piese',
   standalone: true,
-  templateUrl: './edit-piesa.html',
-  styleUrls: ['./edit-piesa.scss'], 
+  templateUrl: './edit-piese.html',
+  styleUrls: ['./edit-piese.scss'], 
   imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
 export class EditPiesaComponent implements OnInit, OnDestroy {
