@@ -7,5 +7,6 @@ namespace Backend.DBClasses
 		public decimal Pret_Cumparare { get; set; } = 0;
 		public decimal Pret_Vanzare { get; set; } = 0;
 		public string Nume_Piesa { get; set; } = string.Empty;
-	}
+        public DateTime created_at { get; set; }
+    }
 }

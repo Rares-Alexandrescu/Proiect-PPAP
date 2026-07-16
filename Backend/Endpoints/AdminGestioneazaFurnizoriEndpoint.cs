@@ -9,10 +9,15 @@ using Backend.Helpers;
 namespace Backend.Endpoints
 {
     public record AdminGestioneazaFurnizorRequest(
-    string? numar_telefon,
-    string? email_furnizor,
-    string? nume_furnizor,
-    string? identificatorAngajat = "");
+        string? numar_telefon,
+        string? email_furnizor,
+        string? nume_furnizor,
+        string? identificatorAngajat = ""
+    );
+
+    public record SetPretVanzareRequest(
+        decimal? pret_vanzare = null
+    );
 
     public static class AdminGestioneazaFurnizorEndpoint
     {
@@ -185,7 +190,7 @@ namespace Backend.Endpoints
                     var parametrii = new DynamicParameters();
                     parametrii.Add("@idFurnizor", idFurnizor);
 
-                    //sa fac metoda asta in bd ---> am facut-o ----> n-am gandit-o pana la capat
+                    //sa fac metoda asta in bd ---> am facut-o ----> n-am gandit-o pana la capat ---> acuma sper ca am facut o bine
                     var furnizorDB = await connection.QueryFirstOrDefaultAsync<Furnizor>(
                         "sp_Furnizor_getByID",
                         parametrii,
@@ -307,10 +312,168 @@ namespace Backend.Endpoints
                         commandType: CommandType.StoredProcedure
                     );
 
-                    return Results.Ok(new { message = "Compania a fost editata cu succes!" });
+                    return Results.Ok(new { message = "Furnizorul a fost editat cu succes!" });
+                }
+
+            }).RequireAuthorization();
+            
+            app.MapGet("/admin/vezi-piese-furnizor/{idFurnizor:int}", async (
+                int idFurnizor,
+                ClaimsPrincipal admin,
+                IConfiguration config) =>
+            {
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametrii = new DynamicParameters();
+                    parametrii.Add("@idFurnizor", idFurnizor);
+
+                    var furnizorDB = await connection.QueryFirstOrDefaultAsync<Furnizor>(
+                        "sp_Furnizor_getByID",
+                        parametrii,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (furnizorDB == null)
+                    {
+                        return Results.BadRequest(new { message = "ID inexistent! Cerere proasta!" });
+                    }
+
+                    //de revizuit in caz de ceva
+                    var pieseFurnizor = await connection.QueryAsync<Piese>(
+                        "sp_Piesa_AdminGetPieseByFurnizorID",
+                        parametrii,
+                        commandType: CommandType.StoredProcedure
+                        );
+
+                    return Results.Ok(new
+                    {
+                        furnizor = furnizorDB,
+                        piese = pieseFurnizor
+                    });
                 }
 
 
+            }).RequireAuthorization();
+
+            app.MapGet("/admin/seteaza-pret-piesa-furnizor/{idFurnizor:int}/{idPiesa:int}",
+                async (
+                int idFurnizor,
+                int idPiesa,
+                ClaimsPrincipal admin,
+                IConfiguration config) =>
+            {
+
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+                
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametriiFurnizor = new DynamicParameters();
+                    parametriiFurnizor.Add("@idFurnizor", idFurnizor);
+
+                    var furnizorDB = await connection.QueryFirstOrDefaultAsync<Furnizor>(
+                        "sp_Furnizor_getByID",
+                        parametriiFurnizor,
+                        commandType: CommandType.StoredProcedure);
+
+                    var parametriiPiesa = new DynamicParameters();
+                    parametriiPiesa.Add("@idPiesa", idPiesa);
+
+                    var piesaDB = await connection.QueryFirstOrDefaultAsync<Piese>(
+                        "sp_Piesa_AdminGetPiesaByPiesaID",
+                        parametriiPiesa,
+                        commandType: CommandType.StoredProcedure);
+
+                    if ( piesaDB == null || furnizorDB == null)
+                    {
+                        return Results.BadRequest(new { message = "ID/ID-uri inexistent/-e! Cerere proasta!" });
+                    }
+
+                    if( ( piesaDB.Furnizor_Id != furnizorDB.Furnizor_Id ) || piesaDB.Furnizor_Id == -1 || furnizorDB.Furnizor_Id == -1 )
+                    {
+                        return Results.BadRequest(new { message = "Piesa nu apartine de furnizor!" });
+                    }
+
+                    return Results.Ok(new
+                    {
+                        furnizor = furnizorDB,
+                        piesa = piesaDB
+                    });
+                }
+            }).RequireAuthorization();
+
+            //tre sa vad cum fac requestu asta
+            app.MapPut("/admin/seteaza-pret-piesa-furnizor/{idFurnizor:int}/{idPiese:int}", async (
+                [FromBody] SetPretVanzareRequest pretVanzare,
+                int idFurnizor,
+                int idPiese,
+                ClaimsPrincipal admin,
+                IConfiguration config) =>
+            {
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametriiFurnizor = new DynamicParameters();
+                    parametriiFurnizor.Add("@idFurnizor", idFurnizor);
+
+                    var furnizorDB = await connection.QueryFirstOrDefaultAsync<Furnizor>(
+                        "sp_Furnizor_getByID",
+                        parametriiFurnizor,
+                        commandType: CommandType.StoredProcedure);
+
+                    var parametriiPiesa = new DynamicParameters();
+                    parametriiPiesa.Add("@idPiesa", idPiesa);
+
+                    var piesaDB = await connection.QueryFirstOrDefaultAsync<Piese>(
+                        "sp_Piesa_AdminGetPiesaByPiesaID",
+                        parametriiPiesa,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (piesaDB == null || furnizorDB == null)
+                    {
+                        return Results.BadRequest(new { message = "ID/ID-uri inexistent/-e! Cerere proasta!" });
+                    }
+
+                    if ((piesaDB.Furnizor_Id != furnizorDB.Furnizor_Id) || piesaDB.Furnizor_Id == -1 || furnizorDB.Furnizor_Id == -1)
+                    {
+                        return Results.BadRequest(new { message = "Piesa nu apartine de furnizor!" });
+                    }
+
+
+                    //si aici urmeaza logica de setare pret
+                    //Q:sa vad daca aici trantesc si ceva de updatare automata? 
+                    //A:vedem
+                    //ne trebuie pentru edit, id -ul piese si pretul penru vanzare
+
+                    var erori = SecurityHelper.ValideazaPretVanzare(pretVanzare.pret_vanzare);
+
+                    if (erori.Count > 0)
+                        return Results.BadRequest(new { eroriCampuri = erori });
+
+                    parametriiPiesa.Add("@idPiesa", idPiesa);
+                    parametriiPiesa.Add("@pretVanzare", pretVanzare.pret_vanzare);
+
+                    //poate fac o validare direct din adminseteaza, iau rowcount si dupa pun iar in message o chestie sau tot in erori
+                    //referitor la ce am zis eu cu pretul plm vedem
+
+                    await connection.ExecuteAsync(
+                        "sp_Piesa_AdminSeteazaPretVanzare",
+                        parametriiPiesa,
+                        commandType: CommandType.StoredProcedure);
+
+                    return Results.Ok(new { message = "Pretul pentru " + piesaDB.Nume_Piesa + " a fost stearsa cu succes!" });
+
+                }
             }).RequireAuthorization();
 
             //CA LA COMPANII, TREBUIE DOAR SA FIU ATENT LA STERGEREA DRACU
@@ -351,6 +514,8 @@ namespace Backend.Endpoints
 
                 return Results.Ok(new { message = "Furnizor a fost stearsa cu succes!" });
             }).RequireAuthorization();
+
+
         }
     }
 }

@@ -71,6 +71,14 @@ export class EditFurnizorComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Eroare la aducerea datelor furnizorului:', err);
+        if (err.status === 400 && err.error && err.error.message) {
+          const mesajPrimit = err.error.message;
+          if (mesajPrimit.includes("ID inexistent")) {
+            alert(mesajPrimit);
+            this.router.navigate(['/admin/vezi-furnizorii']);
+            return;
+          }
+        }
         this.eroriBackend.set({ eroareGenerala: ['Nu s-au putut încărca datele furnizorului.'] });
       }
     });
@@ -141,6 +149,14 @@ export class EditFurnizorComponent implements OnInit, OnDestroy {
         this.seIncarca.set(false);
         console.log('Eroare brută de la C#:', err);
 
+        if (err.status === 400 && err.error && err.error.message) {
+          const mesajPrimit = err.error.message;
+          if (mesajPrimit.includes("ID inexistent")) {
+            alert(mesajPrimit);
+            this.router.navigate(['/admin/vezi-furnizorii']);
+            return;
+          }
+        }
         if (err.error && err.error.eroriCampuri) {
           this.eroriBackend.set(err.error.eroriCampuri);
           console.log('Erori salvate pentru HTML:', this.eroriBackend());

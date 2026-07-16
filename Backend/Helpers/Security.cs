@@ -203,6 +203,17 @@ namespace Backend.Helpers
             return erori;
         }
 
+        //poate aici un failsafe sa vedem daca pretul de vanzare al meu este mai mic ca cel de cumparare al piesei ---> eventuale pierderi din partea noastra?
+        public static Dictionary<string, List<string>> ValideazaPretVanzare(decimal? Pret_Vanzare)
+        {
+            var erori = new Dictionary<string, List<string>>();
+
+            if (!Validators.EstePretValid(Pret_Vanzare))
+                AdaugaEroare(erori, "pret_piesa", "Trebuie sa pui un numar valid, pozitiv, fara litere!");
+
+            return erori;
+        }
+
         public static (string? emailCautare, int? idCautare, string? cnpHash) ParseazaIdentificatorCompanie(string identificator, Dictionary<string, List<string>> erori)
         {
             string? emailCautare = null;
