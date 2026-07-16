@@ -432,7 +432,7 @@ namespace Backend.Endpoints
                         commandType: CommandType.StoredProcedure);
 
                     var parametriiPiesa = new DynamicParameters();
-                    parametriiPiesa.Add("@idPiesa", idPiesa);
+                    parametriiPiesa.Add("@idPiesa", idPiese);
 
                     var piesaDB = await connection.QueryFirstOrDefaultAsync<Piese>(
                         "sp_Piesa_AdminGetPiesaByPiesaID",
@@ -460,18 +460,19 @@ namespace Backend.Endpoints
                     if (erori.Count > 0)
                         return Results.BadRequest(new { eroriCampuri = erori });
 
-                    parametriiPiesa.Add("@idPiesa", idPiesa);
-                    parametriiPiesa.Add("@pretVanzare", pretVanzare.pret_vanzare);
+                    var parametriiUpdate = new DynamicParameters();
+                    parametriiUpdate.Add("@idPiesa", idPiese);
+                    parametriiUpdate.Add("@pretVanzare", pretVanzare.pret_vanzare);
 
                     //poate fac o validare direct din adminseteaza, iau rowcount si dupa pun iar in message o chestie sau tot in erori
                     //referitor la ce am zis eu cu pretul plm vedem
 
                     await connection.ExecuteAsync(
                         "sp_Piesa_AdminSeteazaPretVanzare",
-                        parametriiPiesa,
+                        parametriiUpdate,
                         commandType: CommandType.StoredProcedure);
 
-                    return Results.Ok(new { message = "Pretul pentru " + piesaDB.Nume_Piesa + " a fost stearsa cu succes!" });
+                    return Results.Ok(new { message = "Pretul pentru " + piesaDB.Nume_Piesa + " a fost actualizat cu succes!" });
 
                 }
             }).RequireAuthorization();

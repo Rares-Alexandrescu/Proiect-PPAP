@@ -1,1 +1,107 @@
-<p>seteaza-pret-piesa-furnizor works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Setare Preț de Vânzare</h2>
+      <p>Consultă detaliile piesei și actualizează prețul pentru catalogul platformei.</p>
+    </div>
+    <button class="buton-principal buton-adauga" (click)="inapoiLaPiese()">&larr; Înapoi la Piese</button>
+  </div>
+
+  @if (alertaSucces()) {
+  <div class="alerta-succes">
+    {{ alertaSucces() }}
+  </div>
+  }
+
+  @if (alertaEroare()) {
+  <div class="alerta-eroare">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin" style="padding: 2.5rem;">
+    @if (seIncarca() && !piese()) {
+    <div style="text-align: center; padding: 3rem; color: #6b7280;">
+      <p>Se încarcă datele piesei și ale furnizorului...</p>
+    </div>
+    } @else {
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb;">
+      @if (piese(); as p) {
+      <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 1.25rem;">
+        <h3 style="margin: 0 0 0.75rem 0; color: #111827; font-size: 1.1rem; font-weight: 600;">
+          {{ p.nume_Piesa }}
+        </h3>
+        <p style="margin: 0.4rem 0; color: #374151; font-size: 0.95rem;"><strong>ID Piesă:</strong> #{{ p.piese_Id }}</p>
+        <p style="margin: 0.4rem 0; color: #374151; font-size: 0.95rem;"><strong>Preț Cumpărare:</strong> {{ p.pret_Cumparare }} RON</p>
+        <p style="margin: 0.4rem 0; color: #6b7280; font-size: 0.85rem;"><strong>Adăugată la:</strong> {{ p.created_at }}</p>
+      </div>
+      }
+
+      @if (furnizor(); as f) {
+      <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 1.25rem;">
+        <h3 style="margin: 0 0 0.75rem 0; color: #111827; font-size: 1.1rem; font-weight: 600;">
+          {{ f.nume_Furnizor }}
+        </h3>
+        <p style="margin: 0.4rem 0; color: #374151; font-size: 0.95rem;"><strong>ID Furnizor:</strong> #{{ f.furnizor_Id }}</p>
+        <p style="margin: 0.4rem 0; color: #374151; font-size: 0.95rem;"><strong>Email:</strong> {{ f.email_Furnizor }}</p>
+        <p style="margin: 0.4rem 0; color: #374151; font-size: 0.95rem;"><strong>Telefon:</strong> {{ f.numar_Telefon }}</p>
+      </div>
+      }
+    </div>
+
+    <form [formGroup]="pretForm" (ngSubmit)="onSave()" style="max-width: 400px;">
+      <div class="grup-formular">
+        <label for="pret_vanzare">
+          Preț Nou de Vânzare (RON) <span style="color: #ef4444;">*</span>
+        </label>
+
+        <input type="number"
+               id="pret_vanzare"
+               formControlName="pret_vanzare"
+               step="0.01"
+               placeholder="Ex: 150.00"
+               [class.invalid]="pretForm.get('pret_vanzare')?.touched && pretForm.get('pret_vanzare')?.invalid" />
+
+        @if (pretForm.get('pret_vanzare')?.touched && pretForm.get('pret_vanzare')?.invalid) {
+        <span class="text-eroare">
+          @if (pretForm.get('pret_vanzare')?.errors?.['required']) {
+          Prețul de vânzare este obligatoriu.
+          }
+          @if (pretForm.get('pret_vanzare')?.errors?.['min']) {
+          Prețul trebuie să fie mai mare de 0 RON.
+          }
+        </span>
+        }
+
+        @if (eroriBackend()['pret_vanzare']) {
+        <ul class="lista-erori">
+          @for (eroare of eroriBackend()['pret_vanzare']; track $index) {
+          <li>{{ eroare }}</li>
+          }
+        </ul>
+        }
+      </div>
+
+      <div class="rand-formular" style="margin-top: 1.5rem; gap: 0.75rem;">
+        <button type="submit"
+                class="buton-principal"
+                [disabled]="seIncarca()"
+                style="margin-top: 0;">
+          @if (seIncarca()) {
+          Se salvează...
+          } @else {
+          Salvează Prețul
+          }
+        </button>
+
+        <button type="button"
+                class="buton-actiune buton-delete"
+                (click)="inapoiLaPiese()"
+                style="padding: 0.85rem 1rem; border-radius: 6px; font-size: 0.95rem;">
+          Anulează
+        </button>
+      </div>
+    </form>
+    }
+  </div>
+</div>

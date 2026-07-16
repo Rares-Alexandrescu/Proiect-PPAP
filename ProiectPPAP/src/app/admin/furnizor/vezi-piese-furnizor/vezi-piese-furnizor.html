@@ -1,1 +1,80 @@
-<p>vezi-piese-furnizor works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      @if (furnizor(); as f) {
+      <h2>Piese oferite de: {{ f.nume_Furnizor }}</h2>
+      <p>
+        Email: <strong>{{ f.email_Furnizor }}</strong> |
+        Telefon: <strong>{{ f.numar_Telefon }}</strong> |
+        Admin: <strong>{{ f.nume_Admin_Furnizor ? f.nume_Admin_Furnizor : 'N/A' }} {{ f.prenume_Admin_Furnizor ? f.prenume_Admin_Furnizor : '' }}</strong>
+      </p>
+      } @else {
+      <h2>Gestionare Piese Furnizor</h2>
+      <p>Aici poți vizualiza piesele și gestiona prețurile de vânzare pentru catalog.</p>
+      }
+    </div>
+
+    <button class="buton-principal buton-adauga" (click)="veziFurnizorii()">
+      &larr; Înapoi la Furnizori
+    </button>
+  </div>
+
+  @if (alertaSucces()) {
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;">
+    {{ alertaSucces() }}
+  </div>
+  }
+
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin">
+    @if (seIncarca()) {
+    <div style="text-align: center; padding: 3rem; color: #6b7280;">
+      <p>Se încarcă piesele din baza de date...</p>
+    </div>
+    } @else {
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID Piesă</th>
+            <th>Nume Piesă</th>
+            <th>Preț Cumpărare</th>
+            <th>Data Adăugării</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (piesa of piese(); track piesa.piese_Id) {
+          <tr>
+            <td><strong>{{ piesa.piese_Id }}</strong></td>
+            <td><strong>{{ piesa.nume_Piesa }}</strong></td>
+            <td>{{ piesa.pret_Cumparare }} RON</td>
+            <td>{{ piesa.created_at }}</td>
+            <td>
+              <div class="actiuni-tabel">
+                <button class="buton-actiune buton-edit"
+                        (click)="seteazaPretPiesa(piesa.furnizor_Id, piesa.piese_Id)">
+                  Setează Preț
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Acest furnizor nu are nicio piesă înregistrată momentan.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+</div>

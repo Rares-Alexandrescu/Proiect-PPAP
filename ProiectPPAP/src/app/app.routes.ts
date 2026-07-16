@@ -12,6 +12,8 @@ import { VeziCompaniiComponent } from './admin/companie/vezi-companii/vezi-compa
 import { AdaugaFurnizorComponent } from './admin/furnizor/adauga-furnizor/adauga-furnizor';
 import { VeziFurnizoriComponent } from './admin/furnizor/vezi-furnizorii/vezi-furnizorii';
 import { EditFurnizorComponent } from './admin/furnizor/edit-furnizor/edit-furnizor';
+import { VeziPieseFurnizor } from './admin/furnizor/vezi-piese-furnizor/vezi-piese-furnizor';
+import { SeteazaPretPiesaFurnizor } from './admin/furnizor/seteaza-pret-piesa-furnizor/seteaza-pret-piesa-furnizor';
 
 import { VeziCompanieComponent } from './admin-local/companie/vezi-companie/vezi-companie';
 import { AdaugaAngajatComponent } from './admin-local/companie/adauga-angajat/adauga-angajat';
@@ -57,6 +59,14 @@ export const routes: Routes = [
       {
         path: 'vezi-furnizorii',
         component: VeziFurnizoriComponent
+      },
+      {
+        path: 'vezi-piese-furnizor/:id',
+        component: VeziPieseFurnizor
+      },
+      {
+        path: 'seteaza-pret-piesa-furnizor/:furnizorId/:piesaId',
+        component: SeteazaPretPiesaFurnizor
       }
     ]
   },
