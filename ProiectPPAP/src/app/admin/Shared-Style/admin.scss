@@ -133,13 +133,23 @@
       border-color: #ef4444;
     }
   }
-}
 
+  &.buton-galben {
+    color: #d97706;
+    border: 1px solid #fde68a; 
 
-@media (max-width: 650px) {
-  .antet-admin {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    &:hover {
+      background-color: #fffbeb; 
+      border-color: #d97706;
+    }
   }
-}
+  }
+
+
+  @media (max-width: 650px) {
+    .antet-admin {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }

@@ -10,6 +10,7 @@ export interface Piese {
   piese_Id: number;
   furnizor_Id: number;
   pret_Cumparare: number;
+  pret_Vanzare: number;
   nume_Piesa: string;
   created_at: string;
 }

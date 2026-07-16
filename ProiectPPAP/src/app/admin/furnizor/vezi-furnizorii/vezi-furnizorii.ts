@@ -88,6 +88,11 @@ export class VeziFurnizoriComponent implements OnInit {
     this.router.navigate(['/admin/adauga-furnizor']);
   }
 
+  veziPieseFurnizor(id: number): void {
+    this.router.navigate(['/admin/vezi-piese-furnizor', id]);
+  }
+
+
   stergeFurnizor(id: number): void {
     if (confirm('Ești sigur că vrei să ștergi acest furnizor? Toate datele și piesele lui asociate vor fi pierdute!')) {
 
