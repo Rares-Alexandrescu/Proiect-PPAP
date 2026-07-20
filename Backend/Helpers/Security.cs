@@ -301,5 +301,75 @@ namespace Backend.Helpers
                 return (null, companieLocalAdmin, idAdmin);
             }
         }
+
+        public static async Task<(IResult? Eroare, Utilizator? Utilizator, string? Rol, Companie? Companie)> ObtineContextDinJWT(
+            ClaimsPrincipal utilizatorCompanie,
+            string connectionString)
+        {
+            var idString = utilizatorCompanie.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idString, out int idUtilizatorLogat))
+                return (Results.Unauthorized(), null, null, null);
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var parametrii = new DynamicParameters();
+                parametrii.Add("@id", idUtilizatorLogat);
+
+                var utilizator = await connection.QueryFirstOrDefaultAsync<Utilizator>(
+                    "sp_Utilizator_getbyID",
+                    parametrii,
+                    commandType: CommandType.StoredProcedure);
+
+                if (utilizator != null)
+                {
+                    string jsonUtilizator = JsonSerializer.Serialize(utilizator, new JsonSerializerOptions { WriteIndented = true });
+                    Console.WriteLine("=== DATE UTILIZATOR EXTRASE DIN BAZA DE DATE ===");
+                    Console.WriteLine(jsonUtilizator);
+                    Console.WriteLine("================================================");
+                }
+                else
+                {
+                    Console.WriteLine("Utilizatorul nu a fost găsit în baza de date!");
+                    return (Results.BadRequest(new { message = "Trebuie sa fie logat, sau nu exista" }), null, null, null);
+                }
+
+                string? rolUtilizator = await connection.QueryFirstOrDefaultAsync<string>(
+                    "sp_Utilizator_Get_Rol",
+                    parametrii,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                Companie? companieUtilizator = null;
+
+                if (rolUtilizator != "AdminFurnizor")
+                {
+                    companieUtilizator = await connection.QueryFirstOrDefaultAsync<Companie>(
+                        "sp_Utilizator_Get_Companie",
+                        parametrii,
+                        commandType: CommandType.StoredProcedure
+                    );
+                }
+                else
+                {
+                    Console.WriteLine("ESTE FURNIZOR, NU POATE SA COMANDE!!!");
+                    return (Results.BadRequest(new { message = "Furnizorii nu au voie aici" }), null, null, null);
+                }
+
+                if (companieUtilizator != null)
+                {
+                    string jsonCompanie = JsonSerializer.Serialize(companieUtilizator, new JsonSerializerOptions { WriteIndented = true });
+                    Console.WriteLine("=== DATE COMPANIE EXTRASE DIN BAZA DE DATE ===");
+                    Console.WriteLine(jsonCompanie);
+                    Console.WriteLine("================================================");
+                }
+                else
+                {
+                    Console.WriteLine("Compania nu a fost găsit în baza de date!");
+                    return (Results.BadRequest(new { message = "Nu pot sa intru aici, nu exista companie" }), null, null, null);
+                }
+
+                return (null, utilizator, rolUtilizator, companieUtilizator);
+            }
+        }
     }
 }
