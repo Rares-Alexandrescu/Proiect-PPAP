@@ -35,6 +35,7 @@ namespace Backend.Endpoints
                         parametriiCompanie,
                         commandType: CommandType.StoredProcedure
                         );
+                    //poate mai ac ceva aici sa vad statusul si tot felu de chestii
 
                     var documenteComandaCompanie = await connection.QueryAsync<DocumenteComanda>(
                         "sp_Companie_GetDocumenteComandaByCompanieId",
@@ -81,10 +82,7 @@ namespace Backend.Endpoints
 
                 if (eroare != null) return eroare;
 
-                //etcule, vezi ca trebuie sa uniformizez cumva, si la dashboard, sa arunc functia asta de mi ia utilizator, companie, rol, in security ca e f voluminoasa
-                //momenta doar aici, puncte puncte puncte
-
-                using (var connection = new SqlConnection(connectionString))
+                using (var connection = new SqlConnection(connectionString)) 
                 {
 
                     //deci bau bau bau bau bau, am compania, am tot, ma doare capu rau
@@ -92,11 +90,120 @@ namespace Backend.Endpoints
                     //si pedefeul........
                     //tine tot de post
                     //poate si mail trimis la companie + admin?
+
+                    var furnizori = await connection.QueryAsync<FurnizorCuPieseActive>(
+                        "sp_Companie_GetFurnizoriCuPieseActive",
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    return Results.Ok(new
+                    {
+                        Furnizori = furnizori
+                    });
+
                 }
 
             }).RequireAuthorization();
 
+            app.MapGet("/compania-ta/noua-comanda/{idFurnizor:int}/piese-active", async (
+                int idFurnizor,
+                ClaimsPrincipal utilizatorCompanie,
+                IConfiguration config) =>
+            {
+                var connectionString = config.GetConnectionString("DefaultConnection");
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+
+                if (eroare != null) return eroare;
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametrii = new DynamicParameters();
+                    parametrii.Add("@idFurnizor", idFurnizor);
+
+                    var piese = await connection.QueryAsync<Piese>(
+                        "sp_Piesa_Companie_GetPieseActiveByFurnizorId",
+                        parametrii,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (piese == null)
+                        return Results.BadRequest(new { message = "Bau bau bau Nu trebuie sa apara asta etc" });
+
+                    return Results.Ok(piese);
+                }
+            }).RequireAuthorization();
             //ma chinui la get, hai sa vezi la post...
+
+            app.MapGet("/compania-ta/adauga-piesa/{idFurnizor:int}/{idPiesa:int}", async (
+                int idPiesa,
+                ClaimsPrincipal utilizatorCompanie,
+                IConfiguration config) =>
+            {
+                //tre sa verific id-ul furnizor, direct din backend, bazat pe idPiesa. 
+                //etc
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+
+                if (eroare != null) return eroare;
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametruPiesa = new DynamicParameters();
+                    parametruPiesa.Add("@idPiesa", idPiesa); //get piesa doar pentru companie,nu ne trebuie date intile
+
+                    var piesaCompanie = connection await.QueryFirstOrDefaultAsync<Piese>(
+                        "sp_Piesa_Companie_GetPiesaActivaByPiesaId",
+                        parametruPiesa,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (piesaCompanie == null || piesaCompanie.)
+                        return Results.BadRequest(new { message = "Bau bau bau Nu trebuie sa apara asta etc" });
+
+                    return Results.Ok(piesaCompanie);
+                }
+
+            }).RequireAuthorization();
+
+            //doamne 1001 probleme, poate maine pe douazeci iulie douamiidouazecisicinci fac si pdf si 
+            //anghiuleru.... ar fi un vis frumos sp_Piesa_Companie_GetPiesaActivaByPiesaId
+            //deci sa vad daca fac logica asta cu facturile, sa vd daca diferentiez comenzile una fata de alta
+            //sa pot adauga doar si doar daca e pending
+            //ar fi defapt un status, daca e unu, e plasata. daca e zero inca asteapta
+            //dar nu am voie sa adaug daca e unu, alta mancare de peste....
+            //daca e fac sa vad comenzile, dar nuj daca asta e solutia, sa iau comenzile la care pot, si daca nu are atunci ultima teapa
+            //smbgpl
+
+            app.MapPost("/compania-ta/adauga-piesa/{idPiesa:int}", async (
+                    int idPiesa,
+                    [FromBody] AdaugaPiesaRequest adaugaPiesa,
+                    ClaimsPrincipal utilizatorCompanie,
+                    IConfiguration config) =>
+            {
+                //tre sa verific id-ul furnizor, direct din backend, bazat pe idPiesa. 
+                //etc
+                var connectionString = config.GetConnectionString("DefaultConnection");
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+
+                if (eroare != null) return eroare;
+
+
+
+            }).RequireAuthorization();
         }
+    }
+
+    //aici definesc clasele noi pentru asta etc
+    public class AdaugaPiesaRequest
+    {
+        public int? Comanda_Id { get; set; }
+        public int Cantitate { get; set; } = 1;
+        public string? Comentariu_Cote { get; set; }
+    }
+
+    public class FurnizorCuPieseActive : Backend.DBClasses.Furnizor
+    {
+        public int NumarPieseActive { get; set; } = 0;
     }
 }

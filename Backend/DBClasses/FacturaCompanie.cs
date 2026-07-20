@@ -13,6 +13,6 @@ namespace Backend.DBClasses
 
         public bool? stadiu_plata { get; set; } = false;
 
-        public DateTime created_at { get; set; } = DateTime.UtcNow;
+        public DateTime created_at { get; set; };
     }
 }
