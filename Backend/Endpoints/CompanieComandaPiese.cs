@@ -5,7 +5,7 @@ using System.Data;
 using System.Security.Claims;
 using Backend.DBClasses;
 using Backend.Helpers;
-using Backend.Services
+using Backend.Services;
 
 namespace Backend.Endpoints
 {
@@ -13,7 +13,7 @@ namespace Backend.Endpoints
     {
         public static void MapCompanieComandaPieseEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGet("/compania-ta/comenzi-curente", async(
+            app.MapGet("/compania-ta/comenzi-curente", async (
                 ClaimsPrincipal utilizatorCompanie,
                 IConfiguration config) =>
             {
@@ -45,7 +45,7 @@ namespace Backend.Endpoints
                         "sp_Companie_GetDocumenteComandaByCompanieId",
                         parametriiCompanie,
                         commandType: CommandType.StoredProcedure
-                        ); 
+                        );
 
                     var facturaCompanieComanda = await connection.QueryAsync<FacturaCompanie>(
                         "sp_Companie_GetFacturaCompanieByCompanieId",
@@ -62,14 +62,14 @@ namespace Backend.Endpoints
                     return Results.Ok(new
                     {
                         Utilizator = utilizator,
-                        Rol = rol != null ? rol.ToString() : "N/A", 
+                        Rol = rol != null ? rol.ToString() : "N/A",
                         Companie = companie
                     });
                     //si mai trebuie, macar sa fie asa baza din dashboard
                 }
             }).RequireAuthorization();
 
-            app.MapGet("/compania-ta/vezi-comanda/{idComanda:int}", async(
+            app.MapGet("/compania-ta/vezi-comanda/{idComanda:int}", async (
                 int idComanda,
                 ClaimsPrincipal utilizatorCompanie,
                 IConfiguration config) =>
@@ -99,7 +99,7 @@ namespace Backend.Endpoints
                     //luam comanda, verificam daca exista, daca apartine companiei...
                     //daca se poate adauga piesa in comanda specificata
 
-                    var comandaCeruta = await connection QueryFirstOrDefaultAsync<Comanda>(
+                    var comandaCeruta = await connection.QueryFirstOrDefaultAsync<Comanda>(
                         "sp_Comanda_Companie_GetComandaById",
                         parametruComanda,
                         commandType: CommandType.StoredProcedure);
@@ -138,7 +138,7 @@ namespace Backend.Endpoints
 
                 }
 
-            })RequireAuthorization();
+            }).RequireAuthorization();
 
             //aici trebuie sa iau getul, sa mi dea pentru fiecare furnizor in parte, sa mi completeze o lista interna sau ceva care va popula comanda cu toate alea,
             //smr fam mea
@@ -147,7 +147,7 @@ namespace Backend.Endpoints
             //doamne dumnezeule
             //pfpfppppfpfpfppfpfpfpppfpfpfpfpfpfpfpf
 
-            app.MapGet("/compania-ta/noua-comanda", async(
+            app.MapGet("/compania-ta/noua-comanda", async (
                 ClaimsPrincipal utilizatorCompanie,
                 IConfiguration config) =>
             {
@@ -160,7 +160,7 @@ namespace Backend.Endpoints
                 if (companie == null)
                     return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
 
-                using (var connection = new SqlConnection(connectionString)) 
+                using (var connection = new SqlConnection(connectionString))
                 {
 
                     //deci bau bau bau bau bau, am compania, am tot, ma doare capu rau
@@ -267,136 +267,136 @@ namespace Backend.Endpoints
                     ClaimsPrincipal utilizatorCompanie,
                     IConfiguration config) =>
             {
-                //tre sa verific id-ul furnizor, direct din backend, bazat pe idPiesa. 
-                //etc
-                var connectionString = config.GetConnectionString("DefaultConnection");
-                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+            //tre sa verific id-ul furnizor, direct din backend, bazat pe idPiesa. 
+            //etc
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
 
-                if (eroare != null) return eroare;
+            if (eroare != null) return eroare;
 
-                if (companie == null)
-                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
+            if (companie == null)
+                return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
 
-                using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(connectionString))
+            {
+                //deci aici trebuie sa :
+                //sa adaug si in comanda
+                //sa adaug si in comanda piese
+                //dar si in documente, dar stadiu acceptare ar fi null inca
+                //INCA NU CREEZ FACTURI, DOCUMENTE SI ALTE ETCURI DE GENU
+                //SA VERIFIC DACA COMANDA CERUTA MERGE SA FIE UPDATATA, ALTFEL PULA
+
+                var parametruPiesa = new DynamicParameters();
+                parametruPiesa.Add("@idPiesa", idPiesa); //get piesa doar pentru companie,nu ne trebuie date inutile
+
+                var piesaCompanie = await connection.QueryFirstOrDefaultAsync<Piese>(
+                    "sp_Piesa_Companie_GetPiesaActivaByPiesaId",
+                    parametruPiesa,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                if (piesaCompanie == null || piesaCompanie.Furnizor_Id != idFurnizor)
+                    return Results.BadRequest(new { message = "Bau bau bau Nu trebuie sa apara asta etc" });
+
+
+                if (adaugaPiesa.Cantitate < 0)
                 {
-                    //deci aici trebuie sa :
-                    //sa adaug si in comanda
-                    //sa adaug si in comanda piese
-                    //dar si in documente, dar stadiu acceptare ar fi null inca
-                    //INCA NU CREEZ FACTURI, DOCUMENTE SI ALTE ETCURI DE GENU
-                    //SA VERIFIC DACA COMANDA CERUTA MERGE SA FIE UPDATATA, ALTFEL PULA
-
-                    var parametruPiesa = new DynamicParameters();
-                    parametruPiesa.Add("@idPiesa", idPiesa); //get piesa doar pentru companie,nu ne trebuie date inutile
-
-                    var piesaCompanie = connection await.QueryFirstOrDefaultAsync<Piese>(
-                        "sp_Piesa_Companie_GetPiesaActivaByPiesaId",
-                        parametruPiesa,
-                        commandType: CommandType.StoredProcedure
-                    );
-
-                    if (piesaCompanie == null || piesaCompanie.Furnizor_Id != idFurnizor)
-                        return Results.BadRequest(new { message = "Bau bau bau Nu trebuie sa apara asta etc" });
+                    //tre s fac aici ceva gen eroare de camp, dar nu cred ca e nevoie???????????
+                    //sau nici nu stiu
+                    //de verificat 
+                    return Results.BadRequest(new { message = "Imi da cantitate negativa, suta la suta un glumet!" });
+                }
 
 
-                    if(adaugaPiesa.Cantitate < 0)
-                    {
-                        //tre s fac aici ceva gen eroare de camp, dar nu cred ca e nevoie???????????
-                        //sau nici nu stiu
-                        //de verificat 
-                        return Results.BadRequest(new { message = "Imi da cantitate negativa, suta la suta un glumet!" });
-                    }
+                if (!adaugaPiesa.Comanda_Id.HasValue || adaugaPiesa.Comanda_Id.Value <= 0)
+                {
+                    //aici cream documente_comanda....
+                    var parametruCompanie = new DynamicParameters();
+                    parametruCompanie.Add("@idCompanie", companie.Companie_Id);
 
+                    int idDocumenteComanda = await connection.ExecuteScalarAsync<int>(
+                        "sp_Documente_Comanda_IncepeComanda",
+                        parametruCompanie,
+                        commandType: CommandType.StoredProcedure);
 
-                    if(!adaugaPiesa.Comanda_Id.HasValue || adaugaPiesa.Comanda_Id.Value <= 0)
-                    {
-                        //aici cream documente_comanda....
-                        var parametruCompanie = new DynamicParameters();
-                        parametruCompanie.Add("@idCompanie", companie.Companie_Id);
+                    //aici cream comanda si tot felu de...
 
-                        int idDocumenteComanda = await connection.ExecuteScalarAsync<int>(
-                            "sp_Documente_Comanda_IncepeComanda",
-                            parametruCompanie,
-                            commandType: CommandType.StoredProcedure);
+                    var parametruDocumentCompanie = new DynamicParameters();
+                    parametruDocumentCompanie.Add("@idDocumenteComanda", idDocumenteComanda);
 
-                        //aici cream comanda si tot felu de...
+                    int idComanda = await connection.ExecuteScalarAsync<int>(
+                        "sp_Comanda_IncepeComanda",
+                        parametruCompanie,
+                        commandType: CommandType.StoredProcedure);
+                    //dupa facem comanda_piese
 
-                        var parametruDocumentCompanie = new DynamicParameters();
-                        parametruDocumentCompanie.Add("@idDocumenteComanda", idDocumenteComanda);
+                    var parametriiComandaPiese = new DynamicParameters();
+                    parametriiComandaPiese.Add("@idComanda", idComanda);
+                    parametriiComandaPiese.Add("@idPiesa", idPiesa);
+                    parametriiComandaPiese.Add("@cantitateComandata", adaugaPiesa.Cantitate);
+                    parametriiComandaPiese.Add("@detalii_piese", adaugaPiesa.DetaliiPiese);
 
-                        int idComanda = await connection.ExecuteScalarAsync<int>(
-                            "sp_Comanda_IncepeComanda",
-                            parametruCompanie,
-                            commandType: CommandType.StoredProcedure);
-                        //dupa facem comanda_piese
+                    int statusAdaugare = await connection.ExecuteScalarAsync<int>(
+                        "sp_Comanda_Piesa_AdaugaPiesa",
+                        parametriiComandaPiese,
+                        commandType: CommandType.StoredProcedure);
 
-                        var parametriiComandaPiese = new DynamicParameters();
-                        parametriiComandaPiese.Add("@idComanda", idComanda);
-                        parametriiComandaPiese.Add("@idPiesa", idPiesa);
-                        parametriiComandaPiese.Add("@cantitateComandata", adaugaPiesa.Cantitate);
-                        parametriiComandaPiese.Add("@detalii_piese", adaugaPiesa.DetaliiPiese);
-
-                        int statusAdaugare = await connection.ExecuteScalarAsync<int>(
-                            "sp_Comanda_Piesa_AdaugaPiesa",
-                            parametriiComandaPiese,
-                            commandType: CommandType.StoredProcedure);
-
-                        if (statusAdaugare > 0)
-                            return Results.Ok(new { message = "Piesa " + piesaCompanie.Nume_Piesa + " a/au fost adaugate cu succes!" });
-                        else
-                            return Results.BadRequest(new { message = "Eroare! Nu am putut sa adaugam piesa!" });
-                        //dupa documente_comanda, cu date fasaite pana dam post-ul de comanda efectiv
-                    }
+                    if (statusAdaugare > 0)
+                        return Results.Ok(new { message = "Piesa " + piesaCompanie.Nume_Piesa + " a/au fost adaugate cu succes!" });
                     else
-                    {
+                        return Results.BadRequest(new { message = "Eroare! Nu am putut sa adaugam piesa!" });
+                    //dupa documente_comanda, cu date fasaite pana dam post-ul de comanda efectiv
+                }
+                else
+                {
 
-                        var parametruComanda = new DynamicParameters();
-                        parametruComanda.Add("@idComanda", adaugaPiesa.Comanda_Id);
-                        parametruComanda.Add("@idCompanie", companie.Companie_Id);
-                        //luam comanda, verificam daca exista, daca apartine companiei...
-                        //daca se poate adauga piesa in comanda specificata
+                    var parametruComanda = new DynamicParameters();
+                    parametruComanda.Add("@idComanda", adaugaPiesa.Comanda_Id);
+                    parametruComanda.Add("@idCompanie", companie.Companie_Id);
+                    //luam comanda, verificam daca exista, daca apartine companiei...
+                    //daca se poate adauga piesa in comanda specificata
 
-                        var comandaCeruta = await connection QueryFirstOrDefaultAsync<Comanda>(
-                            "sp_Comanda_Companie_GetComandaById",
-                            parametruComanda,
-                            commandType: CommandType.StoredProcedure);
+                    var comandaCeruta = await connection.QueryFirstOrDefaultAsync<Comanda>(
+                        "sp_Comanda_Companie_GetComandaById",
+                        parametruComanda,
+                        commandType: CommandType.StoredProcedure);
 
-                        if (comandaCeruta == null)
-                            return Results.BadRequest(new { message = "Nu exista comanda ceruta!" });
+                    if (comandaCeruta == null)
+                        return Results.BadRequest(new { message = "Nu exista comanda ceruta!" });
 
-                        if (comandaCeruta.stadiu_finalizare == true)
-                            return Results.BadRequest(new { message = "Comanda e deja plasata, nu poti sa adaugi o piesa intr-o comanda deja pusa" });
-                        //adaugam in comanda_piese
-                        var parametriiComandaPiese = new DynamicParameters();
-                        parametriiComandaPiese.Add("@idComanda", idComanda);
-                        parametriiComandaPiese.Add("@idPiesa", idPiesa);
-                        parametriiComandaPiese.Add("@idPiesa", idPiesa);
-                        parametriiComandaPiese.Add("@cantitateComandata", adaugaPiesa.Cantitate);
-                        parametriiComandaPiese.Add("@detalii_piese", adaugaPiesa.DetaliiPiese);
+                    if (comandaCeruta.stadiu_finalizare == true)
+                        return Results.BadRequest(new { message = "Comanda e deja plasata, nu poti sa adaugi o piesa intr-o comanda deja depusa" });
+                    //adaugam in comanda_piese
+                    var parametriiComandaPiese = new DynamicParameters();
+                    parametriiComandaPiese.Add("@idComanda", idComanda);
+                    parametriiComandaPiese.Add("@idPiesa", idPiesa);
+                    parametriiComandaPiese.Add("@cantitateComandata", adaugaPiesa.Cantitate);
+                    parametriiComandaPiese.Add("@detalii_piese", adaugaPiesa.DetaliiPiese);
 
-                        int statusAdaugare = await connection.ExecuteScalarAsync<int>(
-                            "sp_Comanda_Piesa_AdaugaPiesa",
-                            parametriiComandaPiese,
-                            commandType: CommandType.StoredProcedure);
+                    int statusAdaugare = await connection.ExecuteScalarAsync<int>(
+                        "sp_Comanda_Piesa_AdaugaPiesa",
+                        parametriiComandaPiese,
+                        commandType: CommandType.StoredProcedure);
 
-                        if (statusAdaugare > 0)
-                            return Results.Ok(new { message = "Piesa " + piesaCompanie.Nume_Piesa + " a/au fost adaugate cu succes!" });
-                        else
-                            return Results.BadRequest(new { message = "Eroare! Nu am putut sa adaugam piesa!" });
+                    if (statusAdaugare > 0)
+                        return Results.Ok(new { message = "Piesa " + piesaCompanie.Nume_Piesa + " a/au fost adaugate cu succes!" });
+                    else
+                        return Results.BadRequest(new { message = "Eroare! Nu am putut sa adaugam piesa!" });
 
-                        //si lasa in pace in documente_comanda
-                    }
+                    //si lasa in pace in documente_comanda
+                }
 
             }).RequireAuthorization();
 
             app.MapPost("/compania-ta/plaseaza-comanda/{idComanda:int}", async (
                 int idComanda,
                 ClaimsPrincipal utilizatorCompanie,
+                IPDFService pdfService,
                 IConfiguration config) =>
             {
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
-                var eroareAutentificare = await SecurityHelper.VerificaAdminLocal(admin, config);
+                var eroareAutentificare = await SecurityHelper.VerificaAdminLocal(utilizatorCompanie, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
 
                 var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
@@ -409,27 +409,83 @@ namespace Backend.Endpoints
                 using (var connection = new SqlConnection(connectionString))
                 {
                     //aici imi trebuie pdf urile, factura generata, si chiar si comenzile penru furnizori.
+
                     //dar defapt poate mai fac un pas ca sa confirm ca dupa sa se comande si la furnizori
                     //hai ca vedem
+
                     //si defapt sa verific si daca e deja o comanda plasata
                     //acuma fac PDFService, sa vedem daca il fac bine, dupa ma intorc aici
+                    //o sa fie circ
 
+                    var parametruComanda = new DynamicParameters();
+                    parametruComanda.Add("@idComanda", idComanda);
+                    parametruComanda.Add("@idCompanie", companie.Companie_Id);
+
+
+                    var comandaCeruta = await connection.QueryFirstOrDefaultAsync<Comanda>(
+                        "sp_Comanda_Companie_GetComandaById",
+                        parametruComanda,
+                        commandType: CommandType.StoredProcedure);
+
+
+                    if (comandaCeruta == null)
+                        return Results.BadRequest(new { message = "Nu exista comanda ceruta!" });
+
+                    if (comandaCeruta.stadiu_finalizare == true)
+                        return Results.BadRequest(new { message = "Comanda a fost deja plasata!" });
+
+                    var rezultate = await connection.QueryAsync<Piese, ComandaPiese, Furnizor, decimal, decimal, (Piese Piesa, ComandaPiese Linie, Furnizor furnizorPiesa, decimal PretPiese, decimal TotalPretComanda)>(
+                        "sp_Comanda_GetPieseDetaliateCompanie",
+                        (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda) => (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda),
+                        parametruComanda,
+                        splitOn: "cantitate_comandata, nume_furnizor, pretPiese, TotalPretComanda",
+                        commandType: CommandType.StoredProcedure);
+
+                    //deci stai ca deja am plesnit-o rau, am documente dar n am factura... uof
+                    //functia de pdf mi ar face defapt o factura, sa moara masa
+                    //sa zicem ca asta ar fi quote-ul cum ar veni
+                    //comanda e plasata, dar tre sa vad oe ce ma bazez
+                    //hm, ar mai fi nevoie de o confirmare din partea adminului, doamne ce complicat....
+                    //deci comanda --> se face document_compnaie, factura chix. , sa plaseze adminul comanda si dupa sa accepte iar si pentru factura?
+                    //sau ar fi o chestie la modul trimisa iar, mai succint, direct dupa ce s a trimis
+
+                    decimal totalGeneralComanda = rezultate.FirstOrDefault().TotalPretComanda;
+
+                    string calePdfDocumenteComanda = await pdfService.GenereazaPdfComandaAsync(
+                        comandaCeruta.comanda_id,
+                        companie.Nume_Companie,
+                        totalGeneralComanda,
+                        rezultate);
+
+                    //acuma imi trebuie o metoda sa updatez fix asta,am id comanda, trebuie un join
+                    //si sa updatez bazat pe asta, sa verific daca este al companiei.... etc
+                    //am verificat, am creeat, am pus, daca nu e adevarat sa fac ceva de stergere, chiar daca nu e cea mai buna idee,
+                    //doar ma scapa de un sp in plus expres pentru calePdfDocumenteComanda
+                    //sp_Documente_Comanda_PlaseazaComanda
+                    //taca paca paca, chiar daca am reparat la el, dar vsc -ul imi joaca feste
+                    //poate fac facturile de furnizor aici, doi in unu
+                    parametruComanda.Add("@path_documente_pdf", calePdfDocumenteComanda);
+
+                    await connection.ExecuteAsync(
+                        "sp_Documente_Comanda_PlaseazaComanda",
+                        parametruComanda,
+                        commandType: CommandType.StoredProcedure);
 
                 }
-            })RequireAuthorization();
+            }).RequireAuthorization();
         }
-    }
 
-    //aici definesc clasele noi pentru asta etc
-    public class AdaugaPiesaRequest
-    {
-        public int? Comanda_Id { get; set; }
-        public int Cantitate { get; set; } = 1;
-        public string? DetaliiPiese { get; set; }
-    }
+        //aici definesc clasele noi pentru asta etc
+        public class AdaugaPiesaRequest
+        {
+            public int? Comanda_Id { get; set; }
+            public int Cantitate { get; set; } = 1;
+            public string? DetaliiPiese { get; set; }
+        }
 
-    public class FurnizorCuPieseActive : Backend.DBClasses.Furnizor
-    {
-        public int NumarPieseActive { get; set; } = 0;
+        public class FurnizorCuPieseActive : Backend.DBClasses.Furnizor
+        {
+            public int NumarPieseActive { get; set; } = 0;
+        }
     }
 }
