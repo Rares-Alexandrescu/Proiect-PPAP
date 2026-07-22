@@ -4,14 +4,14 @@ using QuestPDF.Infrastructure;
 
 namespace Backend.PDFTemplates
 {
-    public class ComandaPdfDocument : IDocument
+    public class ComandaPDFDocument : IDocument
     {
         private readonly int _idComanda;
         private readonly string _numeCompanie;
         private readonly decimal _totalGeneral;
         private readonly IEnumerable<dynamic> _pieseComandate;
 
-        public ComandaPdfDocument(int idComanda, string numeCompanie, decimal totalGeneral, IEnumerable<dynamic> pieseComandate)
+        public ComandaPDFDocument(int idComanda, string numeCompanie, decimal totalGeneral, IEnumerable<dynamic> pieseComandate)
         {
             _idComanda = idComanda;
             _numeCompanie = numeCompanie;

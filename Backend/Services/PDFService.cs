@@ -1,6 +1,5 @@
 using Backend.PDFTemplates;
 using QuestPDF.Fluent;
-using QuestPDF.Infrastructure;
 
 namespace Backend.Services
 {
@@ -11,12 +10,11 @@ namespace Backend.Services
 
     public class PDFService : IPDFService
     {
-        private readonly IConfigration _config;
+        private readonly IConfiguration _config;
 
         public PDFService(IConfiguration configuration)
         {
             _config = configuration;
-            QuestPDF.Settings.License = LicenseType.Community;
         }
 
         public async Task<string> GenereazaPdfComandaAsync(int idComanda, string numeCompanie, decimal totalGeneral, IEnumerable<dynamic> pieseComandate)

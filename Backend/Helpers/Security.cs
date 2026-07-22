@@ -203,6 +203,22 @@ namespace Backend.Helpers
             return erori;
         }
 
+        public static Dictionary<string, List<string>> ValideazaDateAdaugaPiesa(AdaugaPiesaRequest adaugaPiesa)
+        {
+            var erori = new Dictionary<string, List<string>>();
+
+            if (adaugaPiesa.Cantitate <= 0)
+            {
+                AdaugaEroare(erori, "cantitate", "Cantitatea trebuie să fie mai mare ca 0!");
+            }
+            if (!string.IsNullOrWhiteSpace(adaugaPiesa.DetaliiPiese) && adaugaPiesa.DetaliiPiese.Length > 255)
+            {
+                AdaugaEroare(erori, "detalii_piese", "Detaliile piesei sunt prea lungi (maxim 255 caractere)!");
+            }
+
+            return erori;
+        }
+
         //poate aici un failsafe sa vedem daca pretul de vanzare al meu este mai mic ca cel de cumparare al piesei ---> eventuale pierderi din partea noastra?
         public static Dictionary<string, List<string>> ValideazaPretVanzare(decimal? Pret_Vanzare)
         {
@@ -369,6 +385,33 @@ namespace Backend.Helpers
                 }
 
                 return (null, utilizator, rolUtilizator, companieUtilizator);
+            }
+        }
+
+        public static async Task<(IResult? Eroare, Comanda? ComandaGasita)> VerificaSiObtineComandaDupaId(
+            int idComanda,
+            int idCompanie,
+            string connectionString,
+            bool verificaFinalizare = true)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var parametruComanda = new DynamicParameters();
+                parametruComanda.Add("@idComanda", idComanda);
+                parametruComanda.Add("@idCompanie", idCompanie);
+
+                var comandaCeruta = await connection.QueryFirstOrDefaultAsync<Comanda>(
+                    "sp_Comanda_Companie_GetComandaById",
+                    parametruComanda,
+                    commandType: CommandType.StoredProcedure);
+
+                if (comandaCeruta == null)
+                    return (Results.BadRequest(new { message = "Nu exista comanda ceruta!" }), null);
+
+                if (verificaFinalizare && comandaCeruta.stadiu_finalizare == true)
+                    return (Results.BadRequest(new { message = "Comanda e deja plasata, nu poti sa adaugi o piesa intr-o comanda deja depusa" }), null);
+
+                return (null, comandaCeruta);
             }
         }
     }

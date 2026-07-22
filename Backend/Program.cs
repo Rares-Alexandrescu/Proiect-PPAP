@@ -3,6 +3,9 @@ using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDataProtection();
+
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPDFService, PDFService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -68,6 +73,9 @@ app.MapAdminGestioneazaFurnizorEndpoint();
 
 app.MapAdminCompanieGestioneazaCompanieEndpoint();
 app.MapAdminFurnizorGestioneazaFurnizorEndpoint();
+
+
+app.MapCompanieComandaPieseEndpoint();
 
 app.Run();
 
