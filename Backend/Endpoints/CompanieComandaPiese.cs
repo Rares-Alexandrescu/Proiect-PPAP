@@ -134,8 +134,6 @@ namespace Backend.Endpoints
                         splitOn: "cantitate_comandata, nume_furnizor, pretPiese, TotalPretComanda",
                         commandType: CommandType.StoredProcedure);
 
-                    //deci aici avem si datele noastre
-                    //deci tre sa fac si jeisonu
 
                     decimal totalGeneralComanda = rezultate.FirstOrDefault().TotalPretComanda;
 
@@ -174,16 +172,12 @@ namespace Backend.Endpoints
                 using (var connection = new SqlConnection(connectionString))
                 {
                     var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
-                        adaugaPiesa.Comanda_Id.Value,
+                        idComanda,
                         companie.Companie_Id,
                         connectionString!);
 
                     if (eroareComanda != null) return eroareComanda;
                     
-                    if(comandsCeruta.stadiu_finalizare == true)
-                    {
-                        return Results.BadRequest(new { message = "Comanda deja plasata!" });
-                    }
 
                     var parametri = new DynamicParameters();
                     parametri.Add("@idComanda", idComanda);
@@ -212,20 +206,165 @@ namespace Backend.Endpoints
             }).RequireAuthorization();
 
             app.MapPut("/compania-ta/modifica-comanda/{idComanda:int}/{idComandaPiesa:int}", async (
-                AdaugaPiesaRequest editDetaliiPiesa,
+                [FromBody] AdaugaPiesaRequest editDetaliiPiesa,
                 int idComanda,
-                int idComandaPiesa) =>
+                int idComandaPiesa,
+                ClaimsPrincipal utilizatorCompanie,
+                IConfiguration config) =>
             {
-                //pot sa schimb numai alea, dar tre sa verific daca comanda a fost deja plasta
-                //comentaii etc, uof
                 //SecurityHelper.ValideazaDateAdaugaPiesa(...)
 
+                //sa vad daca fac si ceva gen sa schimb si piesa, dar smr masa complicat daca ar fi sa
+                //schimbe si piesa... hai ca o las asa... momentan macar
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+                if (eroare != null) return eroare;
+
+                if (companie == null)
+                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+
+                    var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
+                        idComanda,
+                        companie.Companie_Id,
+                        connectionString!);
+
+                    if (eroareComanda != null) return eroareComanda;
+
+                    var eroriValidare = SecurityHelper.ValideazaDateAdaugaPiese(editDetaliiPiesa);
+
+                    if (eroriValidare.Any())
+                    {
+                        return Results.BadRequest(new { eroriCampuri = eroriValidare });
+                    }
+
+                    var parametriiComandaPiesa = new DynamicParameters();
+                    parametriiComandaPiesa.Add("@idComandaPiese", idComandaPiesa);
+                    parametriiComandaPiesa.Add("@idComanda", idComanda);
+                    parametriiComandaPiesa.Add("@idCompanie", companie.Companie_Id);
+                    parametriiComandaPiesa.Add("@detaliiPiese", editDetaliiPiesa.DetaliiPiese);
+                    parametriiComandaPiesa.Add("@cantitatePiesa", editDetaliiPiesa.Cantitate);
+
+                    int statusUpdate = await connection.ExecuteScalarAsync<int>(
+                        "sp_ComandaPiese_CompanieModificaByComandaPieseID",
+                        parametriiComandaPiesa,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (statusUpdate <= 0)
+                        return Results.BadRequest(new { message = "Nu s-a updatat comanda!" });
+
+                    return Results.Ok(new { message = "Comanda cu id-ul " + idComanda + " a fost updatata cu succes!" });
+                }
+
+
             }).RequireAuthorization();
-            //app.MapDelete("/compania-ta/sterge-din-comanda/{idComanda:int}/{idComandaPiesa:int")
 
-            //app.MapDelete("/compania-ta/sterge-comanda/{idComanda:int}")
+            app.MapDelete("/compania-ta/sterge-din-comanda/{idComanda:int}/{idComandaPiese:int}", async(
+                int idComanda,
+                int idComandaPiesa,
+                ClaimsPrincipal utilizatorCompanie,
+                IConfiguration config) =>
+            {
 
+                var connectionString = config.GetConnectionString("DefaultConnection");
 
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+                if (eroare != null) return eroare;
+
+                if (companie == null)
+                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+
+                    var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
+                        idComanda,
+                        companie.Companie_Id,
+                        connectionString!);
+
+                    if (eroareComanda != null) return eroareComanda;
+
+                    //tre sa stearga si sa fie al companiei, si etc, si sa fie si al comenzii
+
+                    //in caz ca se sterg toate elementele,
+                    //sa vad daca o sterg sau nu, cred o sterg
+                    //sa vad cum o fac.
+                    //hai ca o sa vad cum fac, chiar e complicat.
+                    //am facut sa se stearga si comanda
+
+                    var parametriiComandaPiesa = new DynamicParameters();
+                    parametriiComandaPiesa.Add("@idComandaPiese", idComandaPiesa);
+                    parametriiComandaPiesa.Add("@idComanda", idComanda);
+                    parametriiComandaPiesa.Add("@idCompanie", companie.Companie_Id);
+
+                    int statusDelete = await connection.ExecuteScalarAsync<int>(
+                        "sp_ComandaPiese_CompanieStergeByComandaPieseID",
+                        parametriiComandaPiesa,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (statusDelete <= 0)
+                        return Results.BadRequest(new { message = "Nu s-a sters comanda!" });
+
+                    if(statusDelete > 1)
+                        return Results.Ok(new { message = "Comanda a ramas goala, s-a sters toata comanda cu id-ul " + idComanda });
+
+                    return Results.Ok(new { message = "Comanda cu id-ul " + idComanda + " a fost modificata cu succes! " + "Linia cu ID-ul " + idComandaPiesa + " a fost stearsa cu succes!" });
+                }
+
+            }).RequireAuthorization();
+
+            app.MapDelete("/compania-ta/sterge-comanda/{idComanda:int}", async (
+                int idComanda,
+                ClaimsPrincipal utilizatorCompanie,
+                IConfiguration config) =>
+            {
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+                if (eroare != null) return eroare;
+
+                if (companie == null)
+                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+
+                    var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
+                        idComanda,
+                        companie.Companie_Id,
+                        connectionString!);
+
+                    if (eroareComanda != null) return eroareComanda;
+
+                    //aici tre sa vad cum sterg toata comanda
+                    //sp_Comanda_Companie_StergeComanda
+                    //daca e comanda, plm, se verifica statusu in security...
+                    //doamne o mie de linii de endpoint, nici n am facut frotnendu si conexiunile, si e joi
+                    //mai e mult pana departe
+
+                    //daca e plasata, sterg inainte din comanda_piese, dupa din documente si dupa aceea sterg tot 
+
+                    var parametriiComanda = new DynamicParameters();
+                    parametriiComanda.Add("@idComanda", idComanda);
+                    parametriiComanda.Add("@idCompanie", companie.Companie_Id);
+
+                    int statusDelete = await connection.ExecuteScalarAsync<int>(
+                        "sp_Comanda_Companie_StergeComanda",
+                        parametriiComanda,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (statusDelete <= 0)
+                        return Results.BadRequest(new { message = "Nu s-a sters linia din comanda!" });
+                       
+                    return Results.Ok(new { message = "Comanda cu id-ul " + comandaCeruta.comanda_id +" s-a sters cu succes !" });
+                }
+
+            }).RequireAuthorization();
 
             app.MapGet("/compania-ta/noua-comanda", async (
                 ClaimsPrincipal utilizatorCompanie,
@@ -329,7 +468,6 @@ namespace Backend.Endpoints
             //ar fi defapt un status, daca e unu, e plasata. daca e zero inca asteapta
             //dar nu am voie sa adaug daca e unu, alta mancare de peste....
             //daca e fac sa vad comenzile, dar nuj daca asta e solutia, sa iau comenzile la care pot, si daca nu are atunci ultima teapa
-            //smbgpl
 
             app.MapPost("/compania-ta/adauga-piesa/{idFurnizor:int}/{idPiesa:int}", async (
                     int idFurnizor,
@@ -478,22 +616,12 @@ namespace Backend.Endpoints
                     //acuma fac PDFService, sa vedem daca il fac bine, dupa ma intorc aici
                     //o sa fie circ
 
-                    var parametruComanda = new DynamicParameters();
-                    parametruComanda.Add("@idComanda", idComanda);
-                    parametruComanda.Add("@idCompanie", companie.Companie_Id);
+                    var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
+                        idComanda,
+                        companie.Companie_Id,
+                        connectionString!);
 
-
-                    var comandaCeruta = await connection.QueryFirstOrDefaultAsync<Comanda>(
-                        "sp_Comanda_Companie_GetComandaById",
-                        parametruComanda,
-                        commandType: CommandType.StoredProcedure);
-
-
-                    if (comandaCeruta == null)
-                        return Results.BadRequest(new { message = "Nu exista comanda ceruta!" });
-
-                    if (comandaCeruta.stadiu_finalizare == true)
-                        return Results.BadRequest(new { message = "Comanda a fost deja plasata!" });
+                    if (eroareComanda != null) return eroareComanda;
 
                     var rezultate = await connection.QueryAsync<Piese, ComandaPiese, Furnizor, decimal, decimal, (Piese Piesa, ComandaPiese Linie, Furnizor furnizorPiesa, decimal PretPiese, decimal TotalPretComanda)>(
                         "sp_Comanda_GetPieseDetaliateCompanie",

@@ -28,7 +28,6 @@ export class AdaugaPiesa implements OnInit, OnDestroy {
 
   idFurnizor: number = 0;
   idPiesa: number = 0;
-
   formAdaugaPiesa!: FormGroup;
 
   piesaInfo = signal<PiesaDetaliiResponse | null>(null);
