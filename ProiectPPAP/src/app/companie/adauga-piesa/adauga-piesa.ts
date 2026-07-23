@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -42,12 +42,12 @@ export class AdaugaPiesa implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.formAdaugaPiesa = this.fb.group({
-      cantitate: [1],
-      detaliiPiese: [''],
+      cantitate: [1, [Validators.required, Validators.min(1)]],
+      detaliiPiese: ['', [Validators.maxLength(255)]],
       comandaId: [null]
     });
 
-    this.route.paramMap.subscribe(params => {
+    const subRuta = this.route.paramMap.subscribe(params => {
       this.idFurnizor = Number(params.get('idFurnizor'));
       this.idPiesa = Number(params.get('idPiesa'));
 
@@ -57,6 +57,7 @@ export class AdaugaPiesa implements OnInit, OnDestroy {
         this.alertaEroare.set('Parametri invalizi in ruta.');
       }
     });
+    this.subscriptions.add(subRuta); 
     this.curataErorileLaTastare();
   }
 
@@ -94,6 +95,7 @@ export class AdaugaPiesa implements OnInit, OnDestroy {
       if (control) {
         const sub = control.valueChanges.subscribe(() => {
           this.mesajSucces.set('');
+          this.alertaEroare.set(''); 
           const cheiBackend = mapareCampuri[numeInput];
 
           if (cheiBackend) {

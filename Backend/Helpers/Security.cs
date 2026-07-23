@@ -392,7 +392,7 @@ namespace Backend.Helpers
             int idComanda,
             int idCompanie,
             string connectionString,
-            bool verificaFinalizare = true)
+            bool verificaFinalizargite = true)
         {
             using (var connection = new SqlConnection(connectionString))
             {

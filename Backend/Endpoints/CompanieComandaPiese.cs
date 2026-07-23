@@ -76,7 +76,13 @@ namespace Backend.Endpoints
                     //dar e gata in principiu aici
                     return Results.Ok(new
                     {
-                        Utilizator = utilizator,
+                        Utilizator = new
+                        {
+                            utilizator.Id,
+                            utilizator.Email,
+                            utilizator.Nume,
+                            utilizator.Prenume
+                        },
                         Rol = rol != null ? rol.ToString() : "N/A",
                         Companie = companie,
                         Comenzi = comenziComplete
@@ -108,21 +114,13 @@ namespace Backend.Endpoints
                     //join cu comanda_piese, dupa cu piese si dupa cu furnizor, dar sa verific si daca are voie sa umble in ea
                     //si sa fac si pdf-ul sa se retina in /Backend cu un path dat din config
 
-                    var parametruComanda = new DynamicParameters();
-                    parametruComanda.Add("@idComanda", idComanda);
-                    parametruComanda.Add("@idCompanie", companie.Companie_Id);
+                    var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
+                        idComanda,
+                        companie.Companie_Id,
+                        connectionString!,
+                        false);
 
-                    //luam comanda, verificam daca exista, daca apartine companiei...
-                    //daca se poate adauga piesa in comanda specificata
-
-                    var comandaCeruta = await connection.QueryFirstOrDefaultAsync<Comanda>(
-                        "sp_Comanda_Companie_GetComandaById",
-                        parametruComanda,
-                        commandType: CommandType.StoredProcedure);
-
-
-                    if (comandaCeruta == null)
-                        return Results.BadRequest(new { message = "Nu exista comanda ceruta!" });
+                    if (eroareComanda != null) return eroareComanda;
 
                     //sp_Comanda_GetPieseDetaliateCompanie
                     //de unde scot piesele comandate sub forma Piese, Comanda_Piese, si suma la toata factura
@@ -235,7 +233,7 @@ namespace Backend.Endpoints
 
                     if (eroareComanda != null) return eroareComanda;
 
-                    var eroriValidare = SecurityHelper.ValideazaDateAdaugaPiese(editDetaliiPiesa);
+                    var eroriValidare = SecurityHelper.ValideazaDateAdaugaPiesa(editDetaliiPiesa);
 
                     if (eroriValidare.Any())
                     {
@@ -359,7 +357,7 @@ namespace Backend.Endpoints
                         commandType: CommandType.StoredProcedure);
 
                     if (statusDelete <= 0)
-                        return Results.BadRequest(new { message = "Nu s-a sters linia din comanda!" });
+                        return Results.BadRequest(new { message = "Nu s-a sters comanda!" });
                        
                     return Results.Ok(new { message = "Comanda cu id-ul " + comandaCeruta.comanda_id +" s-a sters cu succes !" });
                 }
@@ -508,7 +506,7 @@ namespace Backend.Endpoints
                         return Results.BadRequest(new { message = "Bau bau bau Nu trebuie sa apara asta etc" });
 
 
-                    var eroriValidare = SecurityHelper.ValideazaDateAdaugaPiese(adaugaPiesa);
+                    var eroriValidare = SecurityHelper.ValideazaDateAdaugaPiesa(adaugaPiesa);
 
                     if (eroriValidare.Any())
                     {
@@ -622,6 +620,10 @@ namespace Backend.Endpoints
                         connectionString!);
 
                     if (eroareComanda != null) return eroareComanda;
+
+                    var parametruComanda = new DynamicParameters();
+                    parametruComanda.Add("@idComanda", idComanda);
+                    parametruComanda.Add("@idCompanie", companie.Companie_Id);
 
                     var rezultate = await connection.QueryAsync<Piese, ComandaPiese, Furnizor, decimal, decimal, (Piese Piesa, ComandaPiese Linie, Furnizor furnizorPiesa, decimal PretPiese, decimal TotalPretComanda)>(
                         "sp_Comanda_GetPieseDetaliateCompanie",

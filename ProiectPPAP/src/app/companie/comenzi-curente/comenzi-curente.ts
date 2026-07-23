@@ -34,14 +34,22 @@ export interface ComandaCompletaLocal {
   factura: FacturaLocal | null;
 }
 
+//desi merge sa nu l bag, vedem...
 export interface UtilizatorLocal {
-  [key: string]: any;
+  id: number;
+  email: string;
+  nume: string;
+  prenume: string;
 }
-
 export interface CompanieLocal {
-  [key: string]: any;
+  companie_Id: number;
+  email: string;
+  cnpAdminLocal: string;
+  numeAdminLocal: string;
+  prenumeAdminLocal: string;
+  nume_Companie: string;
+  numar_Telefon: string;
 }
-
 export interface ComenziCurenteResponse {
   utilizator: UtilizatorLocal;
   rol: string;

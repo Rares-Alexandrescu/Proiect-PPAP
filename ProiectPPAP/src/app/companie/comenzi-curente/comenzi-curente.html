@@ -1,1 +1,78 @@
-<p>comenzi-curente works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Comenzile Companiei: {{ companie()?.nume_Companie || 'Se încarcă...' }}</h2>
+      <p>Aici poți vizualiza comenzile plasate și cele aflate încă în lucru.</p>
+    </div>
+    <button class="buton-principal buton-adauga" (click)="comandaNoua()">+ Comandă Nouă</button>
+  </div>
+
+  @if (alertaSucces()) {
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;">
+    {{ alertaSucces() }}
+  </div>
+  }
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin">
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Stadiu</th>
+            <th>Document PDF</th>
+            <th>Factură</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of comenzi(); track item.comanda.comanda_id) {
+          <tr>
+            <td><strong>{{ item.comanda.comanda_id }}</strong></td>
+            <td>{{ item.comanda.created_at | date: 'dd.MM.yyyy HH:mm' }}</td>
+            <td>
+              @if (item.comanda.stadiu_finalizare) {
+              <span class="status-badge status-plasata">Plasată</span>
+              } @else {
+              <span class="status-badge status-pending">În lucru</span>
+              }
+            </td>
+            <td>
+              @if (item.documentComanda?.path_documente_pdf) {
+              <span class="status-badge status-plasata">Generat</span>
+              } @else {
+              <span class="status-badge status-pending">Indisponibil</span>
+              }
+            </td>
+            <td>
+              @if (item.factura) {
+              <span class="status-badge status-plasata">{{ item.factura.pret_brut }} RON</span>
+              } @else {
+              <span class="status-badge status-pending">Fără factură</span>
+              }
+            </td>
+            <td>
+              <div class="actiuni-tabel">
+                <button class="buton-actiune buton-edit" (click)="vezComanda(item.comanda.comanda_id)">Vezi detalii</button>
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există nicio comandă înregistrată momentan.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
