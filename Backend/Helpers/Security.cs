@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens; 
 using System.IdentityModel.Tokens.Jwt; 
 using System.Security.Claims;
+using System.Text.Json;
 using System.Text;
 using Backend.DBClasses;
 using Backend.Endpoints;
@@ -392,7 +393,7 @@ namespace Backend.Helpers
             int idComanda,
             int idCompanie,
             string connectionString,
-            bool verificaFinalizargite = true)
+            bool verificaFinalizare = true)
         {
             using (var connection = new SqlConnection(connectionString))
             {

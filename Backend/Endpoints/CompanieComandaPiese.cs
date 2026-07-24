@@ -124,6 +124,9 @@ namespace Backend.Endpoints
 
                     //sp_Comanda_GetPieseDetaliateCompanie
                     //de unde scot piesele comandate sub forma Piese, Comanda_Piese, si suma la toata factura
+                    var parametruComanda = new DynamicParameters();
+                    parametruComanda.Add("@idComanda", idComanda);
+                    parametruComanda.Add("@idCompanie", companie.Companie_Id);
 
                     var rezultate = await connection.QueryAsync<Piese, ComandaPiese, Furnizor, decimal, decimal, (Piese Piesa, ComandaPiese Linie, Furnizor furnizorPiesa, decimal PretPiese, decimal TotalPretComanda)>(
                         "sp_Comanda_GetPieseDetaliateCompanie",
@@ -142,7 +145,7 @@ namespace Backend.Endpoints
                         PieseComandate = rezultate.Select(item => new
                         {
                             Piesa = item.Piesa,
-                            FurnizorPiesa = item.FurnizorPiesa,
+                            FurnizorPiesa = item.furnizorPiesa,
                             DetaliiComandaPiesa = item.Linie,
                             PretTotalRand = item.PretPiese
                         })
@@ -175,7 +178,7 @@ namespace Backend.Endpoints
                         connectionString!);
 
                     if (eroareComanda != null) return eroareComanda;
-                    
+
 
                     var parametri = new DynamicParameters();
                     parametri.Add("@idComanda", idComanda);
@@ -261,7 +264,7 @@ namespace Backend.Endpoints
 
             }).RequireAuthorization();
 
-            app.MapDelete("/compania-ta/sterge-din-comanda/{idComanda:int}/{idComandaPiese:int}", async(
+            app.MapDelete("/compania-ta/sterge-din-comanda/{idComanda:int}/{idComandaPiese:int}", async (
                 int idComanda,
                 int idComandaPiesa,
                 ClaimsPrincipal utilizatorCompanie,
@@ -307,7 +310,7 @@ namespace Backend.Endpoints
                     if (statusDelete <= 0)
                         return Results.BadRequest(new { message = "Nu s-a sters comanda!" });
 
-                    if(statusDelete > 1)
+                    if (statusDelete > 1)
                         return Results.Ok(new { message = "Comanda a ramas goala, s-a sters toata comanda cu id-ul " + idComanda });
 
                     return Results.Ok(new { message = "Comanda cu id-ul " + idComanda + " a fost modificata cu succes! " + "Linia cu ID-ul " + idComandaPiesa + " a fost stearsa cu succes!" });
@@ -358,8 +361,8 @@ namespace Backend.Endpoints
 
                     if (statusDelete <= 0)
                         return Results.BadRequest(new { message = "Nu s-a sters comanda!" });
-                       
-                    return Results.Ok(new { message = "Comanda cu id-ul " + comandaCeruta.comanda_id +" s-a sters cu succes !" });
+
+                    return Results.Ok(new { message = "Comanda cu id-ul " + comandaCeruta.comanda_id + " s-a sters cu succes !" });
                 }
 
             }).RequireAuthorization();
@@ -474,15 +477,15 @@ namespace Backend.Endpoints
                     ClaimsPrincipal utilizatorCompanie,
                     IConfiguration config) =>
             {
-            //tre sa verific id-ul furnizor, direct din backend, bazat pe idPiesa. 
-            //etc
-            var connectionString = config.GetConnectionString("DefaultConnection");
-            var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+                //tre sa verific id-ul furnizor, direct din backend, bazat pe idPiesa. 
+                //etc
+                var connectionString = config.GetConnectionString("DefaultConnection");
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
 
-            if (eroare != null) return eroare;
+                if (eroare != null) return eroare;
 
-            if (companie == null)
-                return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
+                if (companie == null)
+                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
 
                 using (var connection = new SqlConnection(connectionString))
                 {
@@ -576,9 +579,9 @@ namespace Backend.Endpoints
 
                         if (statusAdaugare > 0)
                             return Results.Ok(new
-                            { 
+                            {
                                 message = "Piesa " + piesaCompanie.Nume_Piesa + " a/au fost adaugate cu succes!",
-                                idComanda = idComanda
+                                idComanda = comandaCeruta.comanda_id
                             });
                         else
                             return Results.BadRequest(new { message = "Eroare! Nu am putut sa adaugam piesa!" });
@@ -658,7 +661,7 @@ namespace Backend.Endpoints
                         comandaCeruta.comanda_id,
                         companie.Nume_Companie,
                         totalGeneralComanda,
-                        rezultate);
+                        rezultate.Cast<dynamic>());
 
                     //acuma imi trebuie o metoda sa updatez fix asta,am id comanda, trebuie un join
                     //si sa updatez bazat pe asta, sa verific daca este al companiei.... etc
@@ -666,7 +669,7 @@ namespace Backend.Endpoints
                     //doar ma scapa de un sp in plus expres pentru calePdfDocumenteComanda
                     //sp_Documente_Comanda_PlaseazaComanda
                     //taca paca paca, chiar daca am reparat la el, dar vs -ul imi joaca feste
-                    
+
                     //poate fac facturile de furnizor aici, doi in unu
                     //daca nu, o sa vad eu cum fac, cel mai probabil o sa pun ceva serviciu sa mi verifice din ora n ora si aia e
                     //o sa vad, macar acuma si a revenit, bine ca am avut o premonitie
@@ -683,7 +686,7 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
         }
-
+    }
         //aici definesc clasele noi pentru asta etc
         public class AdaugaPiesaRequest
         {
@@ -696,5 +699,5 @@ namespace Backend.Endpoints
         {
             public int NumarPieseActive { get; set; } = 0;
         }
-    }
+    
 }

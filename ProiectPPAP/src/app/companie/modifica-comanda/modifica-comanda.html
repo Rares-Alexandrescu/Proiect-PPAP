@@ -1,1 +1,91 @@
-<p>modifica-comanda works!</p>
+<div class="pagina-autentificare">
+  <div class="card-autentificare">
+    <div class="antet-card">
+      <h2>Editează Linia din Comandă</h2>
+      <p>Actualizează cantitatea sau comentariul pentru această piesă din comandă.</p>
+    </div>
+
+    @if (mesajSucces()) {
+    <div class="alerta-succes">
+      {{ mesajSucces() }}
+    </div>
+    }
+
+    @if (eroriBackend()['eroareGenerala']) {
+    <div class="alerta-eroare">
+      @for (err of eroriBackend()['eroareGenerala']; track $index) {
+      <div>{{ err }}</div>
+      }
+    </div>
+    }
+
+    @if (piesaInfo(); as p) {
+    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;">
+      <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;"><strong>Piesă:</strong> {{ p.nume_Piesa }}</p>
+      <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;"><strong>Preț unitar:</strong> {{ p.pret_Cumparare }} RON</p>
+      @if (furnizorInfo(); as f) {
+      <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;"><strong>Furnizor:</strong> {{ f.nume_Furnizor }}</p>
+      }
+    </div>
+    }
+
+    <form [formGroup]="editComandaForm" (ngSubmit)="onSubmit()">
+      <div class="grup-formular">
+        <label>Cantitate</label>
+        <input type="number" formControlName="cantitate" min="1" step="1"
+               [class.invalid]="(editComandaForm.get('cantitate')?.invalid && editComandaForm.get('cantitate')?.touched) || eroriBackend()['cantitate']" />
+
+        @if (editComandaForm.get('cantitate')?.touched && editComandaForm.get('cantitate')?.invalid) {
+        <div class="text-eroare">
+          @if (editComandaForm.get('cantitate')?.errors?.['required']) {
+          Cantitatea este obligatorie.
+          }
+          @if (editComandaForm.get('cantitate')?.errors?.['min']) {
+          Cantitatea trebuie să fie mai mare de 0.
+          }
+        </div>
+        }
+
+        @if (eroriBackend()['cantitate']) {
+        <div class="lista-erori">
+          @for (err of eroriBackend()['cantitate']; track $index) {
+          <div>• {{ err }}</div>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="grup-formular">
+        <label>Detalii / Comentariu</label>
+        <input type="text" formControlName="detaliiPiese"
+               [class.invalid]="(editComandaForm.get('detaliiPiese')?.invalid && editComandaForm.get('detaliiPiese')?.touched) || eroriBackend()['detalii_piese']" />
+
+        @if (editComandaForm.get('detaliiPiese')?.touched && editComandaForm.get('detaliiPiese')?.invalid) {
+        <div class="text-eroare">
+          @if (editComandaForm.get('detaliiPiese')?.errors?.['maxlength']) {
+          Detaliile sunt prea lungi (maxim 255 caractere).
+          }
+        </div>
+        }
+
+        @if (eroriBackend()['detalii_piese']) {
+        <div class="lista-erori">
+          @for (err of eroriBackend()['detalii_piese']; track $index) {
+          <div>• {{ err }}</div>
+          }
+        </div>
+        }
+      </div>
+
+      <button type="submit" class="buton-principal" [disabled]="editComandaForm.invalid || seIncarca()">
+        {{ seIncarca() ? 'Se salvează modificările...' : 'Salvează Modificările' }}
+      </button>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a [routerLink]="['/compania-ta/vezi-comanda', idComanda]" style="color: #6b7280; text-decoration: none; font-size: 0.95rem; font-weight: 500;">
+          &larr; Înapoi la comandă
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

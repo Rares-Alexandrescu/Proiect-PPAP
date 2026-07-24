@@ -8,11 +8,11 @@ namespace Backend.DBClasses
 
         public decimal pret_brut { get; set; } = 0m;
 
-        public string? path_factura_pdf { get; set; }
+        public string? path_factura_pdf { get; set; } = string.Empty;
 
 
         public bool? stadiu_plata { get; set; } = false;
 
-        public DateTime created_at { get; set; };
+        public DateTime created_at { get; set; } = DateTime.Now;
     }
 }

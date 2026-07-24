@@ -28,6 +28,7 @@ export interface FurnizorPiesaLocal {
 export interface DetaliiComandaPiesaLocal {
   comanda_id: number;
   piese_id: number;
+  comanda_piese_id: number;
   cantitate_comandata: number;
   detalii_piese: string | null;
 }
@@ -143,5 +144,31 @@ export class VeziComanda implements OnInit{
   }
   inapoiLaComenzi(): void {
     this.router.navigate(['/compania-ta/comenzi-curente']);
+  }
+  stergeDinComanda(idComandaPiese: number): void {
+    if (!confirm('Sigur dorești să ștergi această piesă din comandă?')) {
+      return;
+    }
+
+    this.alertaEroare.set('');
+    this.alertaSucces.set('');
+
+    const url = `${environment.apiUrl}/compania-ta/sterge-din-comanda/${this.idComanda}/${idComandaPiese}`;
+
+    this.http.delete<{ message: string }>(url).subscribe({
+      next: (raspuns) => {
+        this.alertaSucces.set(raspuns.message);
+        if (raspuns.message.includes('s-a sters toata comanda')) {
+          setTimeout(() => {
+            this.router.navigate(['/compania-ta/comenzi-curente']);
+          }, 1500);
+        } else {
+          this.incarcaComanda();
+        }
+      },
+      error: (eroare) => {
+        this.alertaEroare.set(eroare.error?.message || 'Nu s-a putut șterge linia din comandă.');
+      }
+    });
   }
 }

@@ -30,7 +30,6 @@ namespace Backend.PDFTemplates
                 page.PageColor(Colors.White);
                 page.DefaultTextStyle(x => x.FontSize(10).FontColor(Colors.Grey.Darken3));
 
-     
                 page.Header().Row(row =>
                 {
                     row.RelativeItem().Column(col =>
@@ -41,19 +40,18 @@ namespace Backend.PDFTemplates
                     row.ConstantItem(150).AlignRight().Text($"Data: {DateTime.Now:dd.MM.yyyy HH:mm}").FontSize(9);
                 });
 
-
                 page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
                 {
                     col.Item().Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
                         {
-                            columns.ConstantItem(25);  
-                            columns.RelativeItem(2.5f);
-                            columns.RelativeItem(2);  
-                            columns.RelativeItem(2);   
-                            columns.RelativeItem(0.8f);
-                            columns.RelativeItem(1.2f); 
+                            columns.ConstantColumn(25);
+                            columns.RelativeColumn(2.5f);
+                            columns.RelativeColumn(2);
+                            columns.RelativeColumn(2);
+                            columns.RelativeColumn(0.8f);
+                            columns.RelativeColumn(1.2f);
                         });
 
                         table.Header(header =>
@@ -75,14 +73,17 @@ namespace Backend.PDFTemplates
                         foreach (var item in _pieseComandate)
                         {
                             table.Cell().Element(DataStyle).Text(index++.ToString());
-                            table.Cell().Element(DataStyle).Text(item.Piesa.nume_piesa);
+
+                            table.Cell().Element(DataStyle).Text($"{item.Piesa.nume_piesa}");
+
                             table.Cell().Element(DataStyle).Column(c =>
                             {
-                                c.Item().Text(item.FurnizorPiesa.nume_furnizor).Bold();
-                                c.Item().Text(item.FurnizorPiesa.numar_telefon).FontSize(8).FontColor(Colors.Grey.Medium);
+                                c.Item().Text($"{item.FurnizorPiesa.nume_furnizor}").Bold();
+                                c.Item().Text($"{item.FurnizorPiesa.numar_telefon}").FontSize(8).FontColor(Colors.Grey.Medium);
                             });
-                            table.Cell().Element(DataStyle).Text(item.DetaliiComandaPiesa.detalii_piese ?? "-");
-                            table.Cell().Element(DataStyle).Text(item.DetaliiComandaPiesa.cantitate_comandata.ToString());
+
+                            table.Cell().Element(DataStyle).Text($"{item.DetaliiComandaPiesa.detalii_piese ?? "-"}");
+                            table.Cell().Element(DataStyle).Text($"{item.DetaliiComandaPiesa.cantitate_comandata}");
                             table.Cell().Element(DataStyle).Text($"{item.PretPiese:N2} RON");
 
                             static IContainer DataStyle(IContainer container) => container

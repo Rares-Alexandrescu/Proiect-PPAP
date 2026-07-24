@@ -1,6 +1,6 @@
 namespace Backend.DBClasses
 {
-    public class CompaniePiese
+    public class ComandaPiese
     {
         public int comanda_piese_id;
         public int comands_id;
