@@ -1,2 +1,20 @@
 @use '../../../shared/styles/autentificare.scss';
 @use '../../../admin/Shared-Style/admin.scss';
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-plasata {
+  background-color: #f0fdf4;
+  color: #166534;
+}
+
+.status-pending {
+  background-color: #fef9c3;
+  color: #92400e;
+}

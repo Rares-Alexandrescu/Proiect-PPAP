@@ -1,1 +1,92 @@
-<p>vezi-comanda works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Detalii Comandă #{{ idComanda }}</h2>
+      <p>Vizualizează piesele adăugate în această comandă și gestionează liniile.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <button class="buton-principal buton-adauga" (click)="inapoiLaComenzi()">&larr; Înapoi la Comenzi</button>
+      @if (comanda() && (comanda()?.stadiu_finalizare === 0 || comanda()?.stadiu_finalizare === null)) {
+      <button class="buton-principal" style="background-color: #10b981;" (click)="plaseazaComanda()">Plasează Comanda</button>
+      }
+    </div>
+  </div>
+
+  @if (alertaSucces()) {
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;">
+    {{ alertaSucces() }}
+  </div>
+  }
+
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin">
+    @if (seIncarca()) {
+    <div style="text-align: center; padding: 3rem; color: #6b7280;">
+      <p>Se încarcă detaliile comenzii...</p>
+    </div>
+    } @else {
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID Piesă</th>
+            <th>Nume Piesă</th>
+            <th>Furnizor</th>
+            <th>Preț Unitar</th>
+            <th>Cantitate</th>
+            <th>Detalii / Comentariu</th>
+            <th>Total Rând</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of pieseComandate(); track item.detaliiComandaPiesa.piese_id) {
+          <tr>
+            <td><strong>#{{ item.piesa.piese_id }}</strong></td>
+            <td><strong>{{ item.piesa.nume_piesa }}</strong></td>
+            <td>
+              {{ item.furnizorPiesa.nume_furnizor }}<br>
+              <small style="color: #6b7280;">Tel: {{ item.furnizorPiesa.numar_telefon }}</small>
+            </td>
+            <td>{{ item.piesa.pret_cumparare }} RON</td>
+            <td>{{ item.detaliiComandaPiesa.cantitate_comandata }}</td>
+            <td>{{ item.detaliiComandaPiesa.detalii_piese ? item.detaliiComandaPiesa.detalii_piese : 'N/A' }}</td>
+            <td><strong>{{ item.pretTotalRand }} RON</strong></td>
+            <td>
+              <div class="actiuni-tabel">
+                @if (comanda()?.stadiu_finalizare === 0 || comanda()?.stadiu_finalizare === null) {
+                <button class="buton-actiune buton-delete" (click)="stergeDinComanda(item.detaliiComandaPiesa.piese_id)">Șterge</button>
+                } @else {
+                <span style="color: #9ca3af; font-size: 0.85rem;">Comandă plasată</span>
+                }
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există nicio piesă adăugată în această comandă momentan.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (pieseComandate().length > 0) {
+    <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+      <div style="text-align: right;">
+        <p style="margin: 0; font-size: 0.95rem; color: #6b7280;">Total General Comandă:</p>
+        <h3 style="margin: 0.25rem 0 0 0; font-size: 1.5rem; color: #111827;">{{ totalGeneral() }} RON</h3>
+      </div>
+    </div>
+    }
+    }
+  </div>
+</div>

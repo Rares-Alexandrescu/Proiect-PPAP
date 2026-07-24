@@ -1,1 +1,113 @@
-<p>noua-comanda works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Comandă Nouă</h2>
+      <p>Alege un furnizor pentru a vedea piesele active disponibile.</p>
+    </div>
+    <button class="buton-principal buton-adauga" (click)="inapoiLaComenzi()">&larr; Înapoi la Comenzi</button>
+  </div>
+
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin">
+    @if (seIncarcaFurnizori()) {
+    <div style="text-align: center; padding: 3rem; color: #6b7280;">
+      <p>Se încarcă furnizorii...</p>
+    </div>
+    } @else {
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Furnizor</th>
+            <th>Telefon</th>
+            <th>Piese Active</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of furnizori(); track f.furnizor_Id) {
+          <tr>
+            <td><strong>{{ f.furnizor_Id }}</strong></td>
+            <td><strong>{{ f.nume_Furnizor }}</strong></td>
+            <td>{{ f.numar_Telefon }}</td>
+            <td>{{ f.numarPieseActive }}</td>
+            <td>
+              <div class="actiuni-tabel">
+                <button class="buton-actiune buton-edit" (click)="selecteazaFurnizor(f)">
+                  @if (furnizorSelectat()?.furnizor_Id === f.furnizor_Id) {
+                  Ascunde piesele
+                  } @else {
+                  Vezi piesele
+                  }
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          @if (furnizorSelectat()?.furnizor_Id === f.furnizor_Id) {
+          <tr>
+            <td colspan="5" style="padding: 0; background-color: #f9fafb;">
+              <div style="padding: 1.5rem;">
+
+                @if (seIncarcaPiese()) {
+                <p style="text-align: center; color: #6b7280; margin: 1rem 0;">Se încarcă piesele...</p>
+                } @else {
+                <table class="tabel-admin" style="background-color: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid #e5e7eb;">
+                  <thead>
+                    <tr>
+                      <th>ID Piesă</th>
+                      <th>Nume Piesă</th>
+                      <th>Preț</th>
+                      <th>Acțiuni</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (p of piese(); track p.piese_Id) {
+                    <tr>
+                      <td><strong>{{ p.piese_Id }}</strong></td>
+                      <td>{{ p.nume_Piesa }}</td>
+                      <td>{{ p.pret_Cumparare }} RON</td>
+                      <td>
+                        <div class="actiuni-tabel">
+                          <button class="buton-actiune buton-edit" (click)="adaugaPiesaInComanda(p.piese_Id)">
+                            Adaugă în comandă
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    }
+                    @empty {
+                    <tr>
+                      <td colspan="4" style="text-align: center; padding: 1.5rem; color: #6b7280;">
+                        Acest furnizor nu are piese active momentan.
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+                }
+
+              </div>
+            </td>
+          </tr>
+          }
+          }
+          @empty {
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există furnizori cu piese active momentan.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+</div>

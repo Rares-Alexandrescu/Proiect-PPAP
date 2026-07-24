@@ -186,7 +186,7 @@ namespace Backend.Endpoints
                         "sp_Comanda_GetPieseDetaliateCompanie",
                         (piesa, linie, furnizor) => (piesa, linie, furnizor),
                         parametri,
-                        splitOn: "cantitate_comandata, nume_furnizor",
+                        splitOn: "cantitate_comandata, nume_furnizor, pretPiese, TotalPretComanda",
                         commandType: CommandType.StoredProcedure);
 
                     var linieComanda = rezultate.FirstOrDefault();
@@ -575,7 +575,11 @@ namespace Backend.Endpoints
                             commandType: CommandType.StoredProcedure);
 
                         if (statusAdaugare > 0)
-                            return Results.Ok(new { message = "Piesa " + piesaCompanie.Nume_Piesa + " a/au fost adaugate cu succes!" });
+                            return Results.Ok(new
+                            { 
+                                message = "Piesa " + piesaCompanie.Nume_Piesa + " a/au fost adaugate cu succes!",
+                                idComanda = idComanda
+                            });
                         else
                             return Results.BadRequest(new { message = "Eroare! Nu am putut sa adaugam piesa!" });
 

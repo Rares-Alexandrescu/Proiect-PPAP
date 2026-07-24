@@ -73,6 +73,7 @@ export class VeziComanda implements OnInit{
   alertaEroare = signal<string>('');
   alertaSucces = signal<string>('');
   seIncarca = signal<boolean>(false);
+  seTrimite = signal<boolean>(false);
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('idComanda');
@@ -99,8 +100,9 @@ export class VeziComanda implements OnInit{
           console.warn('Acces neautorizat sau sesiune expirata. Te redirectionam...');
           this.router.navigate(['/dashboard']);
         } else if (eroare.status === 400) {
-          this.alertaEroare.set(eroare.error?.message || 'Comanda nu a fost gasita.');
-          this.router.navigate(['/compania-ta/comenzi-curente']);
+          this.router.navigate(['/compania-ta/comenzi-curente'], {
+            state: { mesajEroare: eroare.error?.message || 'Comanda nu a fost gasita.' }
+          });
         } else {
           console.error('Eroare la preluarea comenzii:', eroare);
           this.alertaEroare.set('Nu s-au putut incarca datele comenzii.');
@@ -111,9 +113,34 @@ export class VeziComanda implements OnInit{
   //doar pentru localadmin, o sa fac eu ceva
   //orc se verifica in backend douapuncteparantezainchisa
   plaseazaComanda(): void {
-    this.router.navigate(['/compania-ta/plaseaza-comanda', this.idComanda]);
-  }
+    if (!confirm('Ești sigur că vrei să plasezi această comandă? Nu vei mai putea adăuga piese după aceea.')) {
+      return;
+    }
 
+    this.seTrimite.set(true);
+    this.alertaEroare.set('');
+
+    this.http.post<{ message: string; calePdf?: string }>(
+      `${environment.apiUrl}/compania-ta/plaseaza-comanda/${this.idComanda}`,
+      {}
+    ).subscribe({
+      next: (raspuns) => {
+        this.seTrimite.set(false);
+        this.router.navigate(['/compania-ta/comenzi-curente'], {
+          state: { mesajSucces: raspuns.message || 'Comanda a fost plasata cu succes!' }
+        });
+      },
+      error: (eroare) => {
+        this.seTrimite.set(false);
+        if (eroare.status === 401 || eroare.status === 403) {
+          console.warn('Acces neautorizat sau sesiune expirata. Te redirectionam...');
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.alertaEroare.set(eroare.error?.message || 'Nu am putut plasa comanda.');
+        }
+      }
+    });
+  }
   inapoiLaComenzi(): void {
     this.router.navigate(['/compania-ta/comenzi-curente']);
   }

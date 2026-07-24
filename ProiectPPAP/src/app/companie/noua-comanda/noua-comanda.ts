@@ -69,6 +69,8 @@ export class NouaComanda implements OnInit {
   }
 
   selecteazaFurnizor(furnizor: FurnizorCuPieseActiveLocal): void {
+    this.alertaEroare.set('');
+
     if (this.furnizorSelectat()?.furnizor_Id === furnizor.furnizor_Id) {
       this.furnizorSelectat.set(null);
       this.piese.set([]);
@@ -104,5 +106,9 @@ export class NouaComanda implements OnInit {
     const idFurnizor = this.furnizorSelectat()?.furnizor_Id;
     if (!idFurnizor) return;
     this.router.navigate(['/compania-ta/adauga-piesa', idFurnizor, idPiesa]);
+  }
+
+  inapoiLaComenzi(): void {
+    this.router.navigate(['/compania-ta/comenzi-curente']);
   }
 }

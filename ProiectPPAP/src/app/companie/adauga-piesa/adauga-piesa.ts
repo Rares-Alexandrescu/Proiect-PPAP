@@ -121,6 +121,12 @@ export class AdaugaPiesa implements OnInit, OnDestroy {
   }
 
   trimiteAdaugarePiesa(): void {
+
+    if (this.formAdaugaPiesa.invalid) {
+      this.formAdaugaPiesa.markAllAsTouched();
+      return;
+    }
+
     this.seTrimite.set(true);
     this.alertaEroare.set('');
     this.mesajSucces.set('');
@@ -130,17 +136,17 @@ export class AdaugaPiesa implements OnInit, OnDestroy {
     const payload = {
       comanda_Id: formData.comandaId ? Number(formData.comandaId) : null,
       cantitate: Number(formData.cantitate),
-      detaliiPiese: formData.detaliiPiese?.trim() ? formData.detaliiPiese : null
+      detaliiPiese: formData.detaliiPiese?.trim() ? formData.detaliiPiese.trim() : null
     };
 
     const url = `${environment.apiUrl}/compania-ta/adauga-piesa/${this.idFurnizor}/${this.idPiesa}`;
 
-    this.http.post<{ message: string; errors?: any }>(url, payload).subscribe({
+    this.http.post<{ message: string; errors?: any; idComanda?: number }>(url, payload).subscribe({
       next: (raspuns) => {
         this.seTrimite.set(false);
         this.mesajSucces.set(raspuns.message || 'Piesa a fost adaugata cu succes!');
 
-        const targetComandaId = payload.comanda_Id;
+        const targetComandaId = payload.comanda_Id || raspuns.idComanda;
         setTimeout(() => {
           if (targetComandaId) {
             this.router.navigate(['/compania-ta/vezi-comanda', targetComandaId]);
