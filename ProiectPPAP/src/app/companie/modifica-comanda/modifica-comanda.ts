@@ -9,13 +9,13 @@ export interface PiesaInfoLocal {
   piese_Id: number;
   furnizor_Id: number;
   nume_Piesa: string;
-  pret_Cumparare: number;
+  pret_Vanzare: number;
 }
 
 export interface FurnizorInfoLocal {
   furnizor_Id: number;
   nume_Furnizor: string;
-  email: string;
+  email_Furnizor: string;
   numar_Telefon: string;
 }
 
@@ -29,6 +29,7 @@ export interface DetaliiComandaPiesaLocal {
 export interface ModificaComandaResponse {
   piesa: PiesaInfoLocal;
   furnizor: FurnizorInfoLocal;
+  pretUnitar: number; 
   detaliiComandaPiesa: DetaliiComandaPiesaLocal;
 }
 
@@ -52,6 +53,7 @@ export class ModificaComandaComponent implements OnInit {
 
   piesaInfo = signal<PiesaInfoLocal | null>(null);
   furnizorInfo = signal<FurnizorInfoLocal | null>(null);
+  pretUnitar = signal<number>(0);
 
   seIncarca = signal<boolean>(false);
   mesajSucces = signal<string>('');
@@ -83,6 +85,7 @@ export class ModificaComandaComponent implements OnInit {
       next: (date) => {
         this.piesaInfo.set(date.piesa);
         this.furnizorInfo.set(date.furnizor);
+        this.pretUnitar.set(date.pretUnitar); 
         this.editComandaForm.patchValue({
           cantitate: date.detaliiComandaPiesa.cantitate_comandata,
           detaliiPiese: date.detaliiComandaPiesa.detalii_piese ?? ''

@@ -122,8 +122,28 @@ export class ComenziCurenteComponent implements OnInit {
     });
   }
 
-  vezComanda(idComanda: number): void {
+  veziComanda(idComanda: number): void {
     this.router.navigate(['/compania-ta/vezi-comanda', idComanda]);
+  }
+
+  stergeComanda(idComanda: number): void {
+    if (!confirm(`Sigur dorești să ștergi definitiv comanda #${idComanda}? Această acțiune nu poate fi anulată.`)) {
+      return;
+    }
+
+    this.http.delete<{ message: string }>(`${environment.apiUrl}/compania-ta/sterge-comanda/${idComanda}`).subscribe({
+      next: (raspuns) => {
+        console.log(raspuns.message);
+        this.incarcaComenzile();
+      },
+      error: (eroare) => {
+        if (eroare.status === 401 || eroare.status === 403) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          alert(eroare.error?.message || 'Nu s-a putut șterge comanda. Încearcă din nou.');
+        }
+      }
+    });
   }
 
   comandaNoua(): void {

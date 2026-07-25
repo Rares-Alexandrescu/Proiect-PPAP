@@ -74,12 +74,12 @@ namespace Backend.PDFTemplates
                         {
                             table.Cell().Element(DataStyle).Text(index++.ToString());
 
-                            table.Cell().Element(DataStyle).Text($"{item.Piesa.nume_piesa}");
+                            table.Cell().Element(DataStyle).Text($"{item.Piesa.Nume_Piesa}");
 
                             table.Cell().Element(DataStyle).Column(c =>
                             {
-                                c.Item().Text($"{item.FurnizorPiesa.nume_furnizor}").Bold();
-                                c.Item().Text($"{item.FurnizorPiesa.numar_telefon}").FontSize(8).FontColor(Colors.Grey.Medium);
+                                c.Item().Text($"{item.FurnizorPiesa.Nume_Furnizor}").Bold();
+                                c.Item().Text($"{item.FurnizorPiesa.Numar_Telefon}").FontSize(8).FontColor(Colors.Grey.Medium);
                             });
 
                             table.Cell().Element(DataStyle).Text($"{item.DetaliiComandaPiesa.detalii_piese ?? "-"}");

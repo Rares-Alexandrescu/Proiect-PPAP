@@ -7,7 +7,7 @@
     <div style="display: flex; gap: 0.75rem;">
       <button class="buton-principal buton-adauga" (click)="inapoiLaComenzi()">&larr; Înapoi la Comenzi</button>
       @if (comanda() && (comanda()?.stadiu_finalizare === false || comanda()?.stadiu_finalizare === null)) {
-      <button class="buton-principal" style="background-color: #10b981;" (click)="plaseazaComanda()">Plasează Comanda</button>
+      <button class="buton-principal buton-adauga" style="background-color: #10b981;" (click)="plaseazaComanda()">Plasează Comanda</button>
       }
     </div>
   </div>
@@ -61,6 +61,7 @@
               <div class="actiuni-tabel">
                 @if (comanda()?.stadiu_finalizare === false|| comanda()?.stadiu_finalizare === null) {
                 <button class="buton-actiune buton-delete" (click)="stergeDinComanda(item.detaliiComandaPiesa.comanda_piese_id)">Șterge</button>
+                <button class="buton-actiune buton-edit" (click)="editComandaPiesa(item.detaliiComandaPiesa.comanda_piese_id)">Editeaza</button>
                 } @else {
                 <span style="color: #9ca3af; font-size: 0.85rem;">Comandă plasată</span>
                 }
@@ -80,10 +81,10 @@
     </div>
 
     @if (pieseComandate().length > 0) {
-    <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
-      <div style="text-align: right;">
-        <p style="margin: 0; font-size: 0.95rem; color: #6b7280;">Total General Comandă:</p>
-        <h3 style="margin: 0.25rem 0 0 0; font-size: 1.5rem; color: #111827;">{{ totalGeneral() }} RON</h3>
+    <div class="total-general-box">
+      <div>
+        <p class="eticheta">Total General Comandă:</p>
+        <h3 class="suma">{{ totalGeneral() }} RON</h3>
       </div>
     </div>
     }

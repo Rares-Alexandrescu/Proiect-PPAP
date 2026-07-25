@@ -185,11 +185,11 @@ namespace Backend.Endpoints
                     parametri.Add("@idCompanie", companie.Companie_Id);
                     parametri.Add("@idComandaPiesa", idComandaPiesa);
 
-                    var rezultate = await connection.QueryAsync<Piese, ComandaPiese, Furnizor, (Piese Piesa, ComandaPiese Linie, Furnizor Furnizor)>(
+                    var rezultate = await connection.QueryAsync<Piese, ComandaPiese, Furnizor, decimal, decimal, (Piese Piesa, ComandaPiese Linie, Furnizor furnizorPiesa, decimal PretPiese, decimal TotalPretComanda)>(
                         "sp_Comanda_GetPieseDetaliateCompanie",
-                        (piesa, linie, furnizor) => (piesa, linie, furnizor),
+                        (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda) => (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda),
                         parametri,
-                        splitOn: "cantitate_comandata, nume_furnizor, pretPiese, TotalPretComanda",
+                        splitOn: "comanda_piese_id, furnizor_id, pretPiese, TotalPretComanda",
                         commandType: CommandType.StoredProcedure);
 
                     var linieComanda = rezultate.FirstOrDefault();
@@ -200,7 +200,8 @@ namespace Backend.Endpoints
                     return Results.Ok(new
                     {
                         Piesa = linieComanda.Piesa,
-                        Furnizor = linieComanda.Furnizor,
+                        Furnizor = linieComanda.furnizorPiesa,
+                        PretUnitar = linieComanda.PretPiese,
                         DetaliiComandaPiesa = linieComanda.Linie
                     });
                 }
@@ -643,7 +644,7 @@ namespace Backend.Endpoints
                         "sp_Comanda_GetPieseDetaliateCompanie",
                         (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda) => (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda),
                         parametruComanda,
-                        splitOn: "cantitate_comandata, nume_furnizor, pretPiese, TotalPretComanda",
+                        splitOn: "comanda_piese_id, furnizor_id, pretPiese, TotalPretComanda",
                         commandType: CommandType.StoredProcedure);
 
                     if (rezultate == null)
@@ -664,11 +665,19 @@ namespace Backend.Endpoints
 
                     decimal totalGeneralComanda = rezultate.FirstOrDefault().TotalPretComanda;
 
+                    var pieseFormatatePentruPdf = rezultate.Select(r => new
+                    {
+                        Piesa = r.Piesa,
+                        FurnizorPiesa = r.furnizorPiesa,
+                        DetaliiComandaPiesa = r.Linie,
+                        PretPiese = r.PretPiese
+                    }).ToList();
+
                     string calePdfDocumenteComanda = await pdfService.GenereazaPdfComandaAsync(
                         comandaCeruta.comanda_id,
                         companie.Nume_Companie,
                         totalGeneralComanda,
-                        rezultate.Cast<dynamic>());
+                        pieseFormatatePentruPdf);
 
                     //acuma imi trebuie o metoda sa updatez fix asta,am id comanda, trebuie un join
                     //si sa updatez bazat pe asta, sa verific daca este al companiei.... etc

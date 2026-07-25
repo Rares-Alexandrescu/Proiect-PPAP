@@ -142,9 +142,11 @@ export class VeziComandaComponent implements OnInit{
       }
     });
   }
+
   inapoiLaComenzi(): void {
     this.router.navigate(['/compania-ta/comenzi-curente']);
   }
+
   stergeDinComanda(idComandaPiese: number): void {
     if (!confirm('Sigur dorești să ștergi această piesă din comandă?')) {
       return;
@@ -170,5 +172,9 @@ export class VeziComandaComponent implements OnInit{
         this.alertaEroare.set(eroare.error?.message || 'Nu s-a putut șterge linia din comandă.');
       }
     });
+  }
+
+  editComandaPiesa(idComandaPiesa: number): void {
+    this.router.navigate(['/compania-ta/modifica-comanda', this.idComanda, idComandaPiesa]);
   }
 }

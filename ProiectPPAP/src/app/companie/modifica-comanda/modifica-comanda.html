@@ -22,10 +22,15 @@
     @if (piesaInfo(); as p) {
     <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;">
       <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;"><strong>Piesă:</strong> {{ p.nume_Piesa }}</p>
-      <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;"><strong>Preț unitar:</strong> {{ p.pret_Cumparare }} RON</p>
+      <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;"><strong>Preț unitar:</strong> {{ p.pret_Vanzare }} RON</p>
       @if (furnizorInfo(); as f) {
       <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;"><strong>Furnizor:</strong> {{ f.nume_Furnizor }}</p>
       }
+      <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;"><strong>Preț Total Original:</strong> {{ pretUnitar() }} RON</p>
+      <p style="margin: 0.3rem 0; font-size: 0.9rem; color: #374151;">
+        <strong>Total Comanda Modificata (estimat):</strong>
+        {{ (pretUnitar() * (editComandaForm.get('cantitate')?.value || 0)) | number: '1.2-2' }} RON
+      </p>
     </div>
     }
 

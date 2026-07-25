@@ -59,7 +59,14 @@
             </td>
             <td>
               <div class="actiuni-tabel">
-                <button class="buton-actiune buton-edit" (click)="vezComanda(item.comanda.comanda_id)">Vezi detalii</button>
+                <button class="buton-actiune buton-edit" (click)="veziComanda(item.comanda.comanda_id)">
+                  Vezi detalii
+                </button>
+                @if (item.comanda.stadiu_finalizare == false){
+                <button class="buton-actiune buton-delete" (click)="stergeComanda(item.comanda.comanda_id)">
+                  Șterge
+                </button>
+                }
               </div>
             </td>
           </tr>

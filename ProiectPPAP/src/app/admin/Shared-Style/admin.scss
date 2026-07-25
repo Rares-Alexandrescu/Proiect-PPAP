@@ -145,6 +145,31 @@
   }
   }
 
+.total-general-box {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1.5rem;
+  margin-top: 0;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.total-general-box .eticheta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+  text-align: right;
+}
+
+.total-general-box .suma {
+  margin: 0.25rem 0 0 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: right;
+}
+
 
   @media (max-width: 650px) {
     .antet-admin {
