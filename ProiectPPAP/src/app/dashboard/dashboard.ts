@@ -100,4 +100,9 @@ export class DashboardComponent implements OnInit {
     console.log('Redirectioneaza catre panoul furnizorului...');
     this.router.navigate(['/admin-furnizor/vezi-piese']);
   }
+
+  mergiLaPanouComenzi(): void {
+    console.log('Redirectioneaza catre panoul comenzi...');
+    this.router.navigate(['/compania-ta/comenzi-curente']);
+  }
 }

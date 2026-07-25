@@ -140,6 +140,7 @@ namespace Backend.Endpoints
 
                     return Results.Ok(new
                     {
+                        RolUtilizator = rol,
                         Comanda = comandaCeruta,
                         TotalGeneral = totalGeneralComanda,
                         PieseComandate = rezultate.Select(item => new

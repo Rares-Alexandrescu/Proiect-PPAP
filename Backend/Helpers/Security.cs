@@ -415,5 +415,56 @@ namespace Backend.Helpers
                 return (null, comandaCeruta);
             }
         }
+
+        public static async Task<(IResult? Eroare, Utilizator? Utilizator)> VerificaUtilizatorPentruAdaugareInCompanie(
+            string emailSauCnp,
+            Companie companieLocalAdmin,
+            string connectionString)
+        {
+            var erori = new Dictionary<string, List<string>>();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+
+                var paramUtilizatorCNP = new DynamicParameters();
+                paramUtilizatorCNP.Add("@emailsaucnp", emailSauCnp);
+
+                var utilizatorDeAdaugat = await connection.QueryFirstOrDefaultAsync<Utilizator>(
+                    "sp_Utilizator_getByEmailSauCNP",
+                    paramUtilizatorCNP,
+                    commandType: CommandType.StoredProcedure);
+
+                if (utilizatorDeAdaugat == null)
+                {
+                    AdaugaEroare(erori, "identificator", "Utilizatorul nu a putut fi găsit în sistem!");
+                    return (Results.BadRequest(new { eroriIdentificator = erori }), null);
+                }
+
+                if (utilizatorDeAdaugat.rol_id == 1)
+                {
+                    AdaugaEroare(erori, "identificator", "Nu poti sa adaugi un Admin General in companie!");
+                }
+                else if (utilizatorDeAdaugat.rol_id == 5)
+                {
+                    AdaugaEroare(erori, "identificator", "Nu poti sa adaugi un Admin Furnizor in companie!");
+                }
+
+                if (utilizatorDeAdaugat.companie_id == companieLocalAdmin.Companie_Id)
+                {
+                    AdaugaEroare(erori, "identificator", "Utilizatorul acesta este deja in compania dumneavoastra!");
+                }
+                else if (utilizatorDeAdaugat.companie_id != int.MaxValue)
+                {
+                    AdaugaEroare(erori, "identificator", "Utilizatorul este deja atribuit unei companii!");
+                }
+
+                if (erori.Count > 0)
+                    return (Results.BadRequest(new { eroriIdentificator = erori }), null);
+
+                return (null, utilizatorDeAdaugat);
+            }
+
+           
+        }
     }
 }

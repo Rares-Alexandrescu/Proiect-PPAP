@@ -41,6 +41,7 @@ export interface PiesaComandataLocal {
 }
 
 export interface VeziComandaResponse {
+  rolUtilizator: string;
   comanda: ComandaLocal;
   totalGeneral: number;
   pieseComandate: PiesaComandataLocal[];
@@ -64,6 +65,7 @@ export class VeziComandaComponent implements OnInit{
   comanda = signal<ComandaLocal | null>(null);
   totalGeneral = signal<number>(0);
   pieseComandate = signal<PiesaComandataLocal[]>([]);
+  rolUtilizator = signal<string | null>(null);
 
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -93,6 +95,7 @@ export class VeziComandaComponent implements OnInit{
         this.comanda.set((dateDinBackend as any).Comanda || dateDinBackend.comanda);
         this.totalGeneral.set((dateDinBackend as any).TotalGeneral ?? dateDinBackend.totalGeneral ?? 0);
         this.pieseComandate.set((dateDinBackend as any).PieseComandate || dateDinBackend.pieseComandate || []);
+        this.rolUtilizator.set((dateDinBackend as any).RolUtilizator || dateDinBackend.rolUtilizator || null);  
         this.seIncarca.set(false);
       },
       error: (eroare) => {

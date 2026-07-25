@@ -89,58 +89,34 @@ namespace Backend.Endpoints
                         SecurityHelper.AdaugaEroare(erori, "identificator", "Nu am găsit niciun utilizator cu aceste date!");
                         return Results.BadRequest(new { eroriIdentificator = erori });
                     }
-
-                    var paramUtilizatorCNP = new DynamicParameters();
-                    paramUtilizatorCNP.Add("@emailsaucnp", cnpRealDinDb);
-
-                    var utilizatorDeAdaugat = await connection.QueryFirstOrDefaultAsync<Utilizator>(
-                        "sp_Utilizator_getByEmailSauCNP",
-                        paramUtilizatorCNP,
-                        commandType: CommandType.StoredProcedure);
-
-
-                    //Poate fac ceva mail ca sa confirme utlizatorii intrarea in companie?
-                    if (utilizatorDeAdaugat == null)
+                    else
                     {
-                        SecurityHelper.AdaugaEroare(erori, "identificator", "Utilizatorul nu a putut fi găsit în sistem!");
-                        return Results.BadRequest(new { eroriIdentificator = erori });
+                        Console.WriteLine("Ce are, ca il gaseste??????");
                     }
 
-                    if (utilizatorDeAdaugat.companie_id != int.MaxValue)
-                    {
-                        SecurityHelper.AdaugaEroare(erori, "identificator", "Utilizatorul este deja atribuit unei companii!");
-                    }
+                    var (eroareValidare, utilizatorDeAdaugat) = await SecurityHelper.VerificaUtilizatorPentruAdaugareInCompanie(
+                        cnpRealDinDb,
+                        companieLocalAdmin,
+                        connectionString!);
 
-                    if (utilizatorDeAdaugat.rol_id == 1)
-                    {
-                        SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poti sa adaugi un Admin General in companie!");
-                    }
+                    if (eroareValidare != null) return eroareValidare;
 
-                    if (utilizatorDeAdaugat.rol_id == 5)
-                    {
-                        SecurityHelper.AdaugaEroare(erori, "identificator", "Nu poti sa adaugi un Admin Furnizor in companie!");
-                    }
-
-                    if (utilizatorDeAdaugat.companie_id == companieLocalAdmin.Companie_Id)
-                    {
-                        SecurityHelper.AdaugaEroare(erori, "identificator", "Utilizatorul acesta este deja in compania dumneavoastra!");
-                    }
-
-                    if (erori.Count > 0)
-                        return Results.BadRequest(new { eroriIdentificator = erori });
 
                     var paramUtilizatorAdaugat = new DynamicParameters();
-                    paramUtilizatorAdaugat.Add("@idUtilizator", utilizatorDeAdaugat.companie_id);
+                    paramUtilizatorAdaugat.Add("@idUtilizator", utilizatorDeAdaugat.Id);
                     paramUtilizatorAdaugat.Add("@idCompanie", companieLocalAdmin.Companie_Id);
 
-                    await connection.ExecuteAsync(
+                    int statusAdaugare = await connection.ExecuteScalarAsync<int>(
                         "sp_Companie_AdaugaUtilizator",
                         paramUtilizatorAdaugat,
-                        commandType: CommandType.StoredProcedure
-                        );
+                        commandType: CommandType.StoredProcedure);
+
+                    if (statusAdaugare > 0)
+                        return Results.Ok(new { message = "Utilizatorul a fost adaugat cu succes in companie!" });
+                    else
+                        return Results.BadRequest(new { message = "Nu am putut adauga utilizatorul in companie cu ID-ul " + utilizatorDeAdaugat.Id });
                 }
 
-                return Results.Ok(new { message = "Utilizator a fost adaugat cu succes!" });
             }).RequireAuthorization();
 
             app.MapDelete("/admin-companie/sterge-angajat/{idAngajat:int}",
