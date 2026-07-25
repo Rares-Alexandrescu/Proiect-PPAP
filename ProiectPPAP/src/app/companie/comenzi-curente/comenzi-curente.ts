@@ -64,7 +64,7 @@ export interface ComenziCurenteResponse {
   templateUrl: './comenzi-curente.html',
   styleUrl: './comenzi-curente.scss',
 })
-export class ComenziCurente implements OnInit {
+export class ComenziCurenteComponent implements OnInit {
   utilizator = signal<UtilizatorLocal | null>(null);
   rol = signal<string>('');
   companie = signal<CompanieLocal | null>(null);

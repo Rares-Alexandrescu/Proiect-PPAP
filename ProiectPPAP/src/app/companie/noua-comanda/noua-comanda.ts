@@ -20,7 +20,7 @@ export interface PiesaActivaLocal {
   piese_Id: number;
   furnizor_Id: number;
   nume_Piesa: string;
-  pret_Cumparare: number;
+  pret_Vanzare: number;
 }
 
 @Component({
@@ -30,7 +30,7 @@ export interface PiesaActivaLocal {
   templateUrl: './noua-comanda.html',
   styleUrl: './noua-comanda.scss',
 })
-export class NouaComanda implements OnInit {
+export class NouaComandaComponent implements OnInit {
   furnizori = signal<FurnizorCuPieseActiveLocal[]>([]);
   furnizorSelectat = signal<FurnizorCuPieseActiveLocal | null>(null);
   piese = signal<PiesaActivaLocal[]>([]);

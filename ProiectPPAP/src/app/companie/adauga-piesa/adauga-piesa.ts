@@ -10,7 +10,7 @@ export interface PiesaDetaliiResponse {
   piese_Id: number;
   furnizor_Id: number;
   nume_Piesa: string;
-  pret_Cumparare: number;
+  pret_Vanzare: number;
 }
 
 @Component({
@@ -20,7 +20,7 @@ export interface PiesaDetaliiResponse {
   templateUrl: './adauga-piesa.html',
   styleUrl: './adauga-piesa.scss',
 })
-export class AdaugaPiesa implements OnInit, OnDestroy {
+export class AdaugaPiesaComandaComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);

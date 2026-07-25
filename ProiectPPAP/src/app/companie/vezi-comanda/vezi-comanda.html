@@ -47,13 +47,13 @@
         <tbody>
           @for (item of pieseComandate(); track item.detaliiComandaPiesa.piese_id) {
           <tr>
-            <td><strong>#{{ item.piesa.piese_id }}</strong></td>
-            <td><strong>{{ item.piesa.nume_piesa }}</strong></td>
+            <td><strong>#{{ item.piesa.piese_Id }}</strong></td>
+            <td><strong>{{ item.piesa.nume_Piesa }}</strong></td>
             <td>
-              {{ item.furnizorPiesa.nume_furnizor }}<br>
-              <small style="color: #6b7280;">Tel: {{ item.furnizorPiesa.numar_telefon }}</small>
+              {{ item.furnizorPiesa.nume_Furnizor }}<br>
+              <small style="color: #6b7280;">Tel: {{ item.furnizorPiesa.numar_Telefon }}</small>
             </td>
-            <td>{{ item.piesa.pret_cumparare }} RON</td>
+            <td>{{ item.piesa.pret_Vanzare }} RON</td>
             <td>{{ item.detaliiComandaPiesa.cantitate_comandata }}</td>
             <td>{{ item.detaliiComandaPiesa.detalii_piese ? item.detaliiComandaPiesa.detalii_piese : 'N/A' }}</td>
             <td><strong>{{ item.pretTotalRand }} RON</strong></td>

@@ -12,17 +12,17 @@ export interface ComandaLocal {
 }
 
 export interface PiesaLocal {
-  piese_id: number;
-  furnizor_id: number;
-  nume_piesa: string;
-  pret_cumparare: number;
+  piese_Id: number;
+  furnizor_Id: number;
+  nume_Piesa: string;
+  pret_Vanzare: number;
 }
 
 export interface FurnizorPiesaLocal {
-  furnizor_id: number;
-  nume_furnizor: string;
-  numar_telefon: string;
-  email?: string;
+  furnizor_Id: number;
+  nume_Furnizor: string;
+  numar_Telefon: string;
+  email_Furnizor?: string;
 }
 
 export interface DetaliiComandaPiesaLocal {
@@ -60,7 +60,7 @@ export interface VeziComandaResponse {
   //mai e mult pana departe....
 
 
-export class VeziComanda implements OnInit{
+export class VeziComandaComponent implements OnInit{
   comanda = signal<ComandaLocal | null>(null);
   totalGeneral = signal<number>(0);
   pieseComandate = signal<PiesaComandataLocal[]>([]);

@@ -21,6 +21,12 @@ import { VeziPieseComponent } from './admin-local/furnizor/vezi-piese/vezi-piese
 import { AdaugaPiesaComponent } from './admin-local/furnizor/adauga-piese/adauga-piese';
 import { EditPiesaComponent } from './admin-local/furnizor/edit-piese/edit-piese';
 
+import { NouaComandaComponent } from './companie/noua-comanda/noua-comanda';
+import { ModificaComandaComponent } from './companie/modifica-comanda/modifica-comanda';
+import { ComenziCurenteComponent } from './companie/comenzi-curente/comenzi-curente';
+import { AdaugaPiesaComandaComponent } from './companie/adauga-piesa/adauga-piesa';
+import { VeziComandaComponent } from './companie/vezi-comanda/vezi-comanda';
+
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -99,6 +105,31 @@ export const routes: Routes = [
       {
         path: 'edit-piesa/:id',
         component: EditPiesaComponent
+      }
+    ]
+  },
+  {
+    path: 'compania-ta',
+    children: [
+      {
+        path: 'comenzi-curente',
+        component: ComenziCurenteComponent
+      },
+      {
+        path: 'vezi-comanda/:idComanda',
+        component: VeziComandaComponent
+      },
+      {
+        path: 'noua-comanda',
+        component: NouaComandaComponent
+      },
+      {
+        path: 'modifica-comanda/:idComanda/:idComandaPiesa',
+        component: ModificaComandaComponent
+      },
+      {
+        path: 'adauga-piesa/:idFurnizor/:idPiesa',
+        component: AdaugaPiesaComandaComponent
       }
     ]
   },

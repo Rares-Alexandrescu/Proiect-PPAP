@@ -132,7 +132,7 @@ namespace Backend.Endpoints
                         "sp_Comanda_GetPieseDetaliateCompanie",
                         (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda) => (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda),
                         parametruComanda,
-                        splitOn: "cantitate_comandata, nume_furnizor, pretPiese, TotalPretComanda",
+                        splitOn: "comanda_piese_id, furnizor_id, pretPiese, TotalPretComanda",
                         commandType: CommandType.StoredProcedure);
 
 
@@ -266,7 +266,7 @@ namespace Backend.Endpoints
 
             app.MapDelete("/compania-ta/sterge-din-comanda/{idComanda:int}/{idComandaPiese:int}", async (
                 int idComanda,
-                int idComandaPiesa,
+                int idComandaPiese,
                 ClaimsPrincipal utilizatorCompanie,
                 IConfiguration config) =>
             {
@@ -298,7 +298,7 @@ namespace Backend.Endpoints
                     //am facut sa se stearga si comanda
 
                     var parametriiComandaPiesa = new DynamicParameters();
-                    parametriiComandaPiesa.Add("@idComandaPiese", idComandaPiesa);
+                    parametriiComandaPiesa.Add("@idComandaPiese", idComandaPiese);
                     parametriiComandaPiesa.Add("@idComanda", idComanda);
                     parametriiComandaPiesa.Add("@idCompanie", companie.Companie_Id);
 
@@ -313,7 +313,7 @@ namespace Backend.Endpoints
                     if (statusDelete > 1)
                         return Results.Ok(new { message = "Comanda a ramas goala, s-a sters toata comanda cu id-ul " + idComanda });
 
-                    return Results.Ok(new { message = "Comanda cu id-ul " + idComanda + " a fost modificata cu succes! " + "Linia cu ID-ul " + idComandaPiesa + " a fost stearsa cu succes!" });
+                    return Results.Ok(new { message = "Comanda cu id-ul " + idComanda + " a fost modificata cu succes! " + "Linia cu ID-ul " + idComandaPiese + " a fost stearsa cu succes!" });
                 }
 
             }).RequireAuthorization();
@@ -384,15 +384,22 @@ namespace Backend.Endpoints
                 {
 
                     var furnizori = await connection.QueryAsync<FurnizorCuPieseActive>(
-                        "sp_Companie_GetFurnizoriCuPieseActive",
+                        "sp_Furnizor_GetFurnizoriCuPieseActive",
                         commandType: CommandType.StoredProcedure
                     );
 
                     return Results.Ok(new
                     {
-                        Furnizori = furnizori
+                        Furnizori = furnizori.Select(f => new
+                        {
+                            f.NumarPieseActive,
+                            f.Furnizor_Id,
+                            f.Numar_Telefon,
+                            f.Email_Furnizor,
+                            f.Nume_Furnizor,
+                            f.CNP_Admin_Furnizor
+                        })
                     });
-
                 }
 
             }).RequireAuthorization();

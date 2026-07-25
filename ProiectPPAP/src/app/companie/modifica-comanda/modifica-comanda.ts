@@ -39,7 +39,7 @@ export interface ModificaComandaResponse {
   templateUrl: './modifica-comanda.html',
   styleUrl: './modifica-comanda.scss',
 })
-export class ModificaComanda implements OnInit {
+export class ModificaComandaComponent implements OnInit {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
