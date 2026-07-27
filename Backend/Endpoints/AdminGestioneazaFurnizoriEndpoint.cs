@@ -29,7 +29,6 @@ namespace Backend.Endpoints
                 ClaimsPrincipal admin,
                 IConfiguration config) =>
             {
-                Console.WriteLine("Intra aici, nu stiu de ce trebuie sa testez asta :c");
 
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
 
