@@ -704,7 +704,6 @@ namespace Backend.Endpoints
             }).RequireAuthorization();
         }
     }
-        //aici definesc clasele noi pentru asta etc
         public class AdaugaPiesaRequest
         {
             public int? Comanda_Id { get; set; }

@@ -131,16 +131,25 @@ export class ComenziCurenteComponent implements OnInit {
       return;
     }
 
+    this.alertaEroare.set('');
+    this.alertaSucces.set('');
+
     this.http.delete<{ message: string }>(`${environment.apiUrl}/compania-ta/sterge-comanda/${idComanda}`).subscribe({
       next: (raspuns) => {
         console.log(raspuns.message);
+        this.alertaSucces.set(raspuns.message);
         this.incarcaComenzile();
+
+        setTimeout(() => {
+          this.alertaSucces.set('');
+        }, 4000);
+
       },
       error: (eroare) => {
         if (eroare.status === 401 || eroare.status === 403) {
           this.router.navigate(['/dashboard']);
         } else {
-          alert(eroare.error?.message || 'Nu s-a putut șterge comanda. Încearcă din nou.');
+          this.alertaEroare.set(eroare.error?.message || 'Nu s-a putut șterge comanda. Încearcă din nou.');
         }
       }
     });

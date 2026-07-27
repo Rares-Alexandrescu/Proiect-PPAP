@@ -6,7 +6,7 @@
     </div>
     <div style="display: flex; gap: 0.75rem;">
       <button class="buton-principal buton-adauga" (click)="inapoiLaComenzi()">&larr; Înapoi la Comenzi</button>
-      @if (comanda() && rolUtilizator() === 'AdminLocal' && (comanda()?.stadiu_finalizare === false || comanda()?.stadiu_finalizare === null)) {
+      @if (comanda() && rolUtilizator() === 'AdminCompanie' && (comanda()?.stadiu_finalizare === false || comanda()?.stadiu_finalizare === null)) {
       <button class="buton-principal buton-adauga" style="background-color: #10b981;" (click)="plaseazaComanda()">Plasează Comanda</button>
       }
     </div>

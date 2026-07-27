@@ -19,6 +19,7 @@ namespace Backend.Services
 
         public async Task<string> GenereazaPdfComandaAsync(int idComanda, string numeCompanie, decimal totalGeneral, IEnumerable<dynamic> pieseComandate)
         {
+            //sa vedem aici la folderabsolut, sa nu fie o problema in viitor
             string folderRelativ = _config["PDFSettings:PathFolderSalvarePDF"] ?? "PdfComenziSalvate";
             string folderAbsolut = Path.Combine(Directory.GetCurrentDirectory(), folderRelativ);
 

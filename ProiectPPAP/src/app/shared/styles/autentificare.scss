@@ -177,11 +177,13 @@ input {
     transform: none;
     box-shadow: none;
   }
-}
+
+
 
 @media (max-width: 650px) {
   .rand-formular {
     flex-direction: column;
     gap: 0;
   }
+}
 }
