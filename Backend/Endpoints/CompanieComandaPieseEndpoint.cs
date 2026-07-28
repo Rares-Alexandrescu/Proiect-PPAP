@@ -195,7 +195,7 @@ namespace Backend.Endpoints
 
                     var linieComanda = rezultate.FirstOrDefault();
 
-                    if (linieComanda.Linie == null)
+                    if (linieComanda.Linie == default)
                         return Results.BadRequest(new { message = "Linia din comanda nu a fost gasita sau nu apartine companiei!" });
 
                     return Results.Ok(new
@@ -648,7 +648,7 @@ namespace Backend.Endpoints
                         splitOn: "comanda_piese_id, furnizor_id, pretPiese, TotalPretComanda",
                         commandType: CommandType.StoredProcedure);
 
-                    if (rezultate == null)
+                    if (rezultate == null || rezultate.Any())
                     {
                         return Results.BadRequest(new
                         {
