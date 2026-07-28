@@ -118,7 +118,10 @@ namespace Backend.Endpoints
             }).RequireAuthorization();
 
 
-            //la posturile astea doua trebuie sa le trimit numai cand a emis si furnizoru factura.
+            //la posturile astea doua trebuie sa le trimit numai cand a emis si furnizoru factura
+            //bine, momentan doar trec aia pe unu, dar ideea e ca se poate trimite ori de cate ori
+            //este o problema? nu stiu.
+
             app.MapPost("/admin-furnizor/trimite-comanda/{idFactura:int}", async (
                 int idFactura,
                 ClaimsPrincipal adminFurnizor,
@@ -133,10 +136,29 @@ namespace Backend.Endpoints
                 var (erori, furnizorAdmin, idAdminFurnizor) = SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, config);
                 if (erori != null) return erori;
 
-            })RequireAutorization();
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametriTrimitere = new DynamicParameters();
+                    parametriTrimitere.Add("@idFactura", idFactura);
+                    parametriTrimitere.Add("@idFurnizor", furnizorAdmin.Furnizor_Id);
 
-            app.MapPost("/admin-furnizor/trimite-linia-comanda/{idFactura:int}/{idFacturaLinie:int}", async
-            (
+                    var randuriAfectate = await connection.ExecuteScalarAsync<int>(
+                        "sp_Furnizor_TrimiteComandaSauLinie",
+                        parametriTrimitere,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (randuriAfectate == 0)
+                    {
+                        return Results.BadRequest(new { message = "Nu exista factura, sau nu apartine furnizorului dumneavoastra!" });
+                    }
+                    Console.WriteLine("S-au trimis " + randuriAfectate + " linii ca si unu");
+                    return Results.Ok(new { message = "Comanda a fost marcata ca trimisa."});
+                }
+
+            }).RequireAutorization();
+
+            app.MapPost("/admin-furnizor/trimite-linia-comanda/{idFactura:int}/{idFacturaLinie:int}", async(
                 int idFactura,
                 int idFacturaLinie,
                 ClaimsPrincipal adminFurnizor,
@@ -150,9 +172,66 @@ namespace Backend.Endpoints
                 var (erori, furnizorAdmin, idAdminFurnizor) = SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, config);
                 if (erori != null) return erori;
 
+                using (var connection = new SqlConnection(connectionString))
+                {
+
+                    var parametriTrimitere = new DynamicParameters();
+                    parametriTrimitere.Add("@idFactura", idFactura);
+                    parametriTrimitere.Add("@idFacturaLinie", idFacturaLinie);
+                    parametriTrimitere.Add("@idFurnizor", furnizorAdmin.Furnizor_Id);
+
+                    var randuriAfectate = await connection.ExecuteScalarAsync<int>(
+                        "sp_Furnizor_TrimiteComandaSauLinie",
+                        parametriTrimitere,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (randuriAfectate == 0)
+                    {
+                        return Results.BadRequest(new { message = "Nu exista factura, sau nu apartine furnizorului dumneavoastra!" });
+                    }
+
+                    Console.WriteLine("S-au trimis " + randuriAfectate + " linii ca si unu");
+                    return Results.Ok(new { message = "Linia de comanda a fost marcata ca trimisa."});
+                }
+
             }).RequireAuthorization();
 
-            //app.MapPost("/admin-furnizor/genereaza-facturi")
+            app.MapPost("/admin-furnizor/genereaza-facturi", async(
+                ClaimsPrincipal adminFurnizor,
+                IConfiguration config) =>
+            {
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                var eroareAutentificare = await SecurityHelper.VerificaAdminFurnizor(adminFurnizor, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var (erori, furnizorAdmin, idAdminFurnizor) = SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, config);
+                if (erori != null) return erori;
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+
+                    var parametriTrimitere = new DynamicParameters();
+                    parametriTrimitere.Add("@idFurnizor", furnizorAdmin.Furnizor_Id);
+                    
+                    //SI CEVA DE PDF, HAI CA VEDEM CUM FACEM...
+                    //fac de aici, o sa trebuiasca sa fac aci
+
+                    var randuriAfectate = await connection.ExecuteScalarAsync<int>(
+                    "sp_Furnizor_GenereazaFacturi",
+                    parametriTrimitere,
+                    commandType: CommandType.StoredProcedure);
+
+                    if (randuriAfectate == 0)
+                    {
+                        return Results.Ok(new { message = "Nu s-au generat facturi." });
+                    }
+                    Console.WriteLine("S-au trimis " + randuriAfectate + " linii ca si unu");
+                    return Results.Ok(new { message = "S-a/S-au generat " + randuriAfectate + " factura/facturi" });
+                }
+
+            }).RequireAuthorization();
         }
         public class StatisticiFactura
         {
