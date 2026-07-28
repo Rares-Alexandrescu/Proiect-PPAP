@@ -238,6 +238,7 @@ namespace Backend.Endpoints
                     return Results.Ok(new { message = "Piesa a fost stearsa cu succes!" });
                 }
         }).RequireAuthorization();
+            //aici vezi facturile. sau in factureaza? probabil ca in factureaza
         }
     }
 }
