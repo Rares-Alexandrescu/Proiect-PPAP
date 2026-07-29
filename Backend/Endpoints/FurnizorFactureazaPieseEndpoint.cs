@@ -255,9 +255,6 @@ namespace Backend.Endpoints
 
                     var liniiFactura = rezultate.Select(r => (r.Piesa, r.Total));
 
-                    //doamne nu stiu cum sa scot astea cum trebuie puncte puncte puncte
-
-                    //aucu fac asta cu pdf-ul, mult mai complicat ca la companie uof
                     //tre a fac si un serviu de isntalare direct din brauzer
                     var caleFisier = await pdfService.GenereazaPdfFacturaFurnizorAsync(
                         factura,

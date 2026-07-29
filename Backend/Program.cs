@@ -76,6 +76,7 @@ app.MapAdminFurnizorGestioneazaFurnizorEndpoint();
 
 
 app.MapCompanieComandaPieseEndpoint();
+app.MapFurnizorFactureazaPieseEndpoint();
 
 app.Run();
 

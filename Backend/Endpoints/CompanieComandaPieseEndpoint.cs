@@ -135,6 +135,10 @@ namespace Backend.Endpoints
                         splitOn: "comanda_piese_id, furnizor_id, pretPiese, TotalPretComanda",
                         commandType: CommandType.StoredProcedure);
 
+                    if (rezultate == null || !rezultate.Any())
+                    {
+                        return Results.BadRequest(new { message = "Comanda e goala sau nu exista!" });
+                    }
 
                     decimal totalGeneralComanda = rezultate.FirstOrDefault().TotalPretComanda;
 
