@@ -57,7 +57,7 @@ export interface VeziFacturaDetaliataResponse {
   templateUrl: './vezi-factura.html',
   styleUrl: './vezi-factura.scss',
 })
-export class VeziFactura implements OnInit{
+export class VeziFacturaComponent implements OnInit{
 
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -68,6 +68,7 @@ export class VeziFactura implements OnInit{
   linii = signal<LinieFacturaDetaliata[]>([]);
 
   alertaEroare = signal<string>('');
+  alertaSucces = signal<string>('');
   seIncarca = signal<boolean>(false);
 
   ngOnInit(): void {
@@ -77,7 +78,10 @@ export class VeziFactura implements OnInit{
       const idFactura = Number(idFacturaParam);
       this.incarcaFacturaDetaliata(idFactura);
     } else {
-      this.alertaEroare.set('ID-ul facturii lipsește din adresa URL.');
+      this.alertaEroare.set('ID-ul facturii lipsește din adresa URL. Veți fi redirecționat...');
+      setTimeout(() => {
+        this.router.navigate(['/admin-furnizor/vezi-facturi']);
+      }, 3000);
     }
   }
 
@@ -105,4 +109,48 @@ export class VeziFactura implements OnInit{
   inapoiLaFacturi() {
     this.router.navigate(['/admin-furnizor/vezi-facturi']);
   }
+
+  trimiteToataFactura() {
+    const id = this.factura()?.facturi_id;
+    if (!id) return;
+
+    this.seIncarca.set(true);
+    this.alertaEroare.set('');
+    this.alertaSucces.set('');
+
+    this.http.post<{ message: string }>(`${environment.apiUrl}/admin-furnizor/trimite-comanda/${id}`, {})
+      .subscribe({
+        next: (res) => {
+          this.alertaSucces.set(res.message);
+          this.incarcaFacturaDetaliata(id);
+        },
+        error: (err) => {
+          this.alertaEroare.set(err.error?.message || 'Eroare la trimiterea facturii.');
+          this.seIncarca.set(false);
+        }
+      });
+  }
+  trimiteLinie(idFacturaLinie: number) {
+    const idFactura = this.factura()?.facturi_id;
+    if (!idFactura) return;
+
+    this.seIncarca.set(true);
+    this.alertaEroare.set('');
+    this.alertaSucces.set('');
+
+    this.http.post<{ message: string }>(`${environment.apiUrl}/admin-furnizor/trimite-linia-comanda/${idFactura}/${idFacturaLinie}`, {})
+      .subscribe({
+        next: (res) => {
+          this.alertaSucces.set(res.message);
+          this.incarcaFacturaDetaliata(idFactura);
+        },
+        error: (err) => {
+          this.alertaEroare.set(err.error?.message || 'Eroare la trimiterea liniei.');
+          this.seIncarca.set(false);
+        }
+      });
+  }
+  //si aici trebuie la psutrile alea de trimite linie si alte d alea, sa va aca au achitat aia factura sau nu,
+  //nici nu mai stiu dac am erificat in api sau in db sau daca am verificat
+  //uof
 }

@@ -1,1 +1,98 @@
-<p>vezi-facturi works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Facturi: {{ furnizor()?.nume_Furnizor || 'Se încarcă...' }}</h2>
+      <p>Aici poți vizualiza facturile tale și stadiul livrării pentru fiecare.</p>
+    </div>
+    <!-- Butonul pentru a apela endpoint-ul de generare facturi -->
+    <button class="buton-principal buton-adauga" (click)="genereazaFacturi()">Generează Facturi Noi</button>
+  </div>
+
+  @if (alertaSucces()) {
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;">
+    {{ alertaSucces() }}
+  </div>
+  }
+
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin">
+    @if (seIncarca()) {
+    <div style="text-align: center; padding: 3rem; color: #6b7280;">
+      <p>Se încarcă lista de facturi...</p>
+    </div>
+    } @else {
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID Factură</th>
+            <th>Data Emiterii</th>
+            <th>Total Brut</th>
+            <th>Stadiu Plată</th>
+            <th>Stadiu Logistică</th>
+            <th>Document PDF</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of facturi(); track item.factura.facturi_id) {
+          <tr>
+            <td><strong>#{{ item.factura.facturi_id }}</strong></td>
+            <td>{{ item.factura.created_at | date: 'dd.MM.yyyy HH:mm' }}</td>
+            <td><strong>{{ item.factura.pret_total_brut }} RON</strong></td>
+            <td>
+              @if (item.factura.stadiu_plata) {
+              <span class="status-badge status-plasata">Achitată</span>
+              } @else {
+              <span class="status-badge status-pending">Neachitată</span>
+              }
+            </td>
+
+            <td>
+              @if (item.statisticiFactura.stadiu_logistica_factura === 'Complet') {
+              <span class="status-badge status-plasata">
+                Complet ({{ item.statisticiFactura.linii_expediate }}/{{ item.statisticiFactura.linii_total }})
+              </span>
+              } @else {
+              <span class="status-badge status-pending">
+                {{ item.statisticiFactura.stadiu_logistica_factura }}
+                ({{ item.statisticiFactura.linii_expediate }}/{{ item.statisticiFactura.linii_total }})
+              </span>
+              }
+            </td>
+
+            <td>
+              @if (item.factura.path_factura_pdf) {
+              <span class="status-badge status-plasata">Generat</span>
+              } @else {
+              <span class="status-badge status-pending">Indisponibil</span>
+              }
+            </td>
+
+            <td>
+              <div class="actiuni-tabel">
+                <button class="buton-actiune buton-edit" (click)="veziDetaliiFactura(item.factura.facturi_id)">
+                  Vezi detalii
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există nicio factură generată momentan pentru acest furnizor.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+</div>

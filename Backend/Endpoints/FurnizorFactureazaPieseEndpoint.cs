@@ -22,7 +22,7 @@ namespace Backend.Endpoints
                 var eroareAutentificare = await SecurityHelper.VerificaAdminFurnizor(adminFurnizor, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
 
-                var (erori, furnizorAdmin, idAdminFurnizor) = SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, config);
+                var (erori, furnizorAdmin, idAdminFurnizor) = await SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, connectionString);
                 if(erori != null) return erori;
 
                 using( var connection = new SqlConnection(connectionString) )
@@ -67,7 +67,7 @@ namespace Backend.Endpoints
                 var eroareAutentificare = await SecurityHelper.VerificaAdminFurnizor(adminFurnizor, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
 
-                var (erori, furnizorAdmin, idAdminFurnizor) = SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, config);
+                var (erori, furnizorAdmin, idAdminFurnizor) = await SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, connectionString);
                 if (erori != null) return erori;
 
                 using (var connection = new SqlConnection(connectionString))
@@ -133,7 +133,7 @@ namespace Backend.Endpoints
                 var eroareAutentificare = await SecurityHelper.VerificaAdminFurnizor(adminFurnizor, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
 
-                var (erori, furnizorAdmin, idAdminFurnizor) = SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, config);
+                var (erori, furnizorAdmin, idAdminFurnizor) = await SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, connectionString);
                 if (erori != null) return erori;
 
                 using (var connection = new SqlConnection(connectionString))
@@ -169,7 +169,7 @@ namespace Backend.Endpoints
                 var eroareAutentificare = await SecurityHelper.VerificaAdminFurnizor(adminFurnizor, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
 
-                var (erori, furnizorAdmin, idAdminFurnizor) = SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, config);
+                var (erori, furnizorAdmin, idAdminFurnizor) = await SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, connectionString);
                 if (erori != null) return erori;
 
                 using (var connection = new SqlConnection(connectionString))
@@ -207,7 +207,7 @@ namespace Backend.Endpoints
                 var eroareAutentificare = await SecurityHelper.VerificaAdminFurnizor(adminFurnizor, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
 
-                var (erori, furnizorAdmin, idAdminFurnizor) = SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, config);
+                var (erori, furnizorAdmin, idAdminFurnizor) = await SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, connectionString);
                 if (erori != null) return erori;
 
                 using (var connection = new SqlConnection(connectionString))
@@ -282,16 +282,17 @@ namespace Backend.Endpoints
 
             }).RequireAuthorization();
         }
-        public class StatisticiFactura
-        {
-            public string stadiu_logistica_factura { get; set; } = "Zero";
-            public int linii_expediate { get; set; } = 0;
-            public int linii_total { get; set; } = 0;
-        }
-        public class TotalPiesaFactura
-        {
-            public int CantitateTotala { get; set; }
-            public decimal PretTotalPiesa { get; set; }
-        }
+
+    }
+    public class StatisticiFactura
+    {
+        public string stadiu_logistica_factura { get; set; } = "Zero";
+        public int linii_expediate { get; set; } = 0;
+        public int linii_total { get; set; } = 0;
+    }
+    public class TotalPiesaFactura
+    {
+        public int CantitateTotala { get; set; }
+        public decimal PretTotalPiesa { get; set; }
     }
 }

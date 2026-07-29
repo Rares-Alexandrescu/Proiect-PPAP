@@ -48,7 +48,7 @@ export interface VeziFacturiResponse {
   templateUrl: './vezi-facturi.html',
   styleUrl: './vezi-facturi.scss',
 })
-export class VeziFacturi implements OnInit {
+export class VeziFacturiComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
 
@@ -101,6 +101,30 @@ export class VeziFacturi implements OnInit {
 
   veziDetaliiFactura(idFactura: number) {
     this.router.navigate(['/admin-furnizor/vezi-factura', idFactura]);
+  }
+
+  genereazaFacturi() {
+    this.seIncarca.set(true);
+    this.alertaEroare.set('');
+    this.alertaSucces.set('');
+
+    this.http.post<{ message: string }>(`${environment.apiUrl}/admin-furnizor/genereaza-facturi`, {})
+      .subscribe({
+        next: (response) => {
+          this.alertaSucces.set(response.message);
+
+          setTimeout(() => {
+            this.alertaSucces.set('');
+          }, 4000);
+
+          this.incarcaFacturi();
+        },
+        error: (err) => {
+          console.error(err);
+          this.alertaEroare.set(err.error?.message || 'A apărut o eroare la generarea facturilor.');
+          this.seIncarca.set(false);
+        }
+      });
   }
 
   //imi trebuie si ceva de incarcafacturi etc samd

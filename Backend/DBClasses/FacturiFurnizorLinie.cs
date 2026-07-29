@@ -2,7 +2,7 @@ namespace Backend.DBClasses
 {
     public class FacturiFurnizorLinie
     {
-        public int factura_linie_id { get; set; } = -1;
+        public int facturi_linie_id { get; set; } = -1;
         public int comanda_piese_id{ get; set; } = -1;
         public int facturi_id { get; set; } = -1;
 

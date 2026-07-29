@@ -20,6 +20,10 @@ import { AdaugaAngajatComponent } from './admin-local/companie/adauga-angajat/ad
 import { VeziPieseComponent } from './admin-local/furnizor/vezi-piese/vezi-piese';
 import { AdaugaPiesaComponent } from './admin-local/furnizor/adauga-piese/adauga-piese';
 import { EditPiesaComponent } from './admin-local/furnizor/edit-piese/edit-piese';
+import { VeziFacturaComponent } from './admin-local/furnizor/vezi-factura/vezi-factura';
+import { VeziFacturiComponent } from './admin-local/furnizor/vezi-facturi/vezi-facturi';
+
+
 
 import { NouaComandaComponent } from './companie/noua-comanda/noua-comanda';
 import { ModificaComandaComponent } from './companie/modifica-comanda/modifica-comanda';
@@ -105,6 +109,14 @@ export const routes: Routes = [
       {
         path: 'edit-piesa/:id',
         component: EditPiesaComponent
+      },
+      {
+        path: 'vezi-facturi',
+        component: VeziFacturiComponent
+      },
+      {
+        path: 'vezi-factura/:idFactura',
+        component: VeziFacturaComponent
       }
     ]
   },

@@ -71,9 +71,9 @@ namespace Backend.PDFTemplates
                         foreach (var (piesa, total) in _liniiFactura)
                         {
                             table.Cell().Element(DataStyle).Text(index++.ToString());
-                            table.Cell().Element(DataStyle).Text($"{piesa.nume_piesa}");
+                            table.Cell().Element(DataStyle).Text($"{piesa.Nume_Piesa}");
                             table.Cell().Element(DataStyle).Text($"{total.CantitateTotala}");
-                            table.Cell().Element(DataStyle).Text($"{piesa.pret_cumparare:N2} RON");
+                            table.Cell().Element(DataStyle).Text($"{piesa.Pret_Cumparare:N2} RON");
                             table.Cell().Element(DataStyle).Text($"{total.PretTotalPiesa:N2} RON");
 
                             static IContainer DataStyle(IContainer container) => container

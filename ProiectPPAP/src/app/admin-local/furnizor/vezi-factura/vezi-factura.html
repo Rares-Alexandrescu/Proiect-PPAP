@@ -1,1 +1,125 @@
-<p>vezi-factura works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Detalii Factură #{{ factura()?.facturi_id }}</h2>
+      <p>Gestionează liniile facturii și marchează piesele expediate către client.</p>
+
+      <div style="margin-top: 10px; display: flex; gap: 15px; font-size: 0.9rem;">
+
+        @if (factura()?.stadiu_plata) {
+        <span class="status-badge status-plasata">Plată: Achitată</span>
+        } @else {
+        <span class="status-badge status-pending">Plată: Neachitată</span>
+        }
+
+        @if (statistici()?.stadiu_logistica_factura === 'Complet') {
+        <span class="status-badge status-plasata">
+          Logistică: Complet ({{ statistici()?.linii_expediate }} / {{ statistici()?.linii_total }})
+        </span>
+        } @else {
+        <span class="status-badge status-pending">
+          Logistică: {{ statistici()?.stadiu_logistica_factura }}
+          ({{ statistici()?.linii_expediate }} / {{ statistici()?.linii_total }})
+        </span>
+        }
+
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem;">
+      <button class="buton-principal buton-adauga" (click)="inapoiLaFacturi()">&larr; Înapoi</button>
+
+      @if (statistici()?.stadiu_logistica_factura !== 'Complet' && linii().length > 0) {
+      <button class="buton-principal buton-adauga" style="background-color: #10b981;" (click)="trimiteToataFactura()">
+        Trimite Toată Factura
+      </button>
+      }
+    </div>
+  </div>
+
+  @if (alertaSucces()) {
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;">
+    {{ alertaSucces() }}
+  </div>
+  }
+
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin">
+    @if (seIncarca()) {
+    <div style="text-align: center; padding: 3rem; color: #6b7280;">
+      <p>Se încarcă detaliile facturii...</p>
+    </div>
+    } @else {
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID Linie</th>
+            <th>Piesă / Cod</th>
+            <th>Cantitate</th>
+            <th>Preț Unitar</th>
+            <th>Total Rând Brut</th>
+            <th>Stadiu Logistică</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of linii(); track item.detaliiFactura.facturi_linie_id) {
+          <tr>
+            <td><strong>#{{ item.detaliiFactura.facturi_linie_id }}</strong></td>
+            <td>
+              <strong>{{ item.piesa.nume_Piesa }}</strong><br>
+              <small style="color: #6b7280;">Ref: {{ item.detaliiFactura.comanda_piese_id }}</small>
+            </td>
+            <td>{{ item.cantitate }} buc.</td>
+            <td>{{ item.piesa.pret_Cumparare }} RON</td>
+            <td><strong>{{ item.detaliiFactura.pret_brut }} RON</strong></td>
+
+            <td>
+              @if (item.detaliiFactura.stadiu_logistica) {
+              <span class="status-badge status-plasata">Expediat</span>
+              } @else {
+              <span class="status-badge status-pending">În așteptare</span>
+              }
+            </td>
+
+            <td>
+              <div class="actiuni-tabel">
+                @if (!item.detaliiFactura.stadiu_logistica) {
+                <button class="buton-actiune buton-edit" (click)="trimiteLinie(item.detaliiFactura.facturi_linie_id)">
+                  Marchează Trimis
+                </button>
+                } @else {
+                <span style="color: #9ca3af; font-size: 0.85rem;">Fără acțiuni</span>
+                }
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există nicio linie în această factură.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (linii().length > 0) {
+    <div class="total-general-box">
+      <div>
+        <p class="eticheta">Total Brut Factură:</p>
+        <h3 class="suma">{{ factura()?.pret_total_brut }} RON</h3>
+      </div>
+    </div>
+    }
+    }
+  </div>
+</div>
