@@ -55,7 +55,7 @@ namespace Backend.Services
                 Directory.CreateDirectory(folderAbsolut);
             }
 
-            var pdfDocument = new FacturaFurnizorPDFDocument(factura.factura_id, numeFurnizor, liniiFactura);
+            var pdfDocument = new FacturaFurnizorPDFDocument(factura.facturi_id, numeFurnizor, liniiFactura);
             byte[] pdfBytes = pdfDocument.GeneratePdf();
 
             string numeFisier = $"Factura_{factura.facturi_id}_{numeFurnizor}_{Guid.NewGuid().ToString()[..8]}.pdf";

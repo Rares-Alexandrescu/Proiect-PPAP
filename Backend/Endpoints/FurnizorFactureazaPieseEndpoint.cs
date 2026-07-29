@@ -248,7 +248,7 @@ namespace Backend.Endpoints
 
                     if (rezultate == null || !rezultate.Any())
                     {
-                        return Results.NotFound(new { message = "Nu exista factura, sau nu apartine furnizorului dumneavoastra!" });
+                        return Results.BadRequest(new { message = "Nu exista factura, sau nu apartine furnizorului dumneavoastra!" });
                     }
 
                     var factura = rezultate.First().Factura;
@@ -259,6 +259,26 @@ namespace Backend.Endpoints
 
                     //aucu fac asta cu pdf-ul, mult mai complicat ca la companie uof
                     //tre a fac si un serviu de isntalare direct din brauzer
+                    var caleFisier = await pdfService.GenereazaPdfFacturaFurnizorAsync(
+                        factura,
+                        furnizorAdmin.Nume_Furnizor,
+                        liniiFactura
+                    );
+
+                    //tre sa o pun in db pe pdf_cale...
+                    var parametruFacturaFurnizor = new DynamicParameters();
+                    parametruFacturaFurnizor.Add("@idFurnizor", furnizorAdmin.Furnizor_Id);
+                    parametruFacturaFurnizor.Add("@idFactura", idFactura);
+                    parametruFacturaFurnizor.Add("@calePdfFactura", caleFisier);
+
+                    var randuriAfectate = await connection.ExecuteScalarAsync<int>(
+                        "sp_FacturiFurnizor_Put_Cale_Pdf",
+                        parametruFacturaFurnizor,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (randuriAfectate == 0)
+                        return Results.BadRequest(new { message = "Problema la a pune path-ul facturii in baza de date!" });
 
                     return Results.Ok(new { message = "S-a generat factura cu id-ul" + idFactura });
                 }
