@@ -231,6 +231,10 @@ namespace Backend.Endpoints
                     {
                         return Results.Ok(new { message = "Nu s-au generat facturi." });
                     }
+                    else
+                    {
+                        Console.WriteLine("URAAA SE CREAZA, ID -UL FACTURII E " + idFactura);
+                    }
 
                     parametriTrimitere.Add("@idFactura", idFactura);
 

@@ -105,4 +105,9 @@ export class DashboardComponent implements OnInit {
     console.log('Redirectioneaza catre panoul comenzi...');
     this.router.navigate(['/compania-ta/comenzi-curente']);
   }
+
+  mergiLaPanouFacturi(): void {
+    console.log('Redirectioneaza catre panoul comenzi...');
+    this.router.navigate(['/admin-furnizor/vezi-facturi']);
+  }
 }
