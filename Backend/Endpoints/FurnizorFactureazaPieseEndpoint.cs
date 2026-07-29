@@ -156,7 +156,7 @@ namespace Backend.Endpoints
                     return Results.Ok(new { message = "Comanda a fost marcata ca trimisa."});
                 }
 
-            }).RequireAutorization();
+            }).RequireAuthorization();
 
             app.MapPost("/admin-furnizor/trimite-linia-comanda/{idFactura:int}/{idFacturaLinie:int}", async(
                 int idFactura,
@@ -199,6 +199,7 @@ namespace Backend.Endpoints
 
             app.MapPost("/admin-furnizor/genereaza-facturi", async(
                 ClaimsPrincipal adminFurnizor,
+                IPDFService pdfService,
                 IConfiguration config) =>
             {
                 var connectionString = config.GetConnectionString("DefaultConnection");
@@ -217,27 +218,63 @@ namespace Backend.Endpoints
                     
                     //SI CEVA DE PDF, HAI CA VEDEM CUM FACEM...
                     //fac de aici, o sa trebuiasca sa fac aci
+                    //momentan nici nu e facut sp=ul puncte puncte puncte
+                    
+                    //in pdf imi trebuie datele furnizorului, piese, liniile de factura, factura
 
-                    var randuriAfectate = await connection.ExecuteScalarAsync<int>(
+                    var idFactura = await connection.ExecuteScalarAsync<int>(
                     "sp_Furnizor_GenereazaFacturi",
                     parametriTrimitere,
                     commandType: CommandType.StoredProcedure);
 
-                    if (randuriAfectate == 0)
+                    if (idFactura == 0)
                     {
                         return Results.Ok(new { message = "Nu s-au generat facturi." });
                     }
-                    Console.WriteLine("S-au trimis " + randuriAfectate + " linii ca si unu");
-                    return Results.Ok(new { message = "S-a/S-au generat " + randuriAfectate + " factura/facturi" });
+
+                    parametriTrimitere.Add("@idFactura", idFactura);
+
+                    var rezultate = await connection.QueryAsync<
+                        FacturiFurnizor,
+                        Piese,
+                        TotalPiesaFactura,
+                        (FacturiFurnizor Factura, Piese Piesa, TotalPiesaFactura Total) > (
+                        "sp_Furnizor_GetFacturaPentruPdf",
+                        (factura, piesa, total) => (factura, piesa, total),
+                        parametriTrimitere,
+                        splitOn: "piese_id, CantitateTotala",
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (rezultate == null || !rezultate.Any())
+                    {
+                        return Results.NotFound(new { message = "Nu exista factura, sau nu apartine furnizorului dumneavoastra!" });
+                    }
+
+                    var factura = rezultate.First().Factura;
+
+                    var liniiFactura = rezultate.Select(r => (r.Piesa, r.Total));
+
+                    //doamne nu stiu cum sa scot astea cum trebuie puncte puncte puncte
+
+                    //aucu fac asta cu pdf-ul, mult mai complicat ca la companie uof
+                    //tre a fac si un serviu de isntalare direct din brauzer
+
+                    return Results.Ok(new { message = "S-a generat factura cu id-ul" + idFactura });
                 }
 
             }).RequireAuthorization();
         }
         public class StatisticiFactura
         {
-            public string stadiu_logistica_text { get; set; } = "Zero";
+            public string stadiu_logistica_factura { get; set; } = "Zero";
             public int linii_expediate { get; set; } = 0;
             public int linii_total { get; set; } = 0;
+        }
+        public class TotalPiesaFactura
+        {
+            public int CantitateTotala { get; set; }
+            public decimal PretTotalPiesa { get; set; }
         }
     }
 }

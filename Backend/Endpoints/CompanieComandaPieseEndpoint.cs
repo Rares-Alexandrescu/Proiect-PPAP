@@ -648,7 +648,7 @@ namespace Backend.Endpoints
                         splitOn: "comanda_piese_id, furnizor_id, pretPiese, TotalPretComanda",
                         commandType: CommandType.StoredProcedure);
 
-                    if (rezultate == null || rezultate.Any())
+                    if (rezultate == null || !rezultate.Any())
                     {
                         return Results.BadRequest(new
                         {
@@ -663,6 +663,7 @@ namespace Backend.Endpoints
                     //hm, ar mai fi nevoie de o confirmare din partea adminului, doamne ce complicat....
                     //deci comanda --> se face document_compnaie, factura chix. , sa plaseze adminul comanda si dupa sa accepte iar si pentru factura?
                     //sau ar fi o chestie la modul trimisa iar, mai succint, direct dupa ce s a trimis
+
 
                     decimal totalGeneralComanda = rezultate.FirstOrDefault().TotalPretComanda;
 
