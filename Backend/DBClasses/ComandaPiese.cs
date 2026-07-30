@@ -7,5 +7,6 @@ namespace Backend.DBClasses
         public int piese_id { get; set; } = -1;
         public int cantitate_comandata { get; set; } = -1;
         public string? detalii_piese { get; set; } = string.Empty;
+        public int stadiu_intern { get; set; } = -1;
     }
 }
