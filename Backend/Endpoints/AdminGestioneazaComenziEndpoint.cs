@@ -107,7 +107,7 @@ namespace Backend.Endpoints
              }).RequireAuthorization();
 
 
-            app.MapPost("/admin/receptie-primire/{idFactura:int}", async (ClaimsPrincipal admin,
+            app.MapPut("/admin/receptie-primire/{idFactura:int}", async (ClaimsPrincipal admin,
                 IConfiguration config,
                 int idFactura) =>
             {
@@ -232,9 +232,10 @@ namespace Backend.Endpoints
             }).RequireAuthorization();
 
             //din unu in doi, si numai din unu in doi
-            app.MapPost("/admin/proceseaza-comanda/{idComanda:int}", async (
+            app.MapPut("/admin/proceseaza-comanda/{idComanda:int}/{idComandaPiese:int}", async (
                 ClaimsPrincipal admin,
                 IConfiguration config,
+                int idComandaPiese,
                 int idComanda) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
@@ -244,14 +245,31 @@ namespace Backend.Endpoints
 
                 using (var connection = new SqlConnection(connectionString))
                 {
+                    var parametriiProcesareComanda = new DynamicParameters();
+                    parametriiProcesareComanda.Add("@idComanda", idComandaPiese);
+                    parametriiProcesareComanda.Add("@idComandaPiese", idComandaPiese);
+
+                    //fac un sp sau doua?
+                    var randuriAfectate = await connection.ExecuteScalarAsync<int>(
+                        "sp_ComandaPiese_AdminProceseazaLinia",
+                        parametri,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (randuriAfectate == 0)
+                    {
+                        return Results.BadRequest(new { message = "Piesa nu exista, nu apartine comenzii specificate, sau nu este inca receptionata (stadiu_intern != 1)." });
+                    }
+
                     return Results.Ok(new { message = "Comanda a fost procesata in dorintele companiei!" });
                 }
             }).RequireAuthorization();
 
             //din doi in trei, si numai din doi in trei
-            app.MapPost("/admin/trimite-comanda/{idComanda:int}", async (
+            app.MapPut("/admin/trimite-comanda/{idComanda:int}/{idComandaPiese:int}", async (
                 ClaimsPrincipal admin,
                 IConfiguration config,
+                int idComandaPiese,
                 int idComanda) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
@@ -261,6 +279,21 @@ namespace Backend.Endpoints
 
                 using (var connection = new SqlConnection(connectionString))
                 {
+                    var parametriiProcesareComanda = new DynamicParameters();
+                    parametriiProcesareComanda.Add("@idComanda", idComandaPiese);
+                    parametriiProcesareComanda.Add("@idComandaPiese", idComandaPiese);
+
+                    var randuriAfectate = await connection.ExecuteScalarAsync<int>(
+                        "sp_ComandaPiese_AdminTrimiteLinia",
+                        parametri,
+                        commandType: CommandType.StoredProcedure
+                    );
+
+                    if (randuriAfectate == 0)
+                    {
+                        return Results.BadRequest(new { message = "Piesa nu exista, nu apartine comenzii specificate, sau nu este inca procesata (stadiu_intern != 2)." });
+                    }
+
                     return Results.Ok(new { message = "Comanda a fost trimisa catre companie!" });
                 }
             }).RequireAuthorization();
