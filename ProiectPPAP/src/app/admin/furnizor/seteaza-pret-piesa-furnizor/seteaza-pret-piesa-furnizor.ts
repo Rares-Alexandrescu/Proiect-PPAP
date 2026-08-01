@@ -29,7 +29,7 @@ export interface Furnizor {
   templateUrl: './seteaza-pret-piesa-furnizor.html',
   styleUrl: './seteaza-pret-piesa-furnizor.scss',
 })
-export class SeteazaPretPiesaFurnizor {
+export class SeteazaPretPiesaFurnizorComponent {
 
   piese = signal<Piese | null>(null);
   furnizor = signal<Furnizor | null>(null);

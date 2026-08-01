@@ -1,1 +1,65 @@
-<p>vezi-logistica-iesire works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Logistică Ieșire</h2>
+      <p>Aici poți vizualiza comenzile plasate de companii și stadiul lor.</p>
+    </div>
+  </div>
+  @if (alertaSucces()) {
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;">
+    {{ alertaSucces() }}
+  </div>
+  }
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+  <div class="card-admin">
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID Comandă</th>
+            <th>Companie</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>Data</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (seIncarca()) {
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Se încarcă...
+            </td>
+          </tr>
+          } @else {
+          @for (item of comenzi(); track item.comanda.comanda_id) {
+          <tr>
+            <td><strong>{{ item.comanda.comanda_id }}</strong></td>
+            <td><strong>{{ item.companie.nume_companie }}</strong></td>
+            <td>{{ item.companie.email }}</td>
+            <td>{{ item.companie.numar_telefon }}</td>
+            <td>{{ item.comanda.created_at | date:'dd.MM.yyyy' }}</td>
+            <td>
+              <div class="actiuni-tabel">
+                <button class="buton-actiune buton-galben" (click)="vezDetaliu(item.comanda.comanda_id)">Vezi Detalii</button>
+              </div>
+            </td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există nicio comandă înregistrată momentan.
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

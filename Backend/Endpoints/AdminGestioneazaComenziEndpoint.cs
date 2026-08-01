@@ -10,7 +10,10 @@ namespace Backend.Endpoints
 {
     public static class AdminGestioneazaComenziEndpoint
     {
-        //tre sa fac si ceva de filtrare etc!
+        //nu mi dau seama ce mai trebuie facut, pe treizeci si unu iulie scriu asta,
+        //si nu e doar atat ce e deja scris...
+        //credeam ca mi amintesc, de acuma incolo trebuiesa scriu toate maparile in comentariu sa mi amintesc
+
         public static void MapAdminGestioneazaComenziEndpoint(this IEndpointRouteBuilder app)
         {
             app.MapGet("/admin/vezi-logistica-intrare", async (ClaimsPrincipal admin, 
@@ -168,8 +171,7 @@ namespace Backend.Endpoints
                         .Select(grup => new
                         {
                             Comanda = grup.First().Comanda,
-                            Companie = grup.First().Companie,
-                            ComenziPieseId = grup.Select(x => x.comandaPieseId).ToList()
+                            Companie = grup.First().Companie
                         })
                         .ToList();
 
@@ -195,7 +197,7 @@ namespace Backend.Endpoints
                     var parametri = new DynamicParameters();
                     parametri.Add("@idComanda", idComanda);
 
-                    var comandaDetaliata = await connection.QueryAsync
+                    var comandaDetaliata = await connection.QueryAsync<
                         Comanda,
                         Companie,
                         ComandaPiese,

@@ -30,7 +30,7 @@ export interface Furnizor {
   templateUrl: './vezi-piese-furnizor.html',
   styleUrl: './vezi-piese-furnizor.scss',
 })
-export class VeziPieseFurnizor implements OnInit {
+export class VeziPieseFurnizorComponent implements OnInit {
 
   piese = signal<Piese[]>([]);
   furnizor = signal<Furnizor | null>(null);

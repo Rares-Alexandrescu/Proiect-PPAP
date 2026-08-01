@@ -12,8 +12,13 @@ import { VeziCompaniiComponent } from './admin/companie/vezi-companii/vezi-compa
 import { AdaugaFurnizorComponent } from './admin/furnizor/adauga-furnizor/adauga-furnizor';
 import { VeziFurnizoriComponent } from './admin/furnizor/vezi-furnizorii/vezi-furnizorii';
 import { EditFurnizorComponent } from './admin/furnizor/edit-furnizor/edit-furnizor';
-import { VeziPieseFurnizor } from './admin/furnizor/vezi-piese-furnizor/vezi-piese-furnizor';
-import { SeteazaPretPiesaFurnizor } from './admin/furnizor/seteaza-pret-piesa-furnizor/seteaza-pret-piesa-furnizor';
+import { VeziPieseFurnizorComponent } from './admin/furnizor/vezi-piese-furnizor/vezi-piese-furnizor';
+import { SeteazaPretPiesaFurnizorComponent } from './admin/furnizor/seteaza-pret-piesa-furnizor/seteaza-pret-piesa-furnizor';
+
+import { VeziLogisticaIesireDetaliatComponent } from './admin/logistica/vezi-logistica-iesire-detaliat/vezi-logistica-iesire-detaliat';
+import { VeziLogisticaIesireComponent } from './admin/logistica/vezi-logistica-iesire/vezi-logistica-iesire';
+import { VeziLogisticaIntrareDetaliatComponent } from './admin/logistica/vezi-logistica-intrare-detaliat/vezi-logistica-intrare-detaliat';
+import { VeziLogisticaIntrareComponent } from './admin/logistica/vezi-logistica-intrare/vezi-logistica-intrare';
 
 import { VeziCompanieComponent } from './admin-local/companie/vezi-companie/vezi-companie';
 import { AdaugaAngajatComponent } from './admin-local/companie/adauga-angajat/adauga-angajat';
@@ -72,12 +77,29 @@ export const routes: Routes = [
       },
       {
         path: 'vezi-piese-furnizor/:id',
-        component: VeziPieseFurnizor
+        component: VeziPieseFurnizorComponent
       },
       {
         path: 'seteaza-pret-piesa-furnizor/:furnizorId/:piesaId',
-        component: SeteazaPretPiesaFurnizor
+        component: SeteazaPretPiesaFurnizorComponent
+      },
+      {
+        path: 'vezi-logistica-intrare',
+        component: VeziLogisticaIntrareComponent
+      },
+      {
+        path: 'vezi-logistica-intrare-detaliat/:facturaId',
+        component: VeziLogisticaIntrareDetaliatComponent
+      },
+      {
+        path: 'vezi-logistica-iesire',
+        component: VeziLogisticaIesireComponent
+      },
+      {
+        path: 'vezi-logistica-iesire-detliat/:comandaId',
+        component: VeziLogisticaIesireDetaliatComponent
       }
+
     ]
   },
 
