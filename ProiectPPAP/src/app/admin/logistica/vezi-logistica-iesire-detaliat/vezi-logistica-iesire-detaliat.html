@@ -1,20 +1,16 @@
+
 <div class="container-admin">
   <div class="antet-admin">
     <div class="titlu-admin">
-      <h2>Detalii Factură #{{ factura()?.factura?.facturi_id }}</h2>
-      <p>Piesele și cantitățile asociate acestei facturi primite de la furnizor.</p>
+      <h2>Detalii Comandă #{{ comanda()?.comanda?.comanda_id }}</h2>
+      <p>Piesele și cantitățile asociate acestei comenzi plasate de companie.</p>
 
       <div style="margin-top: 10px; display: flex; gap: 15px; font-size: 0.9rem;">
 
-        @if (factura()?.statistici?.stadiu_logistica_factura === 'Complet') {
-        <span class="status-badge status-plasata">
-          Logistică: Complet ({{ factura()?.statistici?.linii_expediate }} / {{ factura()?.statistici?.linii_total }})
-        </span>
+        @if (comanda()?.comanda?.stadiu_finalizare === 1) {
+        <span class="status-badge status-plasata">Comandă: Finalizată</span>
         } @else {
-        <span class="status-badge status-pending">
-          Logistică: {{ factura()?.statistici?.stadiu_logistica_factura }}
-          ({{ factura()?.statistici?.linii_expediate }} / {{ factura()?.statistici?.linii_total }})
-        </span>
+        <span class="status-badge status-pending">Comandă: Neplasată</span>
         }
 
       </div>
@@ -22,13 +18,6 @@
 
     <div style="display: flex; gap: 0.75rem;">
       <button class="buton-principal buton-adauga" (click)="inapoiLaLista()">&larr; Înapoi</button>
-
-      @if (factura()?.factura?.path_factura_pdf) {
-      <a class="buton-principal buton-adauga" style="background-color: #10b981; text-decoration: none; text-align: center;"
-         [href]="factura()!.factura.path_factura_pdf!" target="_blank">
-        Vezi PDF Factură
-      </a>
-      }
     </div>
   </div>
 
@@ -47,12 +36,14 @@
   <div class="card-admin">
     @if (seIncarca()) {
     <div style="text-align: center; padding: 3rem; color: #6b7280;">
-      <p>Se încarcă detaliile facturii...</p>
+      <p>Se încarcă detaliile comenzii...</p>
     </div>
     } @else {
     <div style="margin-bottom: 1.5rem; font-size: 0.95rem; color: #374151;">
-      <p><strong>Furnizor:</strong> {{ factura()?.furnizor?.nume_furnizor }}</p>
-      <p><strong>Data:</strong> {{ factura()?.factura?.created_at | date:'dd.MM.yyyy' }}</p>
+      <p><strong>Companie:</strong> {{ comanda()?.companie?.nume_companie }}</p>
+      <p><strong>Email:</strong> {{ comanda()?.companie?.email }}</p>
+      <p><strong>Telefon:</strong> {{ comanda()?.companie?.numar_telefon }}</p>
+      <p><strong>Data:</strong> {{ comanda()?.comanda?.created_at | date:'dd.MM.yyyy' }}</p>
     </div>
 
     <div class="tabel-responsive">
@@ -67,7 +58,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of factura()?.linii; track item.comandaPiesa.comanda_piese_id) {
+          @for (item of comanda()?.linii; track item.comandaPiesa.comanda_piese_id) {
           <tr>
             <td><strong>#{{ item.comandaPiesa.comanda_piese_id }}</strong></td>
             <td>
@@ -82,22 +73,13 @@
           @empty {
           <tr>
             <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
-              Nu există nicio linie în această factură.
+              Nu există nicio linie în această comandă.
             </td>
           </tr>
           }
         </tbody>
       </table>
     </div>
-
-    @if ((factura()?.linii?.length ?? 0) > 0) {
-    <div class="total-general-box">
-      <div>
-        <p class="eticheta">Total Brut Factură:</p>
-        <h3 class="suma">{{ factura()?.factura?.pret_total_brut | number:'1.2-2' }} RON</h3>
-      </div>
-    </div>
-    }
     }
   </div>
 </div>

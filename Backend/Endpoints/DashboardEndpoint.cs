@@ -6,6 +6,7 @@ using System.Data;
 using System.Security.Claims;
 using System.Text.Json; 
 using Backend.DBClasses;
+using Backend.Helpers;
 
 namespace Backend.Endpoints
 {
@@ -89,6 +90,16 @@ namespace Backend.Endpoints
                     });
 
                 }
+            }).RequireAuthorization();
+
+            //asta reprezinta dashboardul de admin
+
+            app.MapGet("/admin", async (ClaimsPrincipal admin, IConfiguration config) =>
+            {
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                return Results.Ok();
             }).RequireAuthorization();
         }
     }

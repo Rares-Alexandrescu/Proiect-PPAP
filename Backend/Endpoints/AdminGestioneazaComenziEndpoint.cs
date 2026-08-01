@@ -254,7 +254,7 @@ namespace Backend.Endpoints
                     //fac un sp sau doua?
                     var randuriAfectate = await connection.ExecuteScalarAsync<int>(
                         "sp_ComandaPiese_AdminProceseazaLinia",
-                        parametri,
+                        parametriiProcesareComanda,
                         commandType: CommandType.StoredProcedure
                     );
 
@@ -287,7 +287,7 @@ namespace Backend.Endpoints
 
                     var randuriAfectate = await connection.ExecuteScalarAsync<int>(
                         "sp_ComandaPiese_AdminTrimiteLinia",
-                        parametri,
+                        parametriiProcesareComanda,
                         commandType: CommandType.StoredProcedure
                     );
 
