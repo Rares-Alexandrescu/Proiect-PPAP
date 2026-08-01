@@ -1,1 +1,84 @@
-<p>vezi-logistica-intrare-detaliat works!</p>
+<div class="container-admin">
+  <div class="antet-admin">
+    <div class="titlu-admin">
+      <h2>Detalii Comandă #{{ comanda()?.comanda?.comanda_id }}</h2>
+      <p>Piesele și cantitățile asociate acestei comenzi plasate de companie.</p>
+
+      <div style="margin-top: 10px; display: flex; gap: 15px; font-size: 0.9rem;">
+
+        @if (comanda()?.comanda?.stadiu_finalizare === 1) {
+        <span class="status-badge status-plasata">Comandă: Finalizată</span>
+        } @else {
+        <span class="status-badge status-pending">Comandă: Neplasată</span>
+        }
+
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem;">
+      <button class="buton-principal buton-adauga" (click)="inapoiLaLista()">&larr; Înapoi</button>
+    </div>
+  </div>
+
+  @if (alertaSucces()) {
+  <div class="alerta-succes" style="margin-bottom: 1.5rem;">
+    {{ alertaSucces() }}
+  </div>
+  }
+
+  @if (alertaEroare()) {
+  <div class="alerta-eroare" style="margin-bottom: 1.5rem;">
+    {{ alertaEroare() }}
+  </div>
+  }
+
+  <div class="card-admin">
+    @if (seIncarca()) {
+    <div style="text-align: center; padding: 3rem; color: #6b7280;">
+      <p>Se încarcă detaliile comenzii...</p>
+    </div>
+    } @else {
+    <div style="margin-bottom: 1.5rem; font-size: 0.95rem; color: #374151;">
+      <p><strong>Companie:</strong> {{ comanda()?.companie?.nume_companie }}</p>
+      <p><strong>Email:</strong> {{ comanda()?.companie?.email }}</p>
+      <p><strong>Telefon:</strong> {{ comanda()?.companie?.numar_telefon }}</p>
+      <p><strong>Data:</strong> {{ comanda()?.comanda?.created_at | date:'dd.MM.yyyy' }}</p>
+    </div>
+
+    <div class="tabel-responsive">
+      <table class="tabel-admin">
+        <thead>
+          <tr>
+            <th>ID Linie</th>
+            <th>Piesă / Cod</th>
+            <th>Cantitate</th>
+            <th>Preț Cumpărare</th>
+            <th>Preț Vânzare</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of comanda()?.linii; track item.comandaPiesa.comanda_piese_id) {
+          <tr>
+            <td><strong>#{{ item.comandaPiesa.comanda_piese_id }}</strong></td>
+            <td>
+              <strong>{{ item.piesa.nume_piesa }}</strong><br>
+              <small style="color: #6b7280;">Ref piesă: {{ item.piesa.piese_id }}</small>
+            </td>
+            <td>{{ item.comandaPiesa.cantitate_comandata }} buc.</td>
+            <td>{{ item.piesa.pret_cumparare | number:'1.2-2' }} RON</td>
+            <td>{{ item.piesa.pret_vanzare | number:'1.2-2' }} RON</td>
+          </tr>
+          }
+          @empty {
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+              Nu există nicio linie în această comandă.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+</div>
