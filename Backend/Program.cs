@@ -70,6 +70,7 @@ app.MapResendConfirmareEndpoint();
 
 app.MapAdminGestioneazaCompaniileEndpoint();
 app.MapAdminGestioneazaFurnizorEndpoint();
+app.MapAdminGestioneazaComenziEndpoint();
 
 app.MapAdminCompanieGestioneazaCompanieEndpoint();
 app.MapAdminFurnizorGestioneazaFurnizorEndpoint();
