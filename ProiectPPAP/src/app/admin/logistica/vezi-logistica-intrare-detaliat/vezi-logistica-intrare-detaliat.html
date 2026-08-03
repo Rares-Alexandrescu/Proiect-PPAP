@@ -20,11 +20,21 @@
       </div>
     </div>
 
-    <div style="display: flex; gap: 0.75rem;">
+    <div class="bara-actiuni">
       <button class="buton-principal buton-adauga" (click)="inapoiLaLista()">&larr; Înapoi</button>
 
+      @if (!toateLiniile(1)) {
+      <button class="buton-principal buton-adauga verde" (click)="receptiePrimire(factura()?.factura?.facturi_id)">
+        Receptie Marfa
+      </button>
+      } @else if (!toateLiniile(2)) {
+      <button class="buton-principal buton-adauga verde" (click)="proceseazaComanda(factura()?.factura?.facturi_id)">
+        Proceseaza Comanda
+      </button>
+      }
+
       @if (factura()?.factura?.path_factura_pdf) {
-      <a class="buton-principal buton-adauga" style="background-color: #10b981; text-decoration: none; text-align: center;"
+      <a class="buton-principal buton-adauga galben"
          [href]="factura()!.factura.path_factura_pdf!" target="_blank">
         Vezi PDF Factură
       </a>

@@ -248,7 +248,7 @@ namespace Backend.Endpoints
                 using (var connection = new SqlConnection(connectionString))
                 {
                     var parametriiProcesareComanda = new DynamicParameters();
-                    parametriiProcesareComanda.Add("@idComanda", idComandaPiese);
+                    parametriiProcesareComanda.Add("@idComanda", idComanda);
                     parametriiProcesareComanda.Add("@idComandaPiese", idComandaPiese);
 
                     //fac un sp sau doua?
@@ -282,7 +282,7 @@ namespace Backend.Endpoints
                 using (var connection = new SqlConnection(connectionString))
                 {
                     var parametriiProcesareComanda = new DynamicParameters();
-                    parametriiProcesareComanda.Add("@idComanda", idComandaPiese);
+                    parametriiProcesareComanda.Add("@idComanda", idComanda);
                     parametriiProcesareComanda.Add("@idComandaPiese", idComandaPiese);
 
                     var randuriAfectate = await connection.ExecuteScalarAsync<int>(

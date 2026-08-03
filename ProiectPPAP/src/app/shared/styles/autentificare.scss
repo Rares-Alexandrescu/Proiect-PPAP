@@ -165,6 +165,7 @@ input {
   cursor: pointer;
   box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
   transition: all 0.2s ease-in-out;
+  text-decoration: none;
 
   &:hover {
     background: #2563eb !important;
@@ -186,24 +187,55 @@ input {
   }
 }
 
+.buton-principal.verde {
+  background: #16a34a;
+  box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.3);
 
-
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  &:hover {
+    background: #15803d !important;
+  }
 }
 
-.status-plasata {
-  background-color: #f0fdf4;
-  color: #166534;
+.buton-principal.galben {
+  background: #d97706;
+  box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.3);
+
+  &:hover {
+    background: #b45309 !important;
+  }
 }
 
-.status-pending {
-  background-color: #fef9c3;
-  color: #92400e;
+.bara-actiuni {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+
+  .buton-principal {
+    width: auto;
+    margin-top: 0;
+  }
+
+
 }
+
+
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .status-plasata {
+    background-color: #f0fdf4;
+    color: #166534;
+  }
+
+  .status-pending {
+    background-color: #fef9c3;
+    color: #92400e;
+  }
 
 

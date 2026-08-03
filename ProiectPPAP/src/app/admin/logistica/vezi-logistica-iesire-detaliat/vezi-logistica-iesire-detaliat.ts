@@ -111,4 +111,32 @@ export class VeziLogisticaIesireDetaliatComponent implements OnInit {
   inapoiLaLista(): void {
     this.router.navigate(['/admin/vezi-logistica-iesire']);
   }
+
+  proceseazaComanda(idComanda: number, idComandaPiese: number): void {
+    this.http.put<{ message: string }>(
+      `${environment.apiUrl}/admin/proceseaza-comanda/${idComanda}/${idComandaPiese}`,
+      null
+    ).subscribe({
+      next: (res) => {
+        this.alertaSucces.set(res.message);
+      },
+      error: (err) => {
+        this.alertaEroare.set(err.error?.message ?? 'Eroare la procesarea comenzii.');
+      }
+    });
+  }
+
+  trimiteComanda(idComanda: number, idComandaPiese: number): void {
+    this.http.put<{ message: string }>(
+      `${environment.apiUrl}/admin/trimite-comanda/${idComanda}/${idComandaPiese}`,
+      null
+    ).subscribe({
+      next: (res) => {
+        this.alertaSucces.set(res.message);
+      },
+      error: (err) => {
+        this.alertaEroare.set(err.error?.message ?? 'Eroare la procesarea comenzii.');
+      }
+    });
+  }
 }

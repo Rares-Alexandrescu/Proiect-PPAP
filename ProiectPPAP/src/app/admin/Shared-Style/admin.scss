@@ -136,14 +136,24 @@
 
   &.buton-galben {
     color: #d97706;
-    border: 1px solid #fde68a; 
+    border: 1px solid #fde68a;
 
     &:hover {
-      background-color: #fffbeb; 
+      background-color: #fffbeb;
       border-color: #d97706;
     }
   }
+
+  &.buton-verde {
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+
+    &:hover {
+      background-color: #f0fdf4;
+      border-color: #16a34a;
+    }
   }
+}
 
 .total-general-box {
   display: flex;

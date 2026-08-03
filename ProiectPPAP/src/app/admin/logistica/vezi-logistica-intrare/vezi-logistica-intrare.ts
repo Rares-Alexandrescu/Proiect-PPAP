@@ -96,9 +96,25 @@ export class VeziLogisticaIntrareComponent {
   veziFacturaIntrareDetaliata(idFactura: number): void {
     this.router.navigate(['/admin/vezi-logistica-intrare-detaliat', idFactura]);
   }
+
   inapoiLaDashboard(): void {
     this.router.navigate(['/admin/vezi-logistica-intrare']);
   }
+
+  receptiePrimire(idFactura: number): void {
+    this.http.put<{ message: string }>(
+      `${environment.apiUrl}/admin/receptie-primire/${idFactura}`,
+      null
+    ).subscribe({
+      next: (res) => {
+        this.alertaSucces.set(res.message);
+      },
+      error: (err) => {
+        this.alertaEroare.set(err.error?.message ?? 'Eroare la confirmarea receptiei.');
+      }
+    });
+  }
+
 
   //pare ok asta, mai imi trebuie poate niste metode facute etc
 }
