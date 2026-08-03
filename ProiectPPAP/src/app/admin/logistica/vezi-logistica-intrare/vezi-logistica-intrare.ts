@@ -98,7 +98,7 @@ export class VeziLogisticaIntrareComponent {
   }
 
   inapoiLaDashboard(): void {
-    this.router.navigate(['/admin/vezi-logistica-intrare']);
+    this.router.navigate(['/admin']);
   }
 
   receptiePrimire(idFactura: number): void {
@@ -108,6 +108,7 @@ export class VeziLogisticaIntrareComponent {
     ).subscribe({
       next: (res) => {
         this.alertaSucces.set(res.message);
+        this.incarcaFacturi();
       },
       error: (err) => {
         this.alertaEroare.set(err.error?.message ?? 'Eroare la confirmarea receptiei.');

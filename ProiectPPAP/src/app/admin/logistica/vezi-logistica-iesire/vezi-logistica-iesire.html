@@ -4,7 +4,13 @@
       <h2>Logistică Ieșire</h2>
       <p>Aici poți vizualiza comenzile plasate de companii și stadiul lor.</p>
     </div>
+    <div class="bara-actiuni">
+      <button class="buton-principal buton-adauga" (click)="inapoiLaDashboard()">&larr; Inapoi la Dashboard</button>
+    </div>
   </div>
+
+
+
   @if (alertaSucces()) {
   <div class="alerta-succes" style="margin-bottom: 1.5rem;">
     {{ alertaSucces() }}

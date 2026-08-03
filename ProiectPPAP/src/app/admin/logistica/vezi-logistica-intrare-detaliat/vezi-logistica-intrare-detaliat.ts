@@ -139,25 +139,6 @@ export class VeziLogisticaIntrareDetaliatComponent implements OnInit {
     });
   }
 
-  proceseazaComanda(idFactura: number | undefined): void {
-    if (!idFactura) {
-      this.alertaEroare.set('Factura nu a fost incarcata inca.');
-      return;
-    }
-    this.http.put<{ message: string }>(
-      `${environment.apiUrl}/admin/proceseaza-factura/${idFactura}`,
-      null
-    ).subscribe({
-      next: (res) => {
-        this.alertaSucces.set(res.message);
-        this.incarcaFacturaDetaliata();
-      },
-      error: (err) => {
-        this.alertaEroare.set(err.error?.message ?? 'Eroare la procesarea comenzii.');
-      }
-    });
-  }
-
   toateLiniile(valoare: number): boolean {
     const linii = this.factura()?.linii ?? [];
     if (linii.length === 0) return false;

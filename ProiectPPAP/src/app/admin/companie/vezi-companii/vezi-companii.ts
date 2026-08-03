@@ -103,4 +103,8 @@ export class VeziCompaniiComponent implements OnInit {
     }
 
   }
+
+  inapoiLaDashboard(): void {
+    this.router.navigate(['/admin']);
+  }
 }

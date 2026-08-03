@@ -87,4 +87,8 @@ export class VeziLogisticaIesireComponent implements OnInit {
   veziFacturaIesireDetaliata(idComanda: number): void {
     this.router.navigate(['/admin/vezi-logistica-iesire-detaliat', idComanda]);
   }
+
+  inapoiLaDashboard(): void {
+    this.router.navigate(['/admin']);
+  }
 }

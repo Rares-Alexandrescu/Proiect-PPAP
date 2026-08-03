@@ -4,7 +4,14 @@
       <h2>Logistică Intrare</h2>
       <p>Aici poți vizualiza facturile primite de la furnizori și stadiul lor logistic.</p>
     </div>
+
+    <div class="bara-actiuni">
+      <button class="buton-principal buton-adauga" (click)="inapoiLaDashboard()">&larr; Inapoi la Dashboard</button>
+    </div>
   </div>
+
+
+
   @if (alertaSucces()) {
   <div class="alerta-succes" style="margin-bottom: 1.5rem;">
     {{ alertaSucces() }}
@@ -43,7 +50,17 @@
             <td><strong>{{ item.furnizor.nume_Furnizor }}</strong></td>
             <td>{{ item.factura.created_at | date:'dd.MM.yyyy' }}</td>
             <td>{{ item.factura.pret_total_brut | number:'1.2-2' }} RON</td>
-            <td>{{ item.statistici.stadiu_logistica_factura }}</td>
+            <td>
+              @if (item.statistici.stadiu_logistica_factura === 'Zero') {
+              <span class="status-badge status-lipsa">Zero</span>
+              }
+              @if (item.statistici.stadiu_logistica_factura === 'Partial') {
+              <span class="status-badge status-pending">Parțial</span>
+              }
+              @if (item.statistici.stadiu_logistica_factura === 'Complet') {
+              <span class="status-badge status-plasata">Complet</span>
+              }
+            </td>
             <td>{{ item.statistici.linii_expediate }} / {{ item.statistici.linii_total }}</td>
             <td>
               <div class="actiuni-tabel">

@@ -27,10 +27,6 @@
       <button class="buton-principal buton-adauga verde" (click)="receptiePrimire(factura()?.factura?.facturi_id)">
         Receptie Marfa
       </button>
-      } @else if (!toateLiniile(2)) {
-      <button class="buton-principal buton-adauga verde" (click)="proceseazaComanda(factura()?.factura?.facturi_id)">
-        Proceseaza Comanda
-      </button>
       }
 
       @if (factura()?.factura?.path_factura_pdf) {

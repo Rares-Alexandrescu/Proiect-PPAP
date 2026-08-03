@@ -4,7 +4,11 @@
       <h2>Gestionare Furnizori</h2>
       <p>Aici poți vizualiza, edita sau șterge furnizorii de piese din platformă.</p>
     </div>
+
+    <div class="bara-actiuni">
     <button class="buton-principal buton-adauga" (click)="adaugaFurnizor()">+ Adaugă Furnizor</button>
+    <button class="buton-principal buton-adauga" (click)="inapoiLaDashboard()">&larr; Inapoi la Dashboard</button>
+    </div>
   </div>
 
   @if (alertaSucces()) {
