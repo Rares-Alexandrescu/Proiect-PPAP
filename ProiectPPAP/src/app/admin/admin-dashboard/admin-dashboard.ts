@@ -30,4 +30,20 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
+  veziCompanii(): void {
+    this.router.navigate(['/admin/vezi-companii']);
+  }
+
+  veziFurnizorii(): void {
+    this.router.navigate(['/admin/vezi-furnizorii']);
+  }
+
+  veziLogisticaIntrare(): void {
+    this.router.navigate(['/admin/vezi-logistica-intrare']);
+  }
+
+  veziLogisticaIesire(): void {
+    this.router.navigate(['/admin/vezi-logistica-iesire']);
+  }
 }

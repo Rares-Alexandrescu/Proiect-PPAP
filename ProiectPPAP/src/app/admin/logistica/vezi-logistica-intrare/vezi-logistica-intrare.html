@@ -40,7 +40,7 @@
           @for (item of facturi(); track item.factura.facturi_id) {
           <tr>
             <td><strong>{{ item.factura.facturi_id }}</strong></td>
-            <td><strong>{{ item.furnizor.nume_furnizor }}</strong></td>
+            <td><strong>{{ item.furnizor.nume_Furnizor }}</strong></td>
             <td>{{ item.factura.created_at | date:'dd.MM.yyyy' }}</td>
             <td>{{ item.factura.pret_total_brut | number:'1.2-2' }} RON</td>
             <td>{{ item.statistici.stadiu_logistica_factura }}</td>

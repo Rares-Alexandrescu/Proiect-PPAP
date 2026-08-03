@@ -39,9 +39,9 @@
           @for (item of comenzi(); track item.comanda.comanda_id) {
           <tr>
             <td><strong>{{ item.comanda.comanda_id }}</strong></td>
-            <td><strong>{{ item.companie.nume_companie }}</strong></td>
+            <td><strong>{{ item.companie.nume_Companie }}</strong></td>
             <td>{{ item.companie.email }}</td>
-            <td>{{ item.companie.numar_telefon }}</td>
+            <td>{{ item.companie.numar_Telefon }}</td>
             <td>{{ item.comanda.created_at | date:'dd.MM.yyyy' }}</td>
             <td>
               <div class="actiuni-tabel">

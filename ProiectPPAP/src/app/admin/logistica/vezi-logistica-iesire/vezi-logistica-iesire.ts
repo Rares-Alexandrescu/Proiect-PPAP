@@ -8,14 +8,14 @@ export interface Comanda {
   comanda_id: number;
   created_at: string;
   documente_id: number;
-  stadiu_finalizare: number;
+  stadiu_finalizare: boolean;
 }
 
 export interface Companie {
-  companie_id: number;
-  nume_companie: string;
+  companie_Id: number;
+  nume_Companie: string;
   email: string;
-  numar_telefon: string;
+  numar_Telefon: string;
 }
 
 export interface ComandaIesireSumar {

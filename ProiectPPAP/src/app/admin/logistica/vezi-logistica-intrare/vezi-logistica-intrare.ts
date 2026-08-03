@@ -17,7 +17,7 @@ export interface FacturiFurnizor {
 
 export interface Furnizor {
   furnizor_id: number;
-  nume_furnizor: string;
+  nume_Furnizor: string;
 }
 
 export interface StatisticiFactura {

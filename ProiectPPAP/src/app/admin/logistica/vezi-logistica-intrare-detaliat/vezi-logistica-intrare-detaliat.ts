@@ -14,7 +14,7 @@ export interface FacturiFurnizor {
 
 export interface Furnizor {
   furnizor_id: number;
-  nume_furnizor: string;
+  nume_Furnizor: string;
 }
 
 export interface StatisticiFactura {
@@ -30,10 +30,10 @@ export interface ComandaPiese {
 }
 
 export interface Piese {
-  piese_id: number;
-  nume_piesa: string;
-  pret_cumparare: number;
-  pret_vanzare: number;
+  piese_Id: number;
+  nume_Piesa: string;
+  pret_Cumparare: number;
+  pret_Vanzare: number;
 }
 
 export interface LinieFacturaDetaliata {

@@ -7,7 +7,7 @@
 
       <div style="margin-top: 10px; display: flex; gap: 15px; font-size: 0.9rem;">
 
-        @if (comanda()?.comanda?.stadiu_finalizare === 1) {
+        @if (comanda()?.comanda?.stadiu_finalizare === true) {
         <span class="status-badge status-plasata">Comandă: Finalizată</span>
         } @else {
         <span class="status-badge status-pending">Comandă: Neplasată</span>
@@ -40,9 +40,9 @@
     </div>
     } @else {
     <div style="margin-bottom: 1.5rem; font-size: 0.95rem; color: #374151;">
-      <p><strong>Companie:</strong> {{ comanda()?.companie?.nume_companie }}</p>
+      <p><strong>Companie:</strong> {{ comanda()?.companie?.nume_Companie }}</p>
       <p><strong>Email:</strong> {{ comanda()?.companie?.email }}</p>
-      <p><strong>Telefon:</strong> {{ comanda()?.companie?.numar_telefon }}</p>
+      <p><strong>Telefon:</strong> {{ comanda()?.companie?.numar_Telefon }}</p>
       <p><strong>Data:</strong> {{ comanda()?.comanda?.created_at | date:'dd.MM.yyyy' }}</p>
     </div>
 
@@ -62,12 +62,12 @@
           <tr>
             <td><strong>#{{ item.comandaPiesa.comanda_piese_id }}</strong></td>
             <td>
-              <strong>{{ item.piesa.nume_piesa }}</strong><br>
+              <strong>{{ item.piesa.nume_Piesa }}</strong><br>
               <small style="color: #6b7280;">Ref piesă: {{ item.piesa.piese_id }}</small>
             </td>
             <td>{{ item.comandaPiesa.cantitate_comandata }} buc.</td>
-            <td>{{ item.piesa.pret_cumparare | number:'1.2-2' }} RON</td>
-            <td>{{ item.piesa.pret_vanzare | number:'1.2-2' }} RON</td>
+            <td>{{ item.piesa.pret_Cumparare | number:'1.2-2' }} RON</td>
+            <td>{{ item.piesa.pret_Vanzare | number:'1.2-2' }} RON</td>
           </tr>
           }
           @empty {

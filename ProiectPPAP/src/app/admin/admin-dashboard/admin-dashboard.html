@@ -3,28 +3,38 @@
     <h2>Panou de Control Admin</h2>
     <p>Alege modulul pe care dorești să-l gestionezi din platformă.</p>
   </div>
-
   <div class="grila-module">
-
     <div class="card-modul">
       <div class="iconita">🏢</div>
       <h3>Gestiune Companii</h3>
       <p>Vizualizează, adaugă, editează sau șterge companiile înregistrate în sistemul tău.</p>
-
-      <button class="buton-principal" routerLink="/admin/vezi-companii">
+      <button class="buton-principal" (click)="veziCompanii()">
         Vezi Companii
       </button>
     </div>
-
     <div class="card-modul">
-      <div class="iconita">🛠️</div>
+      <div class="iconita">🧾</div>
       <h3>Gestiune Furnizorii</h3>
-      <p>Vizualizează, adaugă, editează sau șterge furnizorii înregistrati în sistemul tău.</p>
-
-      <button class="buton-principal" routerLink="/admin/vezi-furnizorii">
+      <p>Vizualizează, adaugă, editează sau șterge furnizorii înregistrați în sistemul tău.</p>
+      <button class="buton-principal" (click)="veziFurnizorii()">
         Vezi Furnizorii
       </button>
     </div>
-
+    <div class="card-modul">
+      <div class="iconita">📥</div>
+      <h3>Gestiune Logistica Intrare</h3>
+      <p>Vezi situația logistică de intrare.</p>
+      <button class="buton-principal" (click)="veziLogisticaIntrare()">
+        Vezi Situație Intrare
+      </button>
+    </div>
+    <div class="card-modul">
+      <div class="iconita">📤</div>
+      <h3>Gestiune Logistica Iesire</h3>
+      <p>Vezi situația logistică de ieșire.</p>
+      <button class="buton-principal" (click)="veziLogisticaIesire()">
+        Vezi Situație Ieșire
+      </button>
+    </div>
   </div>
 </div>

@@ -96,7 +96,7 @@ export const routes: Routes = [
         component: VeziLogisticaIesireComponent
       },
       {
-        path: 'vezi-logistica-iesire-detliat/:comandaId',
+        path: 'vezi-logistica-iesire-detaliat/:comandaId',
         component: VeziLogisticaIesireDetaliatComponent
       }
 
