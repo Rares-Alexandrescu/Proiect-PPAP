@@ -144,6 +144,16 @@
     }
   }
 
+  &.buton-albastru {
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+
+    &:hover {
+      background-color: #eff6ff;
+      border-color: #2563eb;
+    }
+  }
+
   &.buton-verde {
     color: #16a34a;
     border: 1px solid #bbf7d0;

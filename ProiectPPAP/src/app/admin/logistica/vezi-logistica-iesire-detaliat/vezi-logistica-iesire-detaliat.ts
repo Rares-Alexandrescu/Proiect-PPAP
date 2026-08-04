@@ -22,10 +22,11 @@ export interface ComandaPiese {
   comanda_piese_id: number;
   cantitate_comandata: number;
   piese_id: number;
+  stadiu_intern: number;
 }
 
 export interface Piese {
-  piese_id: number;
+  piese_Id: number;
   nume_Piesa: string;
   pret_Cumparare: number;
   pret_Vanzare: number;
@@ -112,13 +113,18 @@ export class VeziLogisticaIesireDetaliatComponent implements OnInit {
     this.router.navigate(['/admin/vezi-logistica-iesire']);
   }
 
-  proceseazaComanda(idComanda: number, idComandaPiese: number): void {
+  proceseazaComanda(idComanda: number | undefined, idComandaPiese: number | undefined): void {
+    if (!idComanda || !idComandaPiese) {
+      this.alertaEroare.set("Nu am Comanda ID sau ID-ul linie specifice pe care vrei sa o trimiti");
+      return;
+    }
     this.http.put<{ message: string }>(
       `${environment.apiUrl}/admin/proceseaza-comanda/${idComanda}/${idComandaPiese}`,
       null
     ).subscribe({
       next: (res) => {
         this.alertaSucces.set(res.message);
+        this.incarcaComandaDetaliata();
       },
       error: (err) => {
         this.alertaEroare.set(err.error?.message ?? 'Eroare la procesarea comenzii.');
@@ -126,13 +132,19 @@ export class VeziLogisticaIesireDetaliatComponent implements OnInit {
     });
   }
 
-  trimiteComanda(idComanda: number, idComandaPiese: number): void {
+  trimiteComanda(idComanda: number | undefined, idComandaPiese: number | undefined): void {
+    if (!idComanda || !idComandaPiese) {
+      this.alertaEroare.set("Nu am Comanda ID sau ID-ul linie specifice pe care vrei sa o trimiti");
+      return;
+    }
+
     this.http.put<{ message: string }>(
       `${environment.apiUrl}/admin/trimite-comanda/${idComanda}/${idComandaPiese}`,
       null
     ).subscribe({
       next: (res) => {
         this.alertaSucces.set(res.message);
+        this.incarcaComandaDetaliata();
       },
       error: (err) => {
         this.alertaEroare.set(err.error?.message ?? 'Eroare la procesarea comenzii.');

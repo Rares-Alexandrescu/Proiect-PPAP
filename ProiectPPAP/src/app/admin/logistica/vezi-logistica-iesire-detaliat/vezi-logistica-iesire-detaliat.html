@@ -8,7 +8,7 @@
       <div style="margin-top: 10px; display: flex; gap: 15px; font-size: 0.9rem;">
 
         @if (comanda()?.comanda?.stadiu_finalizare === true) {
-        <span class="status-badge status-plasata">Comandă: Finalizată</span>
+        <span class="status-badge status-plasata">Comandă: Plasată</span>
         } @else {
         <span class="status-badge status-pending">Comandă: Neplasată</span>
         }
@@ -55,6 +55,7 @@
             <th>Cantitate</th>
             <th>Preț Cumpărare</th>
             <th>Preț Vânzare</th>
+            <th>Actiuni</th>
           </tr>
         </thead>
         <tbody>
@@ -63,16 +64,31 @@
             <td><strong>#{{ item.comandaPiesa.comanda_piese_id }}</strong></td>
             <td>
               <strong>{{ item.piesa.nume_Piesa }}</strong><br>
-              <small style="color: #6b7280;">Ref piesă: {{ item.piesa.piese_id }}</small>
+              <small style="color: #6b7280;">Ref piesă: {{ item.piesa.piese_Id }}</small>
             </td>
             <td>{{ item.comandaPiesa.cantitate_comandata }} buc.</td>
             <td>{{ item.piesa.pret_Cumparare | number:'1.2-2' }} RON</td>
             <td>{{ item.piesa.pret_Vanzare | number:'1.2-2' }} RON</td>
+            <td>
+              @if (item.comandaPiesa.stadiu_intern === 1) {
+              <button class="buton-actiune buton-verde"
+               (click)="proceseazaComanda(comanda()?.comanda?.comanda_id, item.comandaPiesa.comanda_piese_id)">
+                Procesează Piesa
+              </button>
+              } @else if (item.comandaPiesa.stadiu_intern === 2) {
+              <button class="buton-actiune buton-albastru"
+               (click)="trimiteComanda(comanda()?.comanda?.comanda_id, item.comandaPiesa.comanda_piese_id)">
+                Trimite Piesa
+              </button>
+              } @else {
+              <span style="color: #9ca3af; font-size: 0.85rem;">Fără acțiuni</span>
+              }
+            </td>
           </tr>
           }
           @empty {
           <tr>
-            <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+            <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">
               Nu există nicio linie în această comandă.
             </td>
           </tr>
