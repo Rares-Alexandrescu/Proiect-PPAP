@@ -180,4 +180,34 @@ export class VeziComandaComponent implements OnInit{
   editComandaPiesa(idComandaPiesa: number): void {
     this.router.navigate(['/compania-ta/modifica-comanda', this.idComanda, idComandaPiesa]);
   }
+
+  receptioneazaComanda(): void {
+    if (!confirm('Ești sigur că vrei să marchezi această comandă ca fiind recepționată?')) {
+      return;
+    }
+
+    this.seTrimite.set(true);
+    this.alertaEroare.set('');
+    this.alertaSucces.set('');
+
+    const url = `${environment.apiUrl}/compania-ta/receptioneaza-comanda/${this.idComanda}`;
+
+    this.http.put<{ message: string }>(url, {}).subscribe({
+      next: (raspuns) => {
+        this.seTrimite.set(false);
+        this.alertaSucces.set(raspuns.message || 'Comanda a fost recepționată cu succes!');
+        this.incarcaComanda();
+      },
+      error: (eroare) => {
+        this.seTrimite.set(false);
+        if (eroare.status === 401 || eroare.status === 403) {
+          console.warn('Acces neautorizat sau sesiune expirată. Te redirecționăm...');
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.alertaEroare.set(eroare.error?.message || 'Nu s-a putut recepționa comanda.');
+        }
+      }
+    });
+  }
+
 }

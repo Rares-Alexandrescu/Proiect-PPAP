@@ -625,15 +625,6 @@ namespace Backend.Endpoints
 
                 using (var connection = new SqlConnection(connectionString))
                 {
-                    //aici imi trebuie pdf urile, factura generata, si chiar si comenzile penru furnizori.
-
-                    //dar defapt poate mai fac un pas ca sa confirm ca dupa sa se comande si la furnizori
-                    //hai ca vedem
-
-                    //si defapt sa verific si daca e deja o comanda plasata
-                    //acuma fac PDFService, sa vedem daca il fac bine, dupa ma intorc aici
-                    //o sa fie circ
-
                     var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
                         idComanda,
                         companie.Companie_Id,
@@ -704,6 +695,49 @@ namespace Backend.Endpoints
                         commandType: CommandType.StoredProcedure);
 
                     return Results.Ok(new { message = "Comanda a fost plasata cu succes!", CalePdf = calePdfDocumenteComanda });
+
+                }
+            }).RequireAuthorization();
+
+            app.MapPut("/compania-ta/receptioneaza-comanda/{idComanda:int}", async(
+                 int idComanda,
+                ClaimsPrincipal adminCompanie,
+                IPDFService pdfService,
+                IConfiguration config) =>
+            {
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                var eroareAutentificare = await SecurityHelper.VerificaAdminLocal(adminCompanie, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(adminCompanie, connectionString!);
+                if (eroare != null) return eroare;
+
+                if (companie == null)
+                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici, desi a verificat adminlocal....!" });
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+
+                    var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
+                        idComanda,
+                        companie.Companie_Id,
+                        connectionString!);
+
+                    if (eroareComanda != null) return eroareComanda;
+
+                    var parametruComanda = new DynamicParameters();
+                    parametruComanda.Add("@idComanda", idComanda);
+
+                    int rezultatCommanda = await connection.ExecuteAsync("sp_Documente_Comanda_CompaniaReceptioneazaComanda");
+
+                    if(rezultatCommanda == 0)
+                    {
+                        return Results.BadRequest(new { message = "Nu s-a putut receptiona comanda!" });
+                    }
+
+                    return Results.Ok(new { message = "S-a receptionat comanda cu succes!" });
 
                 }
             }).RequireAuthorization();
