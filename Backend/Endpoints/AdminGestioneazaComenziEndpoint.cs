@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
 using System.Security.Claims;
 using Backend.DBClasses;
 using Backend.Helpers;
+using Backend.Services;
 
 namespace Backend.Endpoints
 {
@@ -267,12 +268,12 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
 
-            //din doi in trei, si numai din doi in trei
             app.MapPut("/admin/trimite-comanda/{idComanda:int}/{idComandaPiese:int}", async (
-                ClaimsPrincipal admin,
-                IConfiguration config,
-                int idComandaPiese,
-                int idComanda) =>
+                            ClaimsPrincipal admin,
+                            IConfiguration config,
+                            IPDFService pdfService,
+                            int idComandaPiese,
+                            int idComanda) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
@@ -281,22 +282,121 @@ namespace Backend.Endpoints
 
                 using (var connection = new SqlConnection(connectionString))
                 {
-                    var parametriiProcesareComanda = new DynamicParameters();
-                    parametriiProcesareComanda.Add("@idComanda", idComanda);
-                    parametriiProcesareComanda.Add("@idComandaPiese", idComandaPiese);
+                    await connection.OpenAsync();
 
-                    var randuriAfectate = await connection.ExecuteScalarAsync<int>(
-                        "sp_ComandaPiese_AdminTrimiteLinia",
-                        parametriiProcesareComanda,
-                        commandType: CommandType.StoredProcedure
-                    );
-
-                    if (randuriAfectate == 0)
+                    using (var transaction = connection.BeginTransaction())
                     {
-                        return Results.BadRequest(new { message = "Piesa nu exista, nu apartine comenzii specificate, sau nu este inca procesata (stadiu_intern != 2)." });
-                    }
+                        try
+                        {
+                            var parametriiProcesareComanda = new DynamicParameters();
+                            parametriiProcesareComanda.Add("@idComanda", idComanda);
+                            parametriiProcesareComanda.Add("@idComandaPiese", idComandaPiese);
 
-                    return Results.Ok(new { message = "Comanda a fost trimisa catre companie!" });
+                            var randuriAfectate = await connection.ExecuteScalarAsync<int>(
+                                "sp_ComandaPiese_AdminTrimiteLinia",
+                                parametriiProcesareComanda,
+                                transaction: transaction,
+                                commandType: CommandType.StoredProcedure
+                            );
+
+                            if (randuriAfectate == 0)
+                            {
+                                transaction.Rollback();
+                                return Results.BadRequest(new { message = "Piesa nu exista, nu apartine comenzii specificate, sau nu este inca procesata (stadiu_intern != 2)." });
+                            }
+
+                            var parametriComandaFactura = new DynamicParameters();
+                            parametriComandaFactura.Add("@idComanda", idComanda);
+
+                            var comandaTrimisaComplet = await connection.ExecuteScalarAsync<int>(
+                                "sp_Comanda_VerificaStadiuInternTrimitere",
+                                parametriComandaFactura,
+                                transaction: transaction,
+                                commandType: CommandType.StoredProcedure
+                            );
+
+                            if (comandaTrimisaComplet == 1)
+                            {
+                                var companieFactura = await connection.QueryFirstOrDefaultAsync<Companie>(
+                                    "sp_Companie_AdminGetCompanieByComandaId",
+                                    parametriComandaFactura,
+                                    transaction: transaction,
+                                    commandType: CommandType.StoredProcedure);
+
+                                if (companieFactura == null)
+                                {
+                                    transaction.Rollback();
+                                    return Results.BadRequest(new { message = "Nu s-a putut gasi compania asociata acestei comenzi." });
+                                }
+
+                                var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
+                                    idComanda,
+                                    companieFactura.Companie_Id,
+                                    connectionString!,
+                                    false);
+
+                                if (eroareComanda != null)
+                                {
+                                    transaction.Rollback();
+                                    return eroareComanda;
+                                }
+
+                                var parametruComanda = new DynamicParameters();
+                                parametruComanda.Add("@idComanda", idComanda);
+                                parametruComanda.Add("@idCompanie", companieFactura.Companie_Id);
+
+                                var rezultate = await connection.QueryAsync<Piese, ComandaPiese, Furnizor, decimal, decimal, (Piese Piesa, ComandaPiese Linie, Furnizor furnizorPiesa, decimal PretPiese, decimal TotalPretComanda)>(
+                                    "sp_Comanda_GetPieseDetaliateCompanie",
+                                    (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda) => (piesa, linie, furnizorPiesa, pretPiese, TotalPretComanda),
+                                    parametruComanda,
+                                    transaction: transaction,
+                                    splitOn: "comanda_piese_id, furnizor_id, pretPiese, TotalPretComanda",
+                                    commandType: CommandType.StoredProcedure);
+
+                                if (rezultate == null || !rezultate.Any())
+                                {
+                                    transaction.Rollback();
+                                    return Results.BadRequest(new { message = "Comanda e goala!" });
+                                }
+
+                                decimal totalGeneralComanda = rezultate.FirstOrDefault().TotalPretComanda;
+
+                                var pieseFormatatePentruPdf = rezultate.Select(r => new
+                                {
+                                    Piesa = r.Piesa,
+                                    FurnizorPiesa = r.furnizorPiesa,
+                                    DetaliiComandaPiesa = r.Linie,
+                                    PretPiese = r.PretPiese
+                                }).ToList();
+
+                                string calePdfFacturaComanda = await pdfService.GenereazaPdfFacturaCompanieAsync(
+                                    comandaCeruta.comanda_id,
+                                    companieFactura.Nume_Companie,
+                                    totalGeneralComanda,
+                                    pieseFormatatePentruPdf);
+
+                                parametruComanda.Add("@path_factura_pdf", calePdfFacturaComanda);
+                                parametruComanda.Add("@pret_brut", totalGeneralComanda);
+
+                                await connection.ExecuteAsync(
+                                    "sp_Factura_Companie_TrimiteComanda",
+                                    parametruComanda,
+                                    transaction: transaction,
+                                    commandType: CommandType.StoredProcedure);
+
+                                transaction.Commit();
+                                return Results.Ok(new { message = "Comanda a fost trimisa catre companie, factura pentru comanda asta a fost generata!" });
+                            }
+
+                            transaction.Commit();
+                            return Results.Ok(new { message = "Linia de comanda a fost trimisa catre companie!" });
+                        }
+                        catch (Exception ex)
+                        {
+                            transaction.Rollback();
+                            return Results.BadRequest(new { message = $"A apărut o eroare critică pe server: {ex.Message}" });
+                        }
+                    }
                 }
             }).RequireAuthorization();
         }

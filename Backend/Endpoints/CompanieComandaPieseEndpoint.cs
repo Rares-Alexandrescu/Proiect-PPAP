@@ -709,16 +709,15 @@ namespace Backend.Endpoints
             }).RequireAuthorization();
         }
     }
-        public class AdaugaPiesaRequest
-        {
-            public int? Comanda_Id { get; set; }
-            public int Cantitate { get; set; } = 1;
-            public string? DetaliiPiese { get; set; }
-        }
+    public class AdaugaPiesaRequest
+    {
+        public int? Comanda_Id { get; set; }
+        public int Cantitate { get; set; } = 1;
+        public string? DetaliiPiese { get; set; }
+    }
 
-        public class FurnizorCuPieseActive : Backend.DBClasses.Furnizor
-        {
-            public int NumarPieseActive { get; set; } = 0;
-        }
-    
+    public class FurnizorCuPieseActive : Backend.DBClasses.Furnizor
+    {
+        public int NumarPieseActive { get; set; } = 0;
+    }
 }
