@@ -158,4 +158,33 @@ export class ComenziCurenteComponent implements OnInit {
   comandaNoua(): void {
     this.router.navigate(['/compania-ta/noua-comanda']);
   }
+
+  receptioneazaComanda(idComanda: number): void {
+    if (!confirm('Ești sigur că vrei să marchezi această comandă ca fiind recepționată?')) {
+      return;
+    }
+
+    this.seIncarca.set(true);
+    this.alertaEroare.set('');
+    this.alertaSucces.set('');
+
+    const url = `${environment.apiUrl}/compania-ta/receptioneaza-comanda/${idComanda}`;
+
+    this.http.put<{ message: string }>(url, {}).subscribe({
+      next: (raspuns) => {
+        this.seIncarca.set(false);
+        this.alertaSucces.set(raspuns.message || 'Comanda a fost recepționată cu succes!');
+        this.incarcaComenzile();
+      },
+      error: (eroare) => {
+        this.seIncarca.set(false);
+        if (eroare.status === 401 || eroare.status === 403) {
+          console.warn('Acces neautorizat sau sesiune expirată. Te redirecționăm...');
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.alertaEroare.set(eroare.error?.message || 'Nu s-a putut recepționa comanda.');
+        }
+      }
+    });
+  }
 }

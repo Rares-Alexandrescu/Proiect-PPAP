@@ -156,7 +156,6 @@ namespace Backend.Endpoints
                         return Results.BadRequest(new { eroriIdentificator = erori });
 
                     }
-
                 }
 
                 return Results.Ok(new { message = "Utilizator a fost sters cu succes!" });

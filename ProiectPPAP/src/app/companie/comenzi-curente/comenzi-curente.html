@@ -68,6 +68,12 @@
                   Șterge
                 </button>
                 }
+                @if (item.factura && item.documentComanda?.stadiu_acceptare !== true) {
+                <button class = "buton-actiune buton-adauga"
+                        (click)="receptioneazaComanda(item.comanda.comanda_id)">
+                  Recepționează Comanda
+                </button>
+                }
               </div>
             </td>
           </tr>
