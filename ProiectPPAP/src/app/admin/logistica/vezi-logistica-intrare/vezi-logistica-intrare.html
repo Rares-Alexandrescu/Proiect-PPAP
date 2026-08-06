@@ -31,6 +31,7 @@
             <th>Furnizor</th>
             <th>Data</th>
             <th>Total</th>
+            <th>Stadiu Plata</th>
             <th>Stadiu Logistică</th>
             <th>Linii Expediate</th>
             <th>Acțiuni</th>
@@ -39,7 +40,7 @@
         <tbody>
           @if (seIncarca()) {
           <tr>
-            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
+            <td colspan="8" style="text-align: center; padding: 2rem; color: #6b7280;">
               Se încarcă...
             </td>
           </tr>
@@ -50,6 +51,14 @@
             <td><strong>{{ item.furnizor.nume_Furnizor }}</strong></td>
             <td>{{ item.factura.created_at | date:'dd.MM.yyyy' }}</td>
             <td>{{ item.factura.pret_total_brut | number:'1.2-2' }} RON</td>
+            <td>
+              @if (item.factura.stadiu_plata == false){
+              <span class="status-badge status-lipsa">Neplatita</span>
+              }
+              @else if (item.factura.stadiu_plata == true){
+              <span class="status-badge status-plasata">Platita</span>
+              }
+            </td>
             <td>
               @if (item.statistici.stadiu_logistica_factura === 'Zero') {
               <span class="status-badge status-lipsa">Zero</span>
@@ -65,19 +74,23 @@
             <td>
               <div class="actiuni-tabel">
                 <button class="buton-actiune buton-galben" (click)="veziFacturaIntrareDetaliata(item.factura.facturi_id)">Vezi Detalii</button>
+                @if (item.statistici.receptie_comanda == true)
+                {
                 <button class="buton-actiune buton-verde" (click)="receptiePrimire(item.factura.facturi_id)">Marcheaza Receptia Pieselor</button>
+                }
               </div>
             </td>
           </tr>
           }
           @empty {
           <tr>
-            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
+            <td colspan="8" style="text-align: center; padding: 2rem; color: #6b7280;">
               Nu există nicio factură înregistrată momentan.
             </td>
           </tr>
           }
           }
+
         </tbody>
       </table>
     </div>

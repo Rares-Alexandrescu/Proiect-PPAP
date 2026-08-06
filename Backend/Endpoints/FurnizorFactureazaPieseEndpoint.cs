@@ -293,6 +293,7 @@ namespace Backend.Endpoints
         public string stadiu_logistica_factura { get; set; } = "Zero";
         public int linii_expediate { get; set; } = 0;
         public int linii_total { get; set; } = 0;
+        public bool? receptie_comanda { get; set; } = false;
     }
     public class TotalPiesaFactura
     {

@@ -11,6 +11,7 @@ export interface FacturiFurnizor {
   furnizor_id: number;
   created_at: string; 
   pret_total_brut: number;
+  stadiu_plata: boolean;
   path_factura_pdf: string | null;
 }
 
@@ -24,6 +25,7 @@ export interface StatisticiFactura {
   stadiu_logistica_factura: "Zero" | "Partial" | "Complet";
   linii_expediate: number;
   linii_total: number;
+  receptie_comanda: boolean;
 }
 
 export interface FacturaIntrareSumar {

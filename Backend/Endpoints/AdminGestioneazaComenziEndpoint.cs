@@ -11,9 +11,6 @@ namespace Backend.Endpoints
 {
     public static class AdminGestioneazaComenziEndpoint
     {
-        //nu mi dau seama ce mai trebuie facut, pe treizeci si unu iulie scriu asta,
-        //si nu e doar atat ce e deja scris...
-        //credeam ca mi amintesc, de acuma incolo trebuiesa scriu toate maparile in comentariu sa mi amintesc
 
         public static void MapAdminGestioneazaComenziEndpoint(this IEndpointRouteBuilder app)
         {
