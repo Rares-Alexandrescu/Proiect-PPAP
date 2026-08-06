@@ -266,11 +266,11 @@ namespace Backend.Endpoints
             }).RequireAuthorization();
 
             app.MapPut("/admin/trimite-comanda/{idComanda:int}/{idComandaPiese:int}", async (
-                            ClaimsPrincipal admin,
-                            IConfiguration config,
-                            IPDFService pdfService,
-                            int idComandaPiese,
-                            int idComanda) =>
+                ClaimsPrincipal admin,
+                IConfiguration config,
+                IPDFService pdfService,
+                int idComandaPiese,
+                int idComanda) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
@@ -394,6 +394,125 @@ namespace Backend.Endpoints
                             return Results.BadRequest(new { message = $"A apărut o eroare critică pe server: {ex.Message}" });
                         }
                     }
+                }
+            }).RequireAuthorization();
+
+            app.MapGet("/admin/download-documentatie-companie/{idCompanie:int}/{idDocumenteComanda:int}", async(
+                int idDocumenteComanda, 
+                int idCompanie,
+                ClaimsPrincipal admin,
+                IConfiguration config
+                ) =>
+            {
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametri = new DynamicParameters();
+                    parametri.Add("@idDocumenteComanda", idDocumenteComanda);
+                    parametri.Add("@idCompanie", companie.Companie_Id);
+
+                    var calePdf = await connection.ExecuteScalarAsync<string>(
+                        "sp_Companie_GetDocumenteComandaPathPdf",
+                        parametri,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (string.IsNullOrEmpty(calePdf))
+                    {
+                        return Results.BadRequest(new { message = "Documentul nu exista sau nu apartine companiei dumneavoastra." });
+                    }
+
+                    var caleFizica = Path.Combine(Directory.GetCurrentDirectory(), calePdf.TrimStart('/'));
+
+                    if (!File.Exists(caleFizica))
+                    {
+                        return Results.NotFound(new { message = "Fisierul nu a fost gasit pe server." });
+                    }
+
+                    var bytes = await File.ReadAllBytesAsync(caleFizica);
+                    return Results.File(bytes, "application/pdf", $"Documentatie_{idCompanie}_{idDocumenteComanda}.pdf");
+                }
+            }).RequireAuthorization();
+
+            app.MapGet("/admin/download-factura-companie/{idCompanie:int}/{idFactura:int}", async(
+                int idFactura,
+                int idCompanie,
+                ClaimsPrincipal admin,
+                IConfiguration config                
+                ) =>
+            {
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametri = new DynamicParameters();
+                    parametri.Add("@idFactura", idFactura);
+                    parametri.Add("@idCompanie", idCompanie);
+
+                    var calePdf = await connection.ExecuteScalarAsync<string>(
+                        "sp_Companie_GetFacturaCompaniePathPdf",
+                        parametri,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (string.IsNullOrEmpty(calePdf))
+                    {
+                        return Results.BadRequest(new { message = "Factura nu exista sau nu apartine companiei dumneavoastra." });
+                    }
+
+                    var caleFizica = Path.Combine(Directory.GetCurrentDirectory(), calePdf.TrimStart('/'));
+
+                    if (!File.Exists(caleFizica))
+                    {
+                        return Results.BadRequest(new { message = "Fisierul nu a fost gasit pe server." });
+                    }
+
+                    var bytes = await File.ReadAllBytesAsync(caleFizica);
+                    return Results.File(bytes, "application/pdf", $"Factura_{idCompanie}_{idFactura}.pdf");
+                }
+            }).RequireAuthorization();
+
+            app.MapGet("/admin/download-factura-furnizor/{idFurnizor:int}/{idFacturi:int}", async (
+                int idFurnizor,
+                int idFacturi,
+                ClaimsPrincipal admin,
+                IConfiguration config) =>
+            {
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametri = new DynamicParameters();
+                    parametri.Add("@idFurnizor", idFurnizor);
+                    parametri.Add("@idFacturi", idFacturi);
+
+                    var calePdf = await connection.ExecuteScalarAsync<string>(
+                        "sp_Furnizor_GetFacturiFurnizorPathPdf",
+                        parametri,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (string.IsNullOrEmpty(calePdf))
+                    {
+                        return Results.BadRequest(new { message = "Factura nu exista sau nu apartine companiei dumneavoastra." });
+                    }
+
+                    var caleFizica = Path.Combine(Directory.GetCurrentDirectory(), calePdf.TrimStart('/'));
+
+                    if (!File.Exists(caleFizica))
+                    {
+                        return Results.BadRequest(new { message = "Fisierul nu a fost gasit pe server." });
+                    }
+
+                    var bytes = await File.ReadAllBytesAsync(caleFizica);
+                    return Results.File(bytes, "application/pdf", $"Factura_{idFurnizor}_{idFacturi}.pdf");
                 }
             }).RequireAuthorization();
         }

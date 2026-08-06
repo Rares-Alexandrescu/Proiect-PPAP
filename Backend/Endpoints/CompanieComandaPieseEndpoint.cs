@@ -699,8 +699,8 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
 
-            app.MapPut("/compania-ta/receptioneaza-comanda/{idComanda:int}", async(
-                 int idComanda,
+            app.MapPut("/compania-ta/receptioneaza-comanda/{idComanda:int}", async (
+                int idComanda,
                 ClaimsPrincipal adminCompanie,
                 IPDFService pdfService,
                 IConfiguration config) =>
@@ -732,13 +732,98 @@ namespace Backend.Endpoints
 
                     int rezultatCommanda = await connection.ExecuteAsync("sp_Documente_Comanda_CompaniaReceptioneazaComanda");
 
-                    if(rezultatCommanda == 0)
+                    if (rezultatCommanda == 0)
                     {
                         return Results.BadRequest(new { message = "Nu s-a putut receptiona comanda!" });
                     }
 
                     return Results.Ok(new { message = "S-a receptionat comanda cu succes!" });
 
+                }
+            }).RequireAuthorization();
+
+            ////doua getere pentru daunlaud
+            app.MapGet("/compania-ta/download-factura/{idFactura:int}", async (
+                int idFactura,
+                ClaimsPrincipal utilizatorCompanie,
+                IConfiguration config) =>
+            {
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+
+                if (eroare != null) return eroare;
+
+                if (companie == null)
+                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametri = new DynamicParameters();
+                    parametri.Add("@idFactura", idFactura);
+                    parametri.Add("@idCompanie", companie.Companie_Id);
+
+                    var calePdf = await connection.ExecuteScalarAsync<string>(
+                        "sp_Companie_GetFacturaCompaniePathPdf",
+                        parametri,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (string.IsNullOrEmpty(calePdf))
+                    {
+                        return Results.BadRequest(new { message = "Factura nu exista sau nu apartine companiei dumneavoastra." });
+                    }
+
+                    var caleFizica = Path.Combine(Directory.GetCurrentDirectory(), calePdf.TrimStart('/'));
+
+                    if (!File.Exists(caleFizica))
+                    {
+                        return Results.BadRequest(new { message = "Fisierul nu a fost gasit pe server." });
+                    }
+
+                    var bytes = await File.ReadAllBytesAsync(caleFizica);
+                    return Results.File(bytes, "application/pdf", $"Factura_{companie.Nume_Companie}_{idFactura}.pdf");
+                }
+            }).RequireAuthorization();
+
+            app.MapGet("/compania-ta/download-documentatie/{idDocumenteComanda:int}", async (
+                int idDocumenteComanda,
+                ClaimsPrincipal utilizatorCompanie,
+                IConfiguration config) =>
+            {
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(utilizatorCompanie, connectionString!);
+
+                if (eroare != null) return eroare;
+
+                if (companie == null)
+                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici!" });
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametri = new DynamicParameters();
+                    parametri.Add("@idDocumenteComanda", idDocumenteComanda);
+                    parametri.Add("@idCompanie", companie.Companie_Id);
+
+                    var calePdf = await connection.ExecuteScalarAsync<string>(
+                        "sp_Companie_GetDocumenteComandaPathPdf",
+                        parametri,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (string.IsNullOrEmpty(calePdf))
+                    {
+                        return Results.BadRequest(new { message = "Documentul nu exista sau nu apartine companiei dumneavoastra." });
+                    }
+
+                    var caleFizica = Path.Combine(Directory.GetCurrentDirectory(), calePdf.TrimStart('/'));
+
+                    if (!File.Exists(caleFizica))
+                    {
+                        return Results.NotFound(new { message = "Fisierul nu a fost gasit pe server." });
+                    }
+
+                    var bytes = await File.ReadAllBytesAsync(caleFizica);
+                    return Results.File(bytes, "application/pdf", $"Documentatie_{companie.Nume_Companie}_{idDocumenteComanda}.pdf");
                 }
             }).RequireAuthorization();
         }
