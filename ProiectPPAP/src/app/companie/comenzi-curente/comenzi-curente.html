@@ -46,14 +46,14 @@
             </td>
             <td>
               @if (item.documentComanda?.path_documente_pdf) {
-              <span class="status-badge status-plasata">Generat</span>
+              <span class="status-badge status-plasata", (click) ="descarcaDocumentatia(item.documentComanda.documente_id)">Generat</span>
               } @else {
               <span class="status-badge status-pending">Indisponibil</span>
               }
             </td>
             <td>
               @if (item.factura) {
-              <span class="status-badge status-plasata">{{ item.factura.pret_brut }} RON</span>
+              <span class="status-badge status-plasata", (click) ="descarcaFactura(item.factura.factura_id)">{{ item.factura.pret_brut }} RON</span>
               } @else {
               <span class="status-badge status-pending">Fără factură</span>
               }

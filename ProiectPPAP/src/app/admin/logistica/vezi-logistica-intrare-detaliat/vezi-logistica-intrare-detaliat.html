@@ -16,7 +16,6 @@
           ({{ factura()?.statistici?.linii_expediate }} / {{ factura()?.statistici?.linii_total }})
         </span>
         }
-
       </div>
     </div>
 
@@ -30,10 +29,10 @@
       }
 
       @if (factura()?.factura?.path_factura_pdf) {
-      <a class="buton-principal buton-adauga galben"
-         [href]="factura()!.factura.path_factura_pdf!" target="_blank">
+      <button class="buton-principal buton-adauga galben"
+              (click)="descarcaFactura(factura()!.factura.furnizor_id, factura()!.factura.facturi_id)">
         Vezi PDF Factură
-      </a>
+      </button>
       }
     </div>
   </div>

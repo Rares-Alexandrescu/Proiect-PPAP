@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 
@@ -127,5 +127,64 @@ export class VeziFacturiComponent implements OnInit {
       });
   }
 
+
+
   //imi trebuie si ceva de incarcafacturi etc samd
+
+  descarcaFactura(idFacturi: number): void {
+    this.http.get(`${environment.apiUrl}/admin-furnizor/download-factura/${idFacturi}`, {
+      responseType: 'blob',
+      observe: 'response'
+    }).subscribe({
+      next: (raspuns) => {
+        console.log(raspuns.headers.get('content-disposition'));
+        this.salveazaFisierDinRaspuns(raspuns, `Documentatie_Muie_${idFacturi}.pdf`);
+      },
+      error: (eroare) => {
+        if (eroare.status === 401) {
+          this.router.navigate(['/dashboard']);
+        } else if (eroare.status === 404) {
+          this.alertaEroare.set('Documentul nu a fost gasit.');
+        } else {
+          console.error('Eroare la descarcarea documentatiei:', eroare);
+          this.alertaEroare.set('Nu s-a putut descarca documentul.' + eroare.error.message);
+        }
+      }
+    });
+  }
+
+    private salveazaFisierDinRaspuns(raspuns: HttpResponse<Blob>, numeImplicit: string): void {
+    const blob = raspuns.body;
+    if (!blob) return;
+
+    const numeFisier = this.extrageNumeDinHeader(raspuns.headers.get('content-disposition')) ?? numeImplicit;
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = numeFisier;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+
+  private extrageNumeDinHeader(contentDisposition: string | null): string | null {
+    if (!contentDisposition) return null;
+
+    const matchUtf8 = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (matchUtf8) {
+      return decodeURIComponent(matchUtf8[1]);
+    }
+
+    const matchSimplu = contentDisposition.match(/filename="?([^";]+)"?/i);
+    if (matchSimplu) {
+      return matchSimplu[1];
+    }
+
+    return null;
+  }
+
+
 }

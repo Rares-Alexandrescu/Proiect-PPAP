@@ -67,9 +67,9 @@
 
             <td>
               @if (item.factura.path_factura_pdf) {
-              <span class="status-badge status-plasata">Generat</span>
+              <span class="status-badge status-plasata" (click)= "descarcaFactura(item.factura.facturi_id)">Generat</span>
               } @else {
-              <span class="status-badge status-pending">Indisponibil</span>
+              <span class="status-badge status-lipsa">Indisponibil</span>
               }
             </td>
 

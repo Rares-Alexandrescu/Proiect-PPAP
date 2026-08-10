@@ -16,8 +16,22 @@
       </div>
     </div>
 
-    <div style="display: flex; gap: 0.75rem;">
+    <div class="bara-actiuni">
       <button class="buton-principal buton-adauga" (click)="inapoiLaLista()">&larr; Înapoi</button>
+
+      @if (comanda()?.comanda?.documente_id) {
+      <button class="buton-principal buton-adauga albastru"
+              (click)="descarcaDocumentatia(comanda()!.companie.companie_Id, comanda()!.comanda.documente_id)">
+        Descarcă Documentație
+      </button>
+      }
+      @if (comanda()?.documenteComandaId?.factura_id) {
+      <button class="buton-principal buton-adauga galben"
+              (click)="descarcaFactura(comanda()!.companie.companie_Id, comanda()!.documenteComandaId.factura_id)">
+        Descarcă Factură
+      </button>
+      }
+
     </div>
   </div>
 

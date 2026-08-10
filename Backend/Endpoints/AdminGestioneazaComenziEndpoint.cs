@@ -200,11 +200,12 @@ namespace Backend.Endpoints
                         Companie,
                         ComandaPiese,
                         Piese,
-                        (Comanda Comanda, Companie Companie, ComandaPiese Linie, Piese Piesa)>(
+                        DocumenteComandaId,
+                        (Comanda Comanda, Companie Companie, ComandaPiese Linie, Piese Piesa, DocumenteComandaId documenteComandaId)>(
                         "sp_Companie_AdminGeneralGetFacturiIesire",
-                        (comanda, companie, linie, piesa) => (comanda, companie, linie, piesa),
+                        (comanda, companie, linie, piesa, documenteComandaId) => (comanda, companie, linie, piesa, documenteComandaId),
                         parametri,
-                        splitOn: "companie_id, comanda_piese_id, piese_id",
+                        splitOn: "companie_id, comanda_piese_id, piese_id, documente_id",
                         commandType: CommandType.StoredProcedure
                     );
 
@@ -214,6 +215,7 @@ namespace Backend.Endpoints
                         {
                             Comanda = grup.First().Comanda,
                             Companie = grup.First().Companie,
+                            DocumenteComandaId = grup.First().documenteComandaId,
                             Linii = grup.Select(x => new
                             {
                                 ComandaPiesa = x.Linie,
@@ -413,7 +415,7 @@ namespace Backend.Endpoints
                 {
                     var parametri = new DynamicParameters();
                     parametri.Add("@idDocumenteComanda", idDocumenteComanda);
-                    parametri.Add("@idCompanie", companie.Companie_Id);
+                    parametri.Add("@idCompanie", idCompanie);
 
                     var calePdf = await connection.ExecuteScalarAsync<string>(
                         "sp_Companie_GetDocumenteComandaPathPdf",
@@ -516,5 +518,11 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
         }
+    }
+
+    public class DocumenteComandaId
+    {
+        public int? factura_id { get; set; }
+        public int? documente_id { get; set; }
     }
 }

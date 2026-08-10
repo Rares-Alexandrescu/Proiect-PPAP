@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 
@@ -12,12 +12,16 @@ export interface Comanda {
 }
 
 export interface Companie {
-  companie_id: number;
+  companie_Id: number;
   nume_Companie: string;
   email: string;
   numar_Telefon: string;
 }
 
+export interface DocumenteComandaId {
+  factura_id: number;
+  documente_id: number;
+}
 export interface ComandaPiese {
   comanda_piese_id: number;
   cantitate_comandata: number;
@@ -40,6 +44,7 @@ export interface LinieComandaDetaliata {
 export interface ComandaIesireDetaliata {
   comanda: Comanda;
   companie: Companie;
+  documenteComandaId: DocumenteComandaId;
   linii: LinieComandaDetaliata[];
 }
 
@@ -151,4 +156,83 @@ export class VeziLogisticaIesireDetaliatComponent implements OnInit {
       }
     });
   }
+
+
+  descarcaDocumentatia(idCompanie: number, idDocumenteComanda: number): void {
+    this.http.get(`${environment.apiUrl}/admin/download-documentatie-companie/${idCompanie}/${idDocumenteComanda}`, {
+      responseType: 'blob',
+      observe: 'response'
+    }).subscribe({
+      next: (raspuns) => {
+        console.log(raspuns.headers.get('content-disposition'));
+        this.salveazaFisierDinRaspuns(raspuns, `DocumentatieCompanieAdmin_${idCompanie}_${idDocumenteComanda}.pdf`);
+      },
+      error: (eroare) => {
+        if (eroare.status === 401) {
+          this.router.navigate(['/dashboard']);
+        } else if (eroare.status === 404) {
+          this.alertaEroare.set('Documentul nu a fost gasit.');
+        } else {
+          console.error('Eroare la descarcarea documentatiei:', eroare);
+          this.alertaEroare.set('Nu s-a putut descarca documentul.');
+        }
+      }
+    });
+  }
+
+  descarcaFactura(idCompanie: number, idFactura: number): void {
+    this.http.get(`${environment.apiUrl}/admin/download-factura-companie/${idCompanie}/${idFactura}`, {
+      responseType: 'blob',
+      observe: 'response'
+    }).subscribe({
+      next: (raspuns) => {
+        console.log(raspuns.headers.get('content-disposition'));
+        this.salveazaFisierDinRaspuns(raspuns, `FacturaCompanie_Muie_${idFactura}_${idCompanie}.pdf`);
+      },
+      error: (eroare) => {
+        if (eroare.status === 401) {
+          this.router.navigate(['/dashboard']);
+        } else if (eroare.status === 404) {
+          this.alertaEroare.set('Documentul nu a fost gasit.');
+        } else {
+          console.error('Eroare la descarcarea facturii:', eroare);
+          this.alertaEroare.set('Nu s-a putut descarca factura.');
+        }
+      }
+    });
+  }
+
+  private salveazaFisierDinRaspuns(raspuns: HttpResponse<Blob>, numeImplicit: string): void {
+    const blob = raspuns.body;
+    if (!blob) return;
+
+    const numeFisier = this.extrageNumeDinHeader(raspuns.headers.get('content-disposition')) ?? numeImplicit;
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = numeFisier;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+
+  private extrageNumeDinHeader(contentDisposition: string | null): string | null {
+    if (!contentDisposition) return null;
+
+    const matchUtf8 = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (matchUtf8) {
+      return decodeURIComponent(matchUtf8[1]);
+    }
+
+    const matchSimplu = contentDisposition.match(/filename="?([^";]+)"?/i);
+    if (matchSimplu) {
+      return matchSimplu[1];
+    }
+
+    return null;
+  }
+
 }

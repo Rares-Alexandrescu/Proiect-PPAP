@@ -13,9 +13,9 @@ namespace Backend.Endpoints
     {
         public static void MapFurnizorFactureazaPieseEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGet("/admin-furnizor/vezi-facturi",  async(
+            app.MapGet("/admin-furnizor/vezi-facturi", async (
                 ClaimsPrincipal adminFurnizor,
-                IConfiguration config)=>
+                IConfiguration config) =>
             {
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
@@ -23,9 +23,9 @@ namespace Backend.Endpoints
                 if (eroareAutentificare != null) return eroareAutentificare;
 
                 var (erori, furnizorAdmin, idAdminFurnizor) = await SecurityHelper.ObtineFurnizorAdminLocal(adminFurnizor, connectionString);
-                if(erori != null) return erori;
+                if (erori != null) return erori;
 
-                using( var connection = new SqlConnection(connectionString) )
+                using (var connection = new SqlConnection(connectionString))
                 {
                     var parametruAdminFurnizor = new DynamicParameters();
                     parametruAdminFurnizor.Add("@idFurnizor", furnizorAdmin.Furnizor_Id);
@@ -38,7 +38,7 @@ namespace Backend.Endpoints
                         "sp_Furnizor_GetFacturiFurnizorByFurnizorId",
                         (factura, logistica) => (factura, logistica),
                         parametruAdminFurnizor,
-                        splitOn: "stadiu_logistica_factura",            
+                        splitOn: "stadiu_logistica_factura",
                         commandType: CommandType.StoredProcedure
                     );
 
@@ -46,8 +46,8 @@ namespace Backend.Endpoints
                     {
                         ListaFacturi = facturi.Select(item => new
                         {
-                            Factura = item.Factura,     
-                            StatisticiFactura = item.Logistica   
+                            Factura = item.Factura,
+                            StatisticiFactura = item.Logistica
                         }),
                         Furnizor = furnizorAdmin
                     });
@@ -90,7 +90,7 @@ namespace Backend.Endpoints
                         commandType: CommandType.StoredProcedure
                     );
 
-                    if(facturaDetaliata == null || !facturaDetaliata.Any())
+                    if (facturaDetaliata == null || !facturaDetaliata.Any())
                     {
                         return Results.BadRequest(new { message = "Nu exista factura, sau nu e factura dumneavoastra!" });
                     }
@@ -153,16 +153,16 @@ namespace Backend.Endpoints
                         return Results.BadRequest(new { message = "Nu exista factura, sau nu apartine furnizorului dumneavoastra!" });
                     }
                     Console.WriteLine("S-au trimis " + randuriAfectate + " linii ca si unu");
-                    return Results.Ok(new { message = "Comanda a fost marcata ca trimisa."});
+                    return Results.Ok(new { message = "Comanda a fost marcata ca trimisa." });
                 }
 
             }).RequireAuthorization();
 
-            app.MapPost("/admin-furnizor/trimite-linia-comanda/{idFactura:int}/{idFacturaLinie:int}", async(
+            app.MapPost("/admin-furnizor/trimite-linia-comanda/{idFactura:int}/{idFacturaLinie:int}", async (
                 int idFactura,
                 int idFacturaLinie,
                 ClaimsPrincipal adminFurnizor,
-                IConfiguration config)=>
+                IConfiguration config) =>
             {
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
@@ -192,12 +192,12 @@ namespace Backend.Endpoints
                     }
 
                     Console.WriteLine("S-au trimis " + randuriAfectate + " linii ca si unu");
-                    return Results.Ok(new { message = "Linia de comanda a fost marcata ca trimisa."});
+                    return Results.Ok(new { message = "Linia de comanda a fost marcata ca trimisa." });
                 }
 
             }).RequireAuthorization();
 
-            app.MapPost("/admin-furnizor/genereaza-facturi", async(
+            app.MapPost("/admin-furnizor/genereaza-facturi", async (
                 ClaimsPrincipal adminFurnizor,
                 IPDFService pdfService,
                 IConfiguration config) =>
@@ -215,11 +215,11 @@ namespace Backend.Endpoints
 
                     var parametriTrimitere = new DynamicParameters();
                     parametriTrimitere.Add("@idFurnizor", furnizorAdmin.Furnizor_Id);
-                    
+
                     //SI CEVA DE PDF, HAI CA VEDEM CUM FACEM...
                     //fac de aici, o sa trebuiasca sa fac aci
                     //momentan nici nu e facut sp=ul puncte puncte puncte
-                    
+
                     //in pdf imi trebuie datele furnizorului, piese, liniile de factura, factura
 
                     var idFactura = await connection.ExecuteScalarAsync<int>(
@@ -242,7 +242,7 @@ namespace Backend.Endpoints
                         FacturiFurnizor,
                         Piese,
                         TotalPiesaFactura,
-                        (FacturiFurnizor Factura, Piese Piesa, TotalPiesaFactura Total) > (
+                        (FacturiFurnizor Factura, Piese Piesa, TotalPiesaFactura Total)>(
                         "sp_Furnizor_GetFacturaPentruPdf",
                         (factura, piesa, total) => (factura, piesa, total),
                         parametriTrimitere,
@@ -328,16 +328,18 @@ namespace Backend.Endpoints
             }).RequireAuthorization();
 
         }
-    public class StatisticiFactura
-    {
-        public string stadiu_logistica_factura { get; set; } = "Zero";
-        public int linii_expediate { get; set; } = 0;
-        public int linii_total { get; set; } = 0;
-        public bool? receptie_comanda { get; set; } = false;
     }
-    public class TotalPiesaFactura
-    {
-        public int CantitateTotala { get; set; }
-        public decimal PretTotalPiesa { get; set; }
-    }
+        public class StatisticiFactura
+        {
+            public string stadiu_logistica_factura { get; set; } = "Zero";
+            public int linii_expediate { get; set; } = 0;
+            public int linii_total { get; set; } = 0;
+            public bool? receptie_comanda { get; set; } = false;
+        }
+        public class TotalPiesaFactura
+        {
+            public int CantitateTotala { get; set; }
+            public decimal PretTotalPiesa { get; set; }
+        }
+    
 }

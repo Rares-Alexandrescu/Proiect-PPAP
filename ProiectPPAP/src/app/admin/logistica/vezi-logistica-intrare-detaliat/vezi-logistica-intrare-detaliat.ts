@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 
@@ -143,6 +143,62 @@ export class VeziLogisticaIntrareDetaliatComponent implements OnInit {
     const linii = this.factura()?.linii ?? [];
     if (linii.length === 0) return false;
     return linii.every(l => l.comandaPiesa.stadiu_intern === valoare);
+  }
+
+  descarcaFactura(idFurnizor: number, idFacturi: number): void {
+    this.http.get(`${environment.apiUrl}/admin/download-factura-furnizor/${idFurnizor}/${idFacturi}`, {
+      responseType: 'blob',
+      observe: 'response'
+    }).subscribe({
+      next: (raspuns) => {
+        this.salveazaFisierDinRaspuns(raspuns, `FacturaFurnizor_${idFurnizor}_${idFacturi}.pdf`);
+      },
+      error: (eroare) => {
+        if (eroare.status === 401) {
+          this.router.navigate(['/dashboard']);
+          {
+            console.error('Eroare la descarcarea documentului:', eroare);
+            this.alertaEroare.set('Nu s-a putut descarca factura.' + eroare.error.message);
+          }
+        }
+        else {
+          console.error('Eroare la descarcarea documentului:', eroare);
+          this.alertaEroare.set('Nu s-a putut descărca factura.');
+        }
+      }
+    });
+  }
+
+  private salveazaFisierDinRaspuns(raspuns: HttpResponse<Blob>, numeImplicit: string): void {
+    const blob = raspuns.body;
+    if (!blob) return;
+
+    const numeFisier = this.extrageNumeDinHeader(raspuns.headers.get('content-disposition')) ?? numeImplicit;
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = numeFisier;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+  private extrageNumeDinHeader(contentDisposition: string | null): string | null {
+    if (!contentDisposition) return null;
+
+    const matchUtf8 = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (matchUtf8) {
+      return decodeURIComponent(matchUtf8[1]); 
+    }
+
+    const matchSimplu = contentDisposition.match(/filename="?([^";]+)"?/i);
+    if (matchSimplu) {
+      return matchSimplu[1];
+    }
+
+    return null;
   }
 
 }
