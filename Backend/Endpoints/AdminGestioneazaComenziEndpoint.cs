@@ -384,6 +384,7 @@ namespace Backend.Endpoints
                                     commandType: CommandType.StoredProcedure);
 
                                 transaction.Commit();
+                                //aici trebuie sa fac un mail de trimitere catre companie
                                 return Results.Ok(new { message = "Comanda a fost trimisa catre companie, factura pentru comanda asta a fost generata!" });
                             }
 
@@ -517,8 +518,40 @@ namespace Backend.Endpoints
                     return Results.File(bytes, "application/pdf", $"Factura_{idFurnizor}_{idFacturi}.pdf");
                 }
             }).RequireAuthorization();
+
+
+            app.MapPut("/admin/plateste-factura-furnizor/{idFacturi:int}", async (
+                int idFacturi,
+                ClaimsPrincipal admin,
+                IConfiguration config) =>
+            {
+                var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var parametri = new DynamicParameters();
+                    parametri.Add("@idFacturi", idFacturi);
+
+                    //sa ma gandesc daca asa e cea mai buna chestie de fct
+
+                    var randuriModificate = await connection.ExecuteScalarAsync<int>(
+                        "sp_Furnizor_AdminGeneralPlatesteFacturiFurnizori",
+                        parametri,
+                        commandType: CommandType.StoredProcedure);
+
+                    if(randuriModificate != 1)
+                    {
+                        return Results.BadRequest(new { message = "Factura nu exista sau deja a fost platita!" });
+                    }
+
+                    //mail plata factura furnizorul asta etc cu detalii poate etc
+                    return Results.Ok(new { message = "Factura a fost platita cu succes!" });
+                }
+            }).RequireAuthorization();
         }
-    }
 
     public class DocumenteComandaId
     {

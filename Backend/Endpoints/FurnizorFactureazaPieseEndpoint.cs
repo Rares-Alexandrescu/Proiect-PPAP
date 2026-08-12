@@ -216,12 +216,6 @@ namespace Backend.Endpoints
                     var parametriTrimitere = new DynamicParameters();
                     parametriTrimitere.Add("@idFurnizor", furnizorAdmin.Furnizor_Id);
 
-                    //SI CEVA DE PDF, HAI CA VEDEM CUM FACEM...
-                    //fac de aici, o sa trebuiasca sa fac aci
-                    //momentan nici nu e facut sp=ul puncte puncte puncte
-
-                    //in pdf imi trebuie datele furnizorului, piese, liniile de factura, factura
-
                     var idFactura = await connection.ExecuteScalarAsync<int>(
                     "sp_Furnizor_GenereazaFacturi",
                     parametriTrimitere,
@@ -259,14 +253,12 @@ namespace Backend.Endpoints
 
                     var liniiFactura = rezultate.Select(r => (r.Piesa, r.Total));
 
-                    //tre a fac si un serviu de isntalare direct din brauzer
                     var caleFisier = await pdfService.GenereazaPdfFacturaFurnizorAsync(
                         factura,
                         furnizorAdmin.Nume_Furnizor,
                         liniiFactura
                     );
 
-                    //tre sa o pun in db pe pdf_cale...
                     var parametruFacturaFurnizor = new DynamicParameters();
                     parametruFacturaFurnizor.Add("@idFurnizor", furnizorAdmin.Furnizor_Id);
                     parametruFacturaFurnizor.Add("@idFactura", idFactura);

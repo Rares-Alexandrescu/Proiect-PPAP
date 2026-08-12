@@ -416,6 +416,29 @@ namespace Backend.Helpers
             }
         }
 
+        public static async Task<(IResult? Eroare, FacturaCompanie? FacturaGasita)> VerificaSiObtineFacturaCompanieDupaId(
+            int idFactura,
+            int idCompanie,
+            string connectionString)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var parametruFactura = new DynamicParameters();
+                parametruFactura.Add("@idFactura", idFactura);
+                parametruFactura.Add("@idCompanie", idCompanie);
+
+                var FacturaCompanieCeruta = await connection.QueryFirstOrDefaultAsync<FacturaCompanie>(
+                    "sp_Factura_Companie_GetFacturaCompanieById",
+                    parametruFactura,
+                    commandType: CommandType.StoredProcedure);
+
+                if (FacturaCompanieCeruta == null)
+                    return (Results.BadRequest(new { message = "Nu exista factura ceruta!" }), null);
+
+                return (null, FacturaCompanieCeruta);
+            }
+        }
+
         public static async Task<(IResult? Eroare, Utilizator? Utilizator)> VerificaUtilizatorPentruAdaugareInCompanie(
             string emailSauCnp,
             Companie companieLocalAdmin,

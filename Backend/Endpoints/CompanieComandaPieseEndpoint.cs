@@ -1,13 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Dapper;
-using System.Data;
-using System.Security.Claims;
-using Backend.DBClasses;
-using Backend.Helpers;
-using Backend.Services;
-
-namespace Backend.Endpoints
+﻿namespace Backend.Endpoints
 {
     public static class CompanieComandaPieseEndpoint
     {
@@ -742,7 +733,47 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
 
-            ////doua getere pentru daunlaud
+            app.MapPut("/compania-ta/plateste-factura/{idFactura:int}", async (
+                int idFactura,
+                ClaimsPrincipal adminCompanie,
+                IConfiguration config) =>
+            {
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                var eroareAutentificare = await SecurityHelper.VerificaAdminLocal(adminCompanie, config);
+                if (eroareAutentificare != null) return eroareAutentificare;
+
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(adminCompanie, connectionString!);
+                if (eroare != null) return eroare;
+
+                if (companie == null)
+                    return Results.BadRequest(new { message = "Nu are companie, nu are voie aici, desi a verificat adminlocal....!" });
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+
+                    var (eroareFactura, facturaCeruta) = await SecurityHelper.VerificaSiObtineFacturaCompanieDupaId(
+                        idFactura,
+                        companie.Companie_Id,
+                        connectionString!);
+
+                    if (eroareFactura != null) return eroareFactura;
+
+                    var parametruFactura = new DynamicParameters();
+                    parametruFactura.Add("@idFactura", idFactura);
+
+                    int rezultatFactura = await connection.ExecuteAsync("sp_Factura_Companie_PlatesteFactura",
+                        parametruFactura,
+                        commandType: CommandType.StoredProcedure);
+
+                    if (rezultatFactura == 0)
+                        return Results.BadRequest(new { message = "Nu s-a platit factura!" });
+
+                    return Results.Ok(new { message = "Factura platita cu succes!" });
+
+                }
+            }).RequireAuthorization();
+
             app.MapGet("/compania-ta/download-factura/{idFactura:int}", async (
                 int idFactura,
                 ClaimsPrincipal utilizatorCompanie,
