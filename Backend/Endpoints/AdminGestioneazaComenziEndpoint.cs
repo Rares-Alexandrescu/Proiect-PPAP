@@ -157,10 +157,11 @@ namespace Backend.Endpoints
                     var comenziIesire = await connection.QueryAsync<
                         Comanda,
                         Companie,
-                        (Comanda Comanda, Companie Companie)>(
+                        FacturaCompanie,
+                        (Comanda Comanda, Companie Companie, FacturaCompanie FacturaCompanie)>(
                         "sp_Companie_AdminGeneralGetFacturiIesire",
-                        (comanda, companie) => (comanda, companie),
-                        splitOn: "companie_id",
+                        (comanda, companie, facturaCompanie) => (comanda, companie, facturaCompanie),
+                        splitOn: "companie_id, factura_id",
                         commandType: CommandType.StoredProcedure
                     );
 
@@ -169,7 +170,8 @@ namespace Backend.Endpoints
                         .Select(grup => new
                         {
                             Comanda = grup.First().Comanda,
-                            Companie = grup.First().Companie
+                            Companie = grup.First().Companie,
+                            FacturaCompanie = grup.First().FacturaCompanie,
                         })
                         .ToList();
 

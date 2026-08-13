@@ -18,9 +18,20 @@ export interface Companie {
   numar_Telefon: string;
 }
 
+export interface FacturaCompanie{
+  factura_id: number;
+  comanda_id: number;
+  companie_id: number;
+  pret_brut: number;
+  path_factura_pdf: string;
+  stadiu_plata: boolean;
+  created_at: string;
+}
+
 export interface ComandaIesireSumar {
   comanda: Comanda;
   companie: Companie;
+  facturaCompanie: FacturaCompanie;
 }
 
 export interface RaspunsListaComenziIesire {
