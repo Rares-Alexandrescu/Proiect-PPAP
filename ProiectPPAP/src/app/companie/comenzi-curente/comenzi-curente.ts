@@ -188,6 +188,34 @@ export class ComenziCurenteComponent implements OnInit {
     });
   }
 
+  platesteFactura(idFactura: number): void {
+    if (!confirm('Ești sigur că vrei să platesti această comandă?')) {
+      return;
+    }
+
+    this.seIncarca.set(true);
+    this.alertaEroare.set('');
+    this.alertaSucces.set('');
+
+    this.http.put<{ message: string }>(
+      `${environment.apiUrl}/compania-ta/plateste-factura/${idFactura}`,
+      null
+    ).subscribe({
+      next: (res) => {
+        this.seIncarca.set(false);
+        this.alertaSucces.set(res.message);
+        this.incarcaComenzile();
+        setTimeout(() => this.alertaSucces.set(''), 2000);
+      },
+      error: (err) => {
+        this.seIncarca.set(false);
+        this.alertaEroare.set(err.error?.message ?? 'Eroare la plata facturii!');
+        setTimeout(() => this.alertaEroare.set(''), 2000);
+      }
+    });
+
+  }
+
   descarcaFactura(idFactura: number): void {
     this.http.get(`${environment.apiUrl}/compania-ta/download-factura/${idFactura}`, {
       responseType: 'blob',

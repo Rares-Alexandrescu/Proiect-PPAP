@@ -28,9 +28,6 @@ namespace Backend.Endpoints
 
                 using (var connection = new SqlConnection(connectionString))
                 {
-                    //trebuie sa scot comenzile, cu toate datele, poate intr-o clasa 
-                    //ok, cu id uri si tot felu ca sa fie atat modlara, cat si sa nufie 
-                    //prea full, of ce greu e
 
                     var parametriiCompanie = new DynamicParameters();
                     parametriiCompanie.Add("@idCompanie", companie!.Companie_Id);
@@ -69,12 +66,7 @@ namespace Backend.Endpoints
                             Factura = facturaAferenta
                         };
                     }).ToList();
-                    //o sa fac jsonul fix pentru asta, nu dau toate datele in responsebody
-                    //doar pathul de pdf, etcuri de genul asta, id-urile pentru alte chestii care o sa fie aici, aici fac doar comenzile si restul le arunc in alte
-                    //endpointuri
-                    //am facut clasele exact ca si in db, hai sa fac un json care safie ce e in dashboard + comenzile astea
 
-                    //dar e gata in principiu aici
                     return Results.Ok(new
                     {
                         Utilizator = new
@@ -97,10 +89,6 @@ namespace Backend.Endpoints
                 ClaimsPrincipal utilizatorCompanie,
                 IConfiguration config) =>
             {
-                //o mie de joinuri, sa vad un posibil total si asa mai departe
-                //dar trebuie sa vad neaparat toate alea, sa vad cum fac jeisonu
-                //dar fac asta inainte de toate, de aici o sa pot sa comand si tot felu de...
-                //vreau sa vad fiecare piesa, furnizorul, comentariile, pretul care s a adunat pana acuma pe comanda asta
 
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
@@ -476,13 +464,6 @@ namespace Backend.Endpoints
 
             }).RequireAuthorization();
 
-            //doamne 1001 probleme, poate maine pe douazeci si unu iulie douamiidouazecisisase fac si pdf si 
-            //anghiuleru.... ar fi un vis frumos sp_Piesa_Companie_GetPiesaActivaByPiesaId
-            //deci sa vad daca fac logica asta cu facturile, sa vd daca diferentiez comenzile una fata de alta
-            //sa pot adauga doar si doar daca e pending
-            //ar fi defapt un status, daca e unu, e plasata. daca e zero inca asteapta
-            //dar nu am voie sa adaug daca e unu, alta mancare de peste....
-            //daca e fac sa vad comenzile, dar nuj daca asta e solutia, sa iau comenzile la care pot, si daca nu are atunci ultima teapa
 
             app.MapPost("/compania-ta/adauga-piesa/{idFurnizor:int}/{idPiesa:int}", async (
                     int idFurnizor,
@@ -503,12 +484,6 @@ namespace Backend.Endpoints
 
                 using (var connection = new SqlConnection(connectionString))
                 {
-                    //deci aici trebuie sa :
-                    //sa adaug si in comanda
-                    //sa adaug si in comanda piese
-                    //dar si in documente, dar stadiu acceptare ar fi null inca
-                    //INCA NU CREEZ FACTURI, DOCUMENTE SI ALTE ETCURI DE GENU
-                    //SA VERIFIC DACA COMANDA CERUTA MERGE SA FIE UPDATATA, ALTFEL PULA
 
                     var parametruPiesa = new DynamicParameters();
                     parametruPiesa.Add("@idPiesa", idPiesa); //get piesa doar pentru companie,nu ne trebuie date inutile
@@ -651,14 +626,6 @@ namespace Backend.Endpoints
                             message = "Comanda e goala!"
                         });
                     }
-
-                    //deci stai ca deja am plesnit-o rau, am documente dar n am factura... uof
-                    //functia de pdf mi ar face defapt o factura, sa moara masa
-                    //sa zicem ca asta ar fi quote-ul cum ar veni
-                    //comanda e plasata, dar tre sa vad oe ce ma bazez
-                    //hm, ar mai fi nevoie de o confirmare din partea adminului, doamne ce complicat....
-                    //deci comanda --> se face document_compnaie, factura chix. , sa plaseze adminul comanda si dupa sa accepte iar si pentru factura?
-                    //sau ar fi o chestie la modul trimisa iar, mai succint, direct dupa ce s a trimis
 
 
                     decimal totalGeneralComanda = rezultate.FirstOrDefault().TotalPretComanda;

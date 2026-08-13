@@ -78,6 +78,10 @@
                 {
                 <button class="buton-actiune buton-verde" (click)="receptiePrimire(item.factura.facturi_id)">Marcheaza Receptia Pieselor</button>
                 }
+                @if (item.factura.stadiu_plata == false)
+                {
+                <button class="buton-actiune buton-albastru" (click)="platesteFactura(item.factura.facturi_id)">Plateste factura</button>
+                }
               </div>
             </td>
           </tr>

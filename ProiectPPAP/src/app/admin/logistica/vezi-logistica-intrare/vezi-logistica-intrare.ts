@@ -104,18 +104,50 @@ export class VeziLogisticaIntrareComponent {
   }
 
   receptiePrimire(idFactura: number): void {
-    this.http.put<{ message: string }>(
-      `${environment.apiUrl}/admin/receptie-primire/${idFactura}`,
-      null
-    ).subscribe({
-      next: (res) => {
-        this.alertaSucces.set(res.message);
-        this.incarcaFacturi();
-      },
-      error: (err) => {
-        this.alertaEroare.set(err.error?.message ?? 'Eroare la confirmarea receptiei.');
-      }
-    });
+    if (confirm('Ești sigur că vrei să confirmi recepția pentru această factură?')) {
+      this.seIncarca.set(true);
+
+      this.http.put<{ message: string }>(
+        `${environment.apiUrl}/admin/receptie-primire/${idFactura}`,
+        null
+      ).subscribe({
+        next: (res) => {
+          this.seIncarca.set(false);
+          this.alertaSucces.set(res.message);
+          this.incarcaFacturi();
+          setTimeout(() => this.alertaSucces.set(''), 2000);
+        },
+        error: (err) => {
+          this.seIncarca.set(false);
+          this.alertaEroare.set(err.error?.message ?? 'Eroare la confirmarea receptiei.');
+          setTimeout(() => this.alertaEroare.set(''), 2000);
+        }
+      });
+    }
+  }
+
+  platesteFactura(idFactura: number): void {
+    if (confirm('Ești sigur că vrei să marchezi această factură ca fiind plătită?')) {
+
+      this.seIncarca.set(true);
+
+      this.http.put<{ message: string }>(
+        `${environment.apiUrl}/admin/plateste-factura-furnizor/${idFactura}`,
+        null
+      ).subscribe({
+        next: (res) => {
+          this.seIncarca.set(false);
+          this.alertaSucces.set(res.message);
+          this.incarcaFacturi();
+          setTimeout(() => this.alertaSucces.set(''), 2000);
+        },
+        error: (err) => {
+          this.seIncarca.set(false);
+          this.alertaEroare.set(err.error?.message ?? 'Eroare la plata facturii');
+          setTimeout(() => this.alertaEroare.set(''), 2000);
+        }
+      });
+    }
   }
 
 

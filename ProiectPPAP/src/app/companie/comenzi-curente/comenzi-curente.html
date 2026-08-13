@@ -88,6 +88,12 @@
                   Recepționează Comanda
                 </button>
                 }
+                @if(item.factura && item.factura.stadiu_plata == false){
+                <button class= "buton-actiune buton-galben"
+                        (click)="platesteFactura(item.factura.factura_id)">
+                  Plateste Factura
+                </button>
+                }
               </div>
             </td>
           </tr>
