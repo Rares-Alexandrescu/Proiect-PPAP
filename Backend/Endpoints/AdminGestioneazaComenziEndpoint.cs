@@ -14,9 +14,9 @@ namespace Backend.Endpoints
 
         public static void MapAdminGestioneazaComenziEndpoint(this IEndpointRouteBuilder app)
         {
-            app.MapGet("/admin/vezi-logistica-intrare", async (ClaimsPrincipal admin, 
+            app.MapGet("/admin/vezi-logistica-intrare", async (ClaimsPrincipal admin,
                 IConfiguration config
-                )=>
+                ) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
                 var connectionString = config.GetConnectionString("DefaultConnection");
@@ -30,7 +30,7 @@ namespace Backend.Endpoints
                         FacturiFurnizor,
                         Furnizor,
                         StatisticiFactura,
-                        (FacturiFurnizor Factura, Furnizor Furnizor, StatisticiFactura Logistica) > (
+                        (FacturiFurnizor Factura, Furnizor Furnizor, StatisticiFactura Logistica)>(
                         "sp_Furnizor_AdminGeneralGetFacturiIntrare",
                         (factura, furnizor, logistica) => (factura, furnizor, logistica),
                         splitOn: "furnizor_id, stadiu_logistica_factura",
@@ -54,9 +54,9 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
 
-            app.MapGet("/admin/vezi-logistica-intrare-detaliat/{idFactura:int}", async(ClaimsPrincipal admin,
+            app.MapGet("/admin/vezi-logistica-intrare-detaliat/{idFactura:int}", async (ClaimsPrincipal admin,
                 IConfiguration config,
-                int idFactura) => 
+                int idFactura) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
                 var connectionString = config.GetConnectionString("DefaultConnection");
@@ -65,22 +65,22 @@ namespace Backend.Endpoints
 
                 using (var connection = new SqlConnection(connectionString))
                 {
-                     var parametri = new DynamicParameters();
-                     parametri.Add("@idFactura", idFactura);
+                    var parametri = new DynamicParameters();
+                    parametri.Add("@idFactura", idFactura);
 
-                     var facturaDetaliata = await connection.QueryAsync<
-                        FacturiFurnizor,
-                        Furnizor,
-                        StatisticiFactura,
-                        ComandaPiese,
-                        Piese,
-                        (FacturiFurnizor Factura, Furnizor Furnizor, StatisticiFactura Logistica, ComandaPiese Linie, Piese Piesa) > (
-                        "sp_Furnizor_AdminGeneralGetFacturiIntrare",
-                        (factura, furnizor, logistica, linie, piesa) => (factura, furnizor, logistica, linie, piesa),
-                        parametri,
-                        splitOn: "furnizor_id, stadiu_logistica_factura, comanda_piese_id, piese_id",
-                        commandType: CommandType.StoredProcedure
-                    );
+                    var facturaDetaliata = await connection.QueryAsync<
+                       FacturiFurnizor,
+                       Furnizor,
+                       StatisticiFactura,
+                       ComandaPiese,
+                       Piese,
+                       (FacturiFurnizor Factura, Furnizor Furnizor, StatisticiFactura Logistica, ComandaPiese Linie, Piese Piesa)>(
+                       "sp_Furnizor_AdminGeneralGetFacturiIntrare",
+                       (factura, furnizor, logistica, linie, piesa) => (factura, furnizor, logistica, linie, piesa),
+                       parametri,
+                       splitOn: "furnizor_id, stadiu_logistica_factura, comanda_piese_id, piese_id",
+                       commandType: CommandType.StoredProcedure
+                   );
 
                     var facturaGrupata = facturaDetaliata
                         .GroupBy(item => item.Factura.facturi_id)
@@ -105,7 +105,7 @@ namespace Backend.Endpoints
                     return Results.Ok(new { Factura = facturaGrupata });
                 }
 
-             }).RequireAuthorization();
+            }).RequireAuthorization();
 
 
             app.MapPut("/admin/receptie-primire/{idFactura:int}", async (ClaimsPrincipal admin,
@@ -400,8 +400,8 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
 
-            app.MapGet("/admin/download-documentatie-companie/{idCompanie:int}/{idDocumenteComanda:int}", async(
-                int idDocumenteComanda, 
+            app.MapGet("/admin/download-documentatie-companie/{idCompanie:int}/{idDocumenteComanda:int}", async (
+                int idDocumenteComanda,
                 int idCompanie,
                 ClaimsPrincipal admin,
                 IConfiguration config
@@ -440,11 +440,11 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
 
-            app.MapGet("/admin/download-factura-companie/{idCompanie:int}/{idFactura:int}", async(
+            app.MapGet("/admin/download-factura-companie/{idCompanie:int}/{idFactura:int}", async (
                 int idFactura,
                 int idCompanie,
                 ClaimsPrincipal admin,
-                IConfiguration config                
+                IConfiguration config
                 ) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
@@ -535,14 +535,13 @@ namespace Backend.Endpoints
                     var parametri = new DynamicParameters();
                     parametri.Add("@idFacturi", idFacturi);
 
-                    //sa ma gandesc daca asa e cea mai buna chestie de fct
 
                     var randuriModificate = await connection.ExecuteScalarAsync<int>(
                         "sp_Furnizor_AdminGeneralPlatesteFacturiFurnizori",
                         parametri,
                         commandType: CommandType.StoredProcedure);
 
-                    if(randuriModificate != 1)
+                    if (randuriModificate != 1)
                     {
                         return Results.BadRequest(new { message = "Factura nu exista sau deja a fost platita!" });
                     }
@@ -552,6 +551,7 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
         }
+    }
 
     public class DocumenteComandaId
     {

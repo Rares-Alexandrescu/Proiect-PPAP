@@ -22,7 +22,7 @@
     <div class="bara-actiuni">
       <button class="buton-principal buton-adauga" (click)="inapoiLaLista()">&larr; Înapoi</button>
 
-      @if (!toateLiniile(1)) {
+      @if (!factura()?.statistici?.receptie_comanda) {
       <button class="buton-principal buton-adauga verde" (click)="receptiePrimire(factura()?.factura?.facturi_id)">
         Receptie Marfa
       </button>

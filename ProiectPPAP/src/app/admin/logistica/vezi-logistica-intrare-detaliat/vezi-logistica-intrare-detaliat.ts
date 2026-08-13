@@ -21,6 +21,7 @@ export interface StatisticiFactura {
   stadiu_logistica_factura: "Zero" | "Partial" | "Complet";
   linii_expediate: number;
   linii_total: number;
+  receptie_comanda: boolean;
 }
 
 export interface ComandaPiese {

@@ -113,8 +113,7 @@ export class VeziComandaComponent implements OnInit{
       }
     });
   }
-  //doar pentru localadmin, o sa fac eu ceva
-  //orc se verifica in backend douapuncteparantezainchisa
+
   plaseazaComanda(): void {
     if (!confirm('Ești sigur că vrei să plasezi această comandă? Nu vei mai putea adăuga piese după aceea.')) {
       return;

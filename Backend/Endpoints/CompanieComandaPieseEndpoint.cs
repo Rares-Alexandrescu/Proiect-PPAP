@@ -1,4 +1,14 @@
-﻿namespace Backend.Endpoints
+﻿
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Dapper;
+using System.Data;
+using System.Security.Claims;
+using Backend.DBClasses;
+using Backend.Helpers;
+using Backend.Services;
+
+namespace Backend.Endpoints
 {
     public static class CompanieComandaPieseEndpoint
     {
@@ -667,17 +677,6 @@
                         totalGeneralComanda,
                         pieseFormatatePentruPdf);
 
-                    //acuma imi trebuie o metoda sa updatez fix asta,am id comanda, trebuie un join
-                    //si sa updatez bazat pe asta, sa verific daca este al companiei.... etc
-                    //am verificat, am creeat, am pus, daca nu e adevarat sa fac ceva de stergere, chiar daca nu e cea mai buna idee,
-                    //doar ma scapa de un sp in plus expres pentru calePdfDocumenteComanda
-                    //sp_Documente_Comanda_PlaseazaComanda
-                    //taca paca paca, chiar daca am reparat la el, dar vs -ul imi joaca feste
-
-                    //poate fac facturile de furnizor aici, doi in unu
-                    //daca nu, o sa vad eu cum fac, cel mai probabil o sa pun ceva serviciu sa mi verifice din ora n ora si aia e
-                    //o sa vad, macar acuma si a revenit, bine ca am avut o premonitie
-
                     parametruComanda.Add("@path_documente_pdf", calePdfDocumenteComanda);
 
                     await connection.ExecuteAsync(
@@ -714,14 +713,17 @@
                     var (eroareComanda, comandaCeruta) = await SecurityHelper.VerificaSiObtineComandaDupaId(
                         idComanda,
                         companie.Companie_Id,
-                        connectionString!);
+                        connectionString!,
+                        false);
 
                     if (eroareComanda != null) return eroareComanda;
 
                     var parametruComanda = new DynamicParameters();
                     parametruComanda.Add("@idComanda", idComanda);
 
-                    int rezultatCommanda = await connection.ExecuteAsync("sp_Documente_Comanda_CompaniaReceptioneazaComanda");
+                    int rezultatCommanda = await connection.ExecuteAsync("sp_Documente_Comanda_CompaniaReceptioneazaComanda",
+                        parametruComanda,
+                        commandType: CommandType.StoredProcedure);
 
                     if (rezultatCommanda == 0)
                     {

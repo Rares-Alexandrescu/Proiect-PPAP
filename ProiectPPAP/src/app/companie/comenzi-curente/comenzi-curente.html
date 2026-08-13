@@ -28,6 +28,7 @@
             <th>Stadiu</th>
             <th>Document PDF</th>
             <th>Factură</th>
+            <th>Stadiu Plata</th>
             <th>Acțiuni</th>
           </tr>
         </thead>
@@ -43,6 +44,9 @@
               @if (!item.comanda.stadiu_finalizare && !item.documentComanda?.stadiu_acceptare){
               <span class="status-badge status-pending">În lucru</span>
               }
+              @if(item.comanda.stadiu_finalizare && item.documentComanda?.stadiu_acceptare){
+              <span class="status-badge status-plasata">Primita</span>
+              }
             </td>
             <td>
               @if (item.documentComanda?.path_documente_pdf) {
@@ -57,6 +61,16 @@
               } @else {
               <span class="status-badge status-pending">Fără factură</span>
               }
+            <td>
+              @if(item.factura?.stadiu_plata == false){
+              <span class="status-badge status-lipsa">Neplatita</span>
+              }
+              @if(item.factura?.stadiu_plata == true){
+              <span class="status-badge status-plasata">Platita</span>
+              }
+              @if(item.factura?.stadiu_plata == null){
+              <span class="status-badge status-pending">Factura in lucru</span>
+              }
             </td>
             <td>
               <div class="actiuni-tabel">
@@ -69,7 +83,7 @@
                 </button>
                 }
                 @if (item.factura && item.documentComanda?.stadiu_acceptare !== true) {
-                <button class = "buton-actiune buton-adauga"
+                <button class = "buton-actiune buton-verde"
                         (click)="receptioneazaComanda(item.comanda.comanda_id)">
                   Recepționează Comanda
                 </button>
@@ -80,7 +94,7 @@
           }
           @empty {
           <tr>
-            <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">
+            <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
               Nu există nicio comandă înregistrată momentan.
             </td>
           </tr>
