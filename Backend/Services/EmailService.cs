@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Mail;
-using Backend.DBClasses
+using Backend.DBClasses;
+using System.Text;
+
 namespace Backend.Services
 {
     public interface IEmailService
@@ -8,6 +10,13 @@ namespace Backend.Services
         Task TrimiteEmailResetareParolaAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat);
         Task TrimiteEmailWelcomeAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat);
         Task TrimiteEmailConfirmAsync(string emailDestinatar, string nume, string prenume, string tokenSecurizat);
+        Task TrimitePlataCompanieLaFurnizorAsync(
+            string emailFurnizor,
+            string numeFurnizor,
+            string caleFacturaPdf,
+            decimal pretFactura,
+            int idFactura,
+            List<(string NumePiesa, int Cantitate, decimal PretUnitar)> liniiFactura);
     }
 
     public class EmailService : IEmailService
@@ -151,7 +160,7 @@ namespace Backend.Services
                 .Replace("{{IdFactura}}", idFactura.ToString())
                 .Replace("{{AnulCurent}}", anulCurent)
                 .Replace("{{PretFactura}}", pretFactura.ToString("N2"))
-                .Replace("{{RanduriProduse}}", randuriProduseFormatate);
+                .Replace("{{RanduriProduse}}", randuriProduseFormatate.ToString());
 
             await TrimiteEmailBazaAsync(emailFurnizor, "Plata facturii cu id-ul " + idFactura + " s-a realizat cu succes!", htmlPersonalizat);
         }

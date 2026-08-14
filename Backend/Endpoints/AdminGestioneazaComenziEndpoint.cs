@@ -529,7 +529,7 @@ namespace Backend.Endpoints
             app.MapPut("/admin/plateste-factura-furnizor/{idFacturi:int}", async (
                 int idFacturi,
                 ClaimsPrincipal admin,
-                IConfiguration,
+                IConfiguration config,
                 IEmailService emailService) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
@@ -562,11 +562,11 @@ namespace Backend.Endpoints
                         decimal? Pret_Cumparare,
                         int? Cantitate_Comandata)>(
                         "sp_Furnizor_AdminGetFacturaPentruEmail",
-                        parametriFactura,
+                        parametri,
                         commandType: CommandType.StoredProcedure)).ToList();
 
                     var randuriFactura = toateRandurile
-                        .Where(r => r.NumePiesa != null && r.PretCumparare.HasValue && r.CantitateComandata.HasValue)
+                        .Where(r => r.Nume_Piesa != null && r.Pret_Cumparare.HasValue && r.Cantitate_Comandata.HasValue)
                         .ToList();
 
                     if (randuriFactura.Count > 0)
@@ -578,14 +578,13 @@ namespace Backend.Endpoints
                             .ToList();
 
                         await emailService.TrimitePlataCompanieLaFurnizorAsync(
-                            antet.Email_Furnizor,
-                            antet.Nume_Furnizor,
-                            antet.Path_Factura_Pdf,
-                            antet.Pret_Total_Brut ?? 0,
-                            idFacturi,
-                            liniiFactura);
+                            emailFurnizor: antet.Email_Furnizor,
+                            numeFurnizor: antet.Nume_Furnizor,
+                            caleFacturaPdf: antet.Path_Factura_Pdf,
+                            pretFactura: antet.Pret_Total_Brut ?? 0,
+                            idFactura: idFacturi,
+                            liniiFactura: liniiFactura);
                     }
-
                     return Results.Ok(new { message = "Factura a fost platita cu succes!" });
                 }
             }).RequireAuthorization();

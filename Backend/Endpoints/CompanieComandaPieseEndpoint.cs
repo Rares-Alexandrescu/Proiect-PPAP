@@ -702,17 +702,17 @@ namespace Backend.Endpoints
                 }
             }).RequireAuthorization();
 
-            app.MapPut("/compania-ta/plateste-factura/{idFactura:int}", async (
-                int idFactura,
-                ClaimsPrincipal adminCompanie,
-                IConfiguration config) =>
+            app.MapPut("/compania-ta/plateste-factura/{idFactura:int}", async(int idFactura, 
+                ClaimsPrincipal admin, 
+                IConfiguration config, 
+                IEmailService emailService) =>
             {
                 var connectionString = config.GetConnectionString("DefaultConnection");
 
-                var eroareAutentificare = await SecurityHelper.VerificaAdminLocal(adminCompanie, config);
+                var eroareAutentificare = await SecurityHelper.VerificaAdminLocal(admin, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
 
-                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(adminCompanie, connectionString!);
+                var (eroare, utilizator, rol, companie) = await SecurityHelper.ObtineContextDinJWT(admin, connectionString!);
                 if (eroare != null) return eroare;
 
                 if (companie == null)
@@ -738,7 +738,7 @@ namespace Backend.Endpoints
                     if (rezultatFactura == 0)
                         return Results.BadRequest(new { message = "Nu s-a platit factura!" });
 
-                    var dateEmail = await connection.ExecuteAsync(
+                    var dateEmail = await connection.QueryAsync(
                         "sp_Furnizor_AdminGetFacturaPentruEmail",
                         parametruFactura,
                         commandType: CommandType.StoredProcedure);
