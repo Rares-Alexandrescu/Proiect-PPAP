@@ -529,7 +529,7 @@ namespace Backend.Endpoints
             app.MapPut("/admin/plateste-factura-furnizor/{idFacturi:int}", async (
                 int idFacturi,
                 ClaimsPrincipal admin,
-                IConfiguration ,
+                IConfiguration,
                 IEmailService emailService) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
@@ -554,12 +554,13 @@ namespace Backend.Endpoints
                     }
 
                     var toateRandurile = (await connection.QueryAsync<(
-                        string EmailFurnizor,
-                        string NumeFurnizor,
-                        decimal? PretTotalBrut,
-                        string NumePiesa,
-                        decimal? PretCumparare,
-                        int? CantitateComandata)>(
+                        string Email_Furnizor,
+                        string Nume_Furnizor,
+                        decimal? Pret_Total_Brut,
+                        string Path_Factura_Pdf,
+                        string Nume_Piesa,
+                        decimal? Pret_Cumparare,
+                        int? Cantitate_Comandata)>(
                         "sp_Furnizor_AdminGetFacturaPentruEmail",
                         parametriFactura,
                         commandType: CommandType.StoredProcedure)).ToList();
@@ -573,13 +574,14 @@ namespace Backend.Endpoints
                         var antet = randuriFactura[0];
 
                         var liniiFactura = randuriFactura
-                            .Select(r => (r.NumePiesa, r.CantitateComandata!.Value, r.PretCumparare!.Value))
+                            .Select(r => (r.Nume_Piesa, r.Cantitate_Comandata!.Value, r.Pret_Cumparare!.Value))
                             .ToList();
 
                         await emailService.TrimitePlataCompanieLaFurnizorAsync(
-                            antet.EmailFurnizor,
-                            antet.NumeFurnizor,
-                            antet.PretTotalBrut ?? 0,
+                            antet.Email_Furnizor,
+                            antet.Nume_Furnizor,
+                            antet.Path_Factura_Pdf,
+                            antet.Pret_Total_Brut ?? 0,
                             idFacturi,
                             liniiFactura);
                     }
