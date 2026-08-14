@@ -529,7 +529,8 @@ namespace Backend.Endpoints
             app.MapPut("/admin/plateste-factura-furnizor/{idFacturi:int}", async (
                 int idFacturi,
                 ClaimsPrincipal admin,
-                IConfiguration config) =>
+                IConfiguration ,
+                IEmailService emailService) =>
             {
                 var eroareAutentificare = await SecurityHelper.VerificaAdminGeneral(admin, config);
                 if (eroareAutentificare != null) return eroareAutentificare;
@@ -552,7 +553,37 @@ namespace Backend.Endpoints
                         return Results.BadRequest(new { message = "Factura nu exista sau deja a fost platita!" });
                     }
 
-                    //mail plata factura furnizorul asta etc cu detalii poate etc
+                    var toateRandurile = (await connection.QueryAsync<(
+                        string EmailFurnizor,
+                        string NumeFurnizor,
+                        decimal? PretTotalBrut,
+                        string NumePiesa,
+                        decimal? PretCumparare,
+                        int? CantitateComandata)>(
+                        "sp_Furnizor_AdminGetFacturaPentruEmail",
+                        parametriFactura,
+                        commandType: CommandType.StoredProcedure)).ToList();
+
+                    var randuriFactura = toateRandurile
+                        .Where(r => r.NumePiesa != null && r.PretCumparare.HasValue && r.CantitateComandata.HasValue)
+                        .ToList();
+
+                    if (randuriFactura.Count > 0)
+                    {
+                        var antet = randuriFactura[0];
+
+                        var liniiFactura = randuriFactura
+                            .Select(r => (r.NumePiesa, r.CantitateComandata!.Value, r.PretCumparare!.Value))
+                            .ToList();
+
+                        await emailService.TrimitePlataCompanieLaFurnizorAsync(
+                            antet.EmailFurnizor,
+                            antet.NumeFurnizor,
+                            antet.PretTotalBrut ?? 0,
+                            idFacturi,
+                            liniiFactura);
+                    }
+
                     return Results.Ok(new { message = "Factura a fost platita cu succes!" });
                 }
             }).RequireAuthorization();

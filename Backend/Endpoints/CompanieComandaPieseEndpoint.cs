@@ -738,6 +738,11 @@ namespace Backend.Endpoints
                     if (rezultatFactura == 0)
                         return Results.BadRequest(new { message = "Nu s-a platit factura!" });
 
+                    var dateEmail = await connection.ExecuteAsync(
+                        "sp_Furnizor_AdminGetFacturaPentruEmail",
+                        parametruFactura,
+                        commandType: CommandType.StoredProcedure);
+
                     return Results.Ok(new { message = "Factura platita cu succes!" });
 
                 }

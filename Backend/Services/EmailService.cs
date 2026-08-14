@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Mail;
-
+using Backend.DBClasses
 namespace Backend.Services
 {
     public interface IEmailService
@@ -108,6 +108,52 @@ namespace Backend.Services
             await TrimiteEmailBazaAsync(emailDestinatar, "Cerere de resetare a parolei", htmlPersonalizat);
         }
 
+        //trebuie sa vad si clasele etc sa le trimit direct cumtrebuie
+        //ar fi bine sa fac si ceva tabel de factura, pe langa pedefeul ala sa fie treaba treaba etc
+        public async Task TrimitePlataCompanieLaFurnizorAsync(
+            string emailFurnizor,
+            string numeFurnizor,
+            decimal pretFactura,
+            int idFactura,
+            List<(string NumePiesa, int Cantitate, decimal PretUnitar)> liniiFactura)
+        {
+            string frontendUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:4200";
+            string anulCurent = DateTime.Now.Year.ToString();
+
+            string caleTemplate = Path.Combine(AppContext.BaseDirectory, "EmailTemplates", "TrimitePlataCompanieLaFurnizorEmail.html");
+
+            Console.WriteLine("PATH TEMPLATE EMAIL PLATA:");
+            Console.WriteLine(caleTemplate);
+            Console.WriteLine("EXISTS: " + File.Exists(caleTemplate));
+
+            if (!File.Exists(caleTemplate))
+            {
+                throw new FileNotFoundException($"Template-ul de email nu a fost gasit la {caleTemplate}");
+            }
+
+            string htmlBrut = await File.ReadAllTextAsync(caleTemplate);
+
+            var randuriProduseFormatate = new StringBuilder();
+            foreach (var linie in liniiFactura)
+            {
+                decimal totalLinie = linie.Cantitate * linie.PretUnitar;
+                randuriProduseFormatate.Append($@"
+                        <tr>
+                            <td>{linie.NumePiesa}</td>
+                            <td class=""numeric"">{linie.Cantitate}</td>
+                            <td class=""numeric"">{linie.PretUnitar:N2} RON</td>
+                            <td class=""numeric"">{totalLinie:N2} RON</td>
+                        </tr>");
+            }
+            string htmlPersonalizat = htmlBrut
+                .Replace("{{NumeFurnizor}}", numeFurnizor)
+                .Replace("{{IdFactura}}", idFactura.ToString())
+                .Replace("{{AnulCurent}}", anulCurent)
+                .Replace("{{PretFactura}}", pretFactura.ToString("N2"))
+                .Replace("{{RanduriProduse}}", randuriProduseFormatate);
+
+            await TrimiteEmailBazaAsync(emailFurnizor, "Plata facturii cu id-ul " + idFactura + " s-a realizat cu succes!", htmlPersonalizat);
+        }
 
         private async Task TrimiteEmailBazaAsync(string emailDestinatar, string subiect, string mesajHtml)
         {
@@ -132,4 +178,5 @@ namespace Backend.Services
             }
         }
     }
+
 }
