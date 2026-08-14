@@ -199,7 +199,6 @@ namespace Backend.Services
                 {
                     atasament?.Dispose();
                 }
-                await client.SendMailAsync(mailMessage);
             }
         }
     }
