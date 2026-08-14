@@ -11,6 +11,21 @@ export interface Comanda {
   stadiu_finalizare: boolean;
 }
 
+export interface StatisticiFactura {
+  stadiu_logistica_factura: string;
+  linii_expediate: number;
+  linii_total: number;
+  receptie_comanda: boolean;
+}
+
+export interface DocumenteComanda{
+  documente_id: number;
+  compania_id: number;
+  stadiu_acceptare: boolean | null;
+  path_documente_pdf: string | null;
+  created_at: string;
+}
+
 export interface Companie {
   companie_Id: number;
   nume_Companie: string;
@@ -31,6 +46,8 @@ export interface FacturaCompanie{
 export interface ComandaIesireSumar {
   comanda: Comanda;
   companie: Companie;
+  statistici: StatisticiFactura;
+  documenteComanda: DocumenteComanda;
   facturaCompanie: FacturaCompanie;
 }
 

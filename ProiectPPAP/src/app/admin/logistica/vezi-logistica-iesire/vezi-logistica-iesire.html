@@ -31,6 +31,10 @@
             <th>Email</th>
             <th>Telefon</th>
             <th>Data</th>
+            <th>Factura</th>
+            <th>Documentatie</th>
+            <th>Stadiu Plata</th>
+            <th>Stadiu Trimitere</th>
             <th>Acțiuni</th>
           </tr>
         </thead>
@@ -49,6 +53,37 @@
             <td>{{ item.companie.email }}</td>
             <td>{{ item.companie.numar_Telefon }}</td>
             <td>{{ item.comanda.created_at | date:'dd.MM.yyyy' }}</td>
+            <td>
+              @if (item.facturaCompanie == null){
+              <span class="status-badge status-pending">Factura in lucru</span>
+              }
+              @else if(item.facturaCompanie){
+              <span class="status-badge status-plasata">Factura creata</span>}
+            </td>
+            <td>
+              @if (item.documenteComanda){
+              <span class="status-badge status-plasata">Documentatie Comanda</span>
+              }
+              @else{
+              <span class="status-badge status-lipsa">Docuentatie lipsa! Contacteaza suport!</span>
+              }
+            </td>
+            <td>
+              @if (item.facturaCompanie.stadiu_plata == false){
+              <span class="status-badge status-lipsa">Neplatita</span>
+              }
+              @else if(item.facturaCompanie.stadiu_plata == true){
+              <span class="status-badge status-plasata">Platita</span>
+              }
+            </td>
+            <td>
+              @if (item.documenteComanda.stadiu_acceptare == true){
+              <span class="status-badge status-plasata">Comanda receptionata de companie</span>
+              }
+              @else{
+              <span class="status-badge status-pending">Comanda in lucru</span>
+              }
+            </td>
             <td>
               <div class="actiuni-tabel">
                 <button class="buton-actiune buton-galben" (click)="veziFacturaIesireDetaliata(item.comanda.comanda_id)">Vezi Detalii</button>
