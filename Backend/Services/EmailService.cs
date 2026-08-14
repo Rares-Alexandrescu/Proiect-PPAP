@@ -113,6 +113,7 @@ namespace Backend.Services
         public async Task TrimitePlataCompanieLaFurnizorAsync(
             string emailFurnizor,
             string numeFurnizor,
+            string caleFacturaPdf,
             decimal pretFactura,
             int idFactura,
             List<(string NumePiesa, int Cantitate, decimal PretUnitar)> liniiFactura)
@@ -155,7 +156,7 @@ namespace Backend.Services
             await TrimiteEmailBazaAsync(emailFurnizor, "Plata facturii cu id-ul " + idFactura + " s-a realizat cu succes!", htmlPersonalizat);
         }
 
-        private async Task TrimiteEmailBazaAsync(string emailDestinatar, string subiect, string mesajHtml)
+        private async Task TrimiteEmailBazaAsync(string emailDestinatar, string subiect, string mesajHtml, string? caleAtasament = null)
         {
             var mailtrap = _config.GetSection("Mailtrap");
             
@@ -174,6 +175,21 @@ namespace Backend.Services
                 
                 mailMessage.To.Add(emailDestinatar);
 
+                Attachment? atasament = null;
+                if (!string.IsNullOrEmpty(caleAtasament) && File.Exists(caleAtasament))
+                {
+                    atasament = new Attachment(caleAtasament, "application/pdf");
+                    mailMessage.Attachments.Add(atasament);
+                }
+
+                try
+                {
+                    await client.SendMailAsync(mailMessage);
+                }
+                finally
+                {
+                    atasament?.Dispose();
+                }
                 await client.SendMailAsync(mailMessage);
             }
         }
