@@ -276,6 +276,7 @@ namespace Backend.Endpoints
             app.MapPut("/admin/trimite-comanda/{idComanda:int}/{idComandaPiese:int}", async (
                 ClaimsPrincipal admin,
                 IConfiguration config,
+                IEmailService emailService,
                 IPDFService pdfService,
                 int idComandaPiese,
                 int idComanda) =>
@@ -365,7 +366,9 @@ namespace Backend.Endpoints
                                 }
 
                                 decimal totalGeneralComanda = rezultate.FirstOrDefault().TotalPretComanda;
-
+                                //aici merge sa trimit direct factura facuta din procedura stocata si pe mail
+                                //direct pe mailul companiei
+                                //aici e mai ok zic eu
                                 var pieseFormatatePentruPdf = rezultate.Select(r => new
                                 {
                                     Piesa = r.Piesa,
@@ -389,8 +392,19 @@ namespace Backend.Endpoints
                                     transaction: transaction,
                                     commandType: CommandType.StoredProcedure);
 
+                                await emailService.TrimitemComandaLaCompanieCuFacturaAsync(
+                                    emailCompanie: companieFactura.Email,
+                                    numeCompanie: companieFactura.Nume_Companie,
+                                    caleFacturaPdf: calePdfFacturaComanda,
+                                    PretFactura: totalGeneralComanda,
+                                    idFactura: idComanda,
+                                    liniiFactura: pieseFormatatePentruPdf);
+
                                 transaction.Commit();
                                 //aici trebuie sa fac un mail de trimitere catre companie
+
+
+
                                 return Results.Ok(new { message = "Comanda a fost trimisa catre companie, factura pentru comanda asta a fost generata!" });
                             }
 
