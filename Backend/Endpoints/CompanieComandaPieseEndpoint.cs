@@ -738,12 +738,48 @@ namespace Backend.Endpoints
                     if (rezultatFactura == 0)
                         return Results.BadRequest(new { message = "Nu s-a platit factura!" });
 
-                    var dateEmail = await connection.QueryAsync(
-                        "sp_Furnizor_AdminGetFacturaPentruEmail",
+                    var dateEmail = (await connection.QueryAsync<(
+                        string Email,
+                        string Nume_Companie,
+                        string Path_Factura_Pdf,
+                        decimal? Pret_Brut,
+                        string Nume_Piesa,
+                        decimal? Pret_Vanzare,
+                        string Nume_Furnizor,
+                        int? Cantitate_Comandata,
+                        string ? Detalii_Piese)>(
+                        "sp_Companie_AdminGetFacturaCompaniePentruMail",
                         parametruFactura,
-                        commandType: CommandType.StoredProcedure);
+                        commandType: CommandType.StoredProcedure)).ToList();
 
-                    return Results.Ok(new { message = "Factura platita cu succes!" });
+                    var randuriValideCompanie = dateEmail
+                        .Where(r => r.Nume_Piesa != null && r.Pret_Vanzare.HasValue && r.Cantitate_Comandata.HasValue)
+                        .ToList();
+
+                    if (randuriValideCompanie.Count > 0)
+                    {
+                        var antetCompanie = randuriValideCompanie[0];
+
+                        var liniiFactura = randuriValideCompanie
+                            .Select(r => (
+                                NumePiesa: r.Nume_Piesa,
+                                NumeFurnizorPiesa: r.Nume_Furnizor,
+                                DetaliiPiesa: r.Detalii_Piese,
+                                Cantitate: r.Cantitate_Comandata!.Value,
+                                PretUnitar: r.Pret_Vanzare!.Value))
+                            .ToList();
+
+                        await emailService.TrimitePlataCompanieLaNoiAsync(
+                            antetCompanie.Email,
+                            antetCompanie.Nume_Companie,
+                            antetCompanie.Path_Factura_Pdf,
+                            antetCompanie.Pret_Brut ?? 0,
+                            idFactura,
+                            liniiFactura);
+
+                        return Results.Ok(new { message = "Factura platita cu succes!" });
+                    }
+                    return Results.Ok(new { message = "Factura platita cu succes, dar nu s-a trimis mailul de confirmare!!" });
 
                 }
             }).RequireAuthorization();

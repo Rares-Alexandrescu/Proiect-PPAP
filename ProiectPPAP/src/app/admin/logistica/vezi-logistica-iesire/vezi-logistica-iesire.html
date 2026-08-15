@@ -69,19 +69,28 @@
               }
             </td>
             <td>
-              @if (item.facturaCompanie.stadiu_plata == false){
+              @if(item.facturaCompanie == null){
+              <span class="status-badge status-pending">Factura in lucru</span>
+              }
+              @if (item.facturaCompanie?.stadiu_plata == false){
               <span class="status-badge status-lipsa">Neplatita</span>
               }
-              @else if(item.facturaCompanie.stadiu_plata == true){
+              @else if(item.facturaCompanie?.stadiu_plata == true){
               <span class="status-badge status-plasata">Platita</span>
               }
             </td>
             <td>
-              @if (item.documenteComanda.stadiu_acceptare == true){
+              @if (item.documenteComanda.stadiu_acceptare == true) {
               <span class="status-badge status-plasata">Comanda receptionata de companie</span>
               }
-              @else{
-              <span class="status-badge status-pending">Comanda in lucru</span>
+              @else if (item.statisticiFactura.receptie_comanda == true && item.facturaCompanie == null) {
+              <span class="status-badge status-pending">Comanda in curs de procesare</span>
+              }
+              @else if (item.statisticiFactura.receptie_comanda == true && item.facturaCompanie != null) {
+              <span class="status-badge status-pending">Comanda trimisa la companie</span>
+              }
+              @else if (item.statisticiFactura.receptie_comanda == false) {
+              <span class="status-badge status-lipsa">Comanda inca e procesata de furnizor</span>
               }
             </td>
             <td>

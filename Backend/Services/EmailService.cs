@@ -17,6 +17,14 @@ namespace Backend.Services
             decimal pretFactura,
             int idFactura,
             List<(string NumePiesa, int Cantitate, decimal PretUnitar)> liniiFactura);
+
+        Task TrimitePlataCompanieLaNoiAsync(
+            string emailCompanie,
+            string numeCompanie,
+            string caleFacturaPdf,
+            decimal PretFactura,
+            int idFactura,
+            List<(string NumePiesa, string NumeFurnizorPiesa, string? DetaliiPiesa, int Cantitate, decimal PretUnitar)> liniiFactura);
     }
 
     public class EmailService : IEmailService
@@ -162,7 +170,56 @@ namespace Backend.Services
                 .Replace("{{PretFactura}}", pretFactura.ToString("N2"))
                 .Replace("{{RanduriProduse}}", randuriProduseFormatate.ToString());
 
-            await TrimiteEmailBazaAsync(emailFurnizor, "Plata facturii cu id-ul " + idFactura + " s-a realizat cu succes!", htmlPersonalizat);
+            await TrimiteEmailBazaAsync(emailFurnizor, "Plata facturii cu id-ul " + idFactura + " s-a realizat cu succes!", htmlPersonalizat, caleFacturaPdf);
+        }
+
+        public async Task TrimitePlataCompanieLaNoiAsync(
+            string emailCompanie,
+            string numeCompanie,
+            string caleFacturaPdf,
+            decimal PretFactura,
+            int idFactura,
+            List<(string NumePiesa, string NumeFurnizorPiesa, string? DetaliiPiesa, int Cantitate, decimal PretUnitar)> liniiFactura)
+        {
+            string frontendUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:4200";
+            string anulCurent = DateTime.Now.Year.ToString();
+
+            string caleTemplate = Path.Combine(AppContext.BaseDirectory, "EmailTemplates", "TrimitePlataCompanieLaNoiEmail.html");
+
+            Console.WriteLine("PATH TEMPLATE EMAIL PLATA:");
+            Console.WriteLine(caleTemplate);
+            Console.WriteLine("EXISTS: " + File.Exists(caleTemplate));
+
+            if (!File.Exists(caleTemplate))
+            {
+                throw new FileNotFoundException($"Template-ul de email nu a fost gasit la {caleTemplate}");
+            }
+
+            string htmlBrut = await File.ReadAllTextAsync(caleTemplate);
+
+            var randuriProduseFormatate = new StringBuilder();
+            foreach (var linie in liniiFactura)
+            {
+                decimal totalLinie = linie.Cantitate * linie.PretUnitar;
+                randuriProduseFormatate.Append($@"
+                        <tr>
+                            <td>{linie.NumeFurnizorPiesa}</td>
+                            <td>{linie.NumePiesa}</td>
+                            <td>{linie.DetaliiPiesa ?? "N/A"}</td>
+                            <td class=""numeric"">{linie.Cantitate}</td>
+                            <td class=""numeric"">{linie.PretUnitar:N2} RON</td>
+                            <td class=""numeric"">{totalLinie:N2} RON</td>
+                        </tr>");
+            }
+
+            string htmlPersonalizat = htmlBrut
+                .Replace("{{NumeCompanie}}", numeCompanie)
+                .Replace("{{IdFactura}}", idFactura.ToString())
+                .Replace("{{AnulCurent}}", anulCurent)
+                .Replace("{{PretFactura}}", PretFactura.ToString("N2"))
+                .Replace("{{RanduriProduse}}", randuriProduseFormatate.ToString());
+
+            await TrimiteEmailBazaAsync(emailCompanie, "Plata facturii cu id-ul " + idFactura + " s-a realizat cu succes!", htmlPersonalizat, caleFacturaPdf);
         }
 
         private async Task TrimiteEmailBazaAsync(string emailDestinatar, string subiect, string mesajHtml, string? caleAtasament = null)

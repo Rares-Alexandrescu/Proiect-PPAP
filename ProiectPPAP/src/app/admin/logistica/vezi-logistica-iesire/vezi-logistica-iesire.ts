@@ -46,7 +46,7 @@ export interface FacturaCompanie{
 export interface ComandaIesireSumar {
   comanda: Comanda;
   companie: Companie;
-  statistici: StatisticiFactura;
+  statisticiFactura: StatisticiFactura;
   documenteComanda: DocumenteComanda;
   facturaCompanie: FacturaCompanie;
 }
