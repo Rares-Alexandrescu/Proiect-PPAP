@@ -95,60 +95,31 @@ namespace Backend.Helpers
                 commandType: CommandType.StoredProcedure);
         }
 
-    //DE SCURTAT, SA LE FAC SA CONVEARGA DOAR INTR-O SINGURA FUNCTIE PE AMANTREI
-        public static async Task<IResult?> VerificaAdminGeneral(ClaimsPrincipal admin, IConfiguration config)
+        private static async Task<IResult?> VerificaRol(ClaimsPrincipal admin, IConfiguration config, string rolAsteptat)
         {
             var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             if (!int.TryParse(idString, out int idAdmin))
                 return Results.Unauthorized();
 
             var connectionString = config.GetConnectionString("DefaultConnection");
             var rolAdmin = await GetRol(idAdmin, connectionString);
 
-            Console.WriteLine("Rolul pe care toti il asteptam este AdminGeneral " + rolAdmin);
-            if (rolAdmin != "AdminGeneral")
+            Console.WriteLine($"Rolul pe care toti il asteptam este {rolAsteptat}: {rolAdmin}");
+
+            if (rolAdmin != rolAsteptat)
                 return Results.Forbid();
 
             return null;
         }
 
-        //DE SCURTAT, SA LE FAC SA CONVEARGA DOAR INTR-O SINGURA FUNCTIE PE AMANTREI
-        public static async Task<IResult?> VerificaAdminLocal(ClaimsPrincipal admin, IConfiguration config)
-        {
-            var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        public static Task<IResult?> VerificaAdminGeneral(ClaimsPrincipal admin, IConfiguration config)
+            => VerificaRol(admin, config, "AdminGeneral");
 
-            if (!int.TryParse(idString, out int idAdmin))
-                return Results.Unauthorized();
+        public static Task<IResult?> VerificaAdminLocal(ClaimsPrincipal admin, IConfiguration config)
+            => VerificaRol(admin, config, "AdminCompanie");
 
-            var connectionString = config.GetConnectionString("DefaultConnection");
-            var rolAdmin = await GetRol(idAdmin, connectionString);
-
-            Console.WriteLine("Rolul pe care toti il asteptam este AdminCompanie " + rolAdmin);
-            if (rolAdmin != "AdminCompanie")
-                return Results.Forbid();
-
-            return null;
-        }
-
-        //DE SCURTAT, SA LE FAC SA CONVEARGA DOAR INTR-O SINGURA FUNCTIE PE AMANTREI
-        public static async Task<IResult?> VerificaAdminFurnizor(ClaimsPrincipal admin, IConfiguration config)
-        {
-            var idString = admin.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(idString, out int idAdmin))
-                return Results.Unauthorized();
-
-            var connectionString = config.GetConnectionString("DefaultConnection");
-            var rolAdmin = await GetRol(idAdmin, connectionString);
-
-            Console.WriteLine("Rolul pe care toti il asteptam este AdminFurnizor :" + rolAdmin);
-            if (rolAdmin != "AdminFurnizor")
-                return Results.Forbid();
-
-            return null;
-        }
-
+        public static Task<IResult?> VerificaAdminFurnizor(ClaimsPrincipal admin, IConfiguration config)
+            => VerificaRol(admin, config, "AdminFurnizor");
 
 
         public static void AdaugaEroare(Dictionary<string, List<string>> erori, string camp, string mesaj)
@@ -173,7 +144,7 @@ namespace Backend.Helpers
             return erori;
         }
 
-        //daca mi da eroare cand dau dotnet run, sa fiu atent aici, suta la suta crapa si tre sa includ ceva
+  
         public static Dictionary<string, List<string>> ValideazaDateFurnizor(AdminGestioneazaFurnizorRequest furnizorNou)
         {
             var erori = new Dictionary<string, List<string>>();

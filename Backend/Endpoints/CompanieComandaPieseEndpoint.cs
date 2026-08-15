@@ -650,6 +650,10 @@ namespace Backend.Endpoints
                         "sp_Documente_Comanda_PlaseazaComanda",
                         parametruComanda,
                         commandType: CommandType.StoredProcedure);
+                    
+
+                    //ca sa nu fie problema, poate fac ceva gen un vector de id-uri furnizori
+                    //si la fiecare trimit mail de notificare sau ceva
 
                     return Results.Ok(new { message = "Comanda a fost plasata cu succes!", CalePdf = calePdfDocumenteComanda });
 
