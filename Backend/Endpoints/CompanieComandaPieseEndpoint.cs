@@ -575,7 +575,6 @@ namespace Backend.Endpoints
                         else
                             return Results.BadRequest(new { message = "Eroare! Nu am putut sa adaugam piesa!" });
 
-                        //si lasa in pace in documente_comanda
                     }
                 }
 
@@ -585,6 +584,7 @@ namespace Backend.Endpoints
                 int idComanda,
                 ClaimsPrincipal utilizatorCompanie,
                 IPDFService pdfService,
+                IEmailService emailService,
                 IConfiguration config) =>
             {
                 var connectionString = config.GetConnectionString("DefaultConnection");
@@ -650,10 +650,8 @@ namespace Backend.Endpoints
                         "sp_Documente_Comanda_PlaseazaComanda",
                         parametruComanda,
                         commandType: CommandType.StoredProcedure);
-                    
 
-                    //ca sa nu fie problema, poate fac ceva gen un vector de id-uri furnizori
-                    //si la fiecare trimit mail de notificare sau ceva
+                    await SecurityHelper.TrimiteNotificareFurnizori(idComanda, config, emailService);
 
                     return Results.Ok(new { message = "Comanda a fost plasata cu succes!", CalePdf = calePdfDocumenteComanda });
 

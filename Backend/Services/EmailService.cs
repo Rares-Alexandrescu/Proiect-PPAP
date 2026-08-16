@@ -34,6 +34,10 @@ namespace Backend.Services
             decimal PretFactura,
             int idFactura,
             List<T> liniiFactura);
+
+        Task TrimiteNotificareComandaFurnizor(
+            string emailFurnizor,
+            string numeFurnizor);
     }
 
     public class EmailService : IEmailService
@@ -57,7 +61,7 @@ namespace Backend.Services
             Console.WriteLine("PATH TEMPLATE EMAIL:");
             Console.WriteLine(caleTemplate);
             Console.WriteLine("EXISTS: " + File.Exists(caleTemplate));
-            
+
             if (!File.Exists(caleTemplate))
             {
                 throw new FileNotFoundException($"Template-ul de email nu a fost gasit la {caleTemplate}");
@@ -134,8 +138,6 @@ namespace Backend.Services
             await TrimiteEmailBazaAsync(emailDestinatar, "Cerere de resetare a parolei", htmlPersonalizat);
         }
 
-        //trebuie sa vad si clasele etc sa le trimit direct cumtrebuie
-        //ar fi bine sa fac si ceva tabel de factura, pe langa pedefeul ala sa fie treaba treaba etc
         public async Task TrimitePlataCompanieLaFurnizorAsync(
             string emailFurnizor,
             string numeFurnizor,
@@ -276,6 +278,29 @@ namespace Backend.Services
                 .Replace("{{RanduriProduse}}", randuriProduseFormatate.ToString());
 
             await TrimiteEmailBazaAsync(emailCompanie, "Comanda ta cu id-ul " + idFactura + " a fost trimisa!", htmlPersonalizat, caleFacturaPdf);
+        }
+
+        public async Task TrimiteNotificareComandaFurnizor(
+            string emailFurnizor,
+            string numeFurnizor)
+        {
+            string anulCurent = DateTime.Now.Year.ToString();
+            string caleTemplate = Path.Combine(AppContext.BaseDirectory, "EmailTemplates", "NotificareFurnizorComandaEmail.html");
+
+            if (!File.Exists(caleTemplate))
+                throw new FileNotFoundException($"Template-ul de email nu a fost gasit la {caleTemplate}");
+
+            string htmlBrut = await File.ReadAllTextAsync(caleTemplate);
+
+            string frontendUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:4200";
+
+            string linkPanou = $"{frontendUrl}/admin-furnizor/vezi-facturi"
+            string htmlPersonalizat = htmlBrut
+                .Replace("{{NumeFurnizor}}", numeFurnizor)
+                .Replace("{{LinkPanou}}", linkPanou )
+                .Replace("{{AnulCurent}}", anulCurent);
+
+            await TrimiteEmailBazaAsync(emailFurnizor, "Comanda noua pe platforma PPAP!", htmlPersonalizat);
         }
 
         private async Task TrimiteEmailBazaAsync(string emailDestinatar, string subiect, string mesajHtml, string? caleAtasament = null)

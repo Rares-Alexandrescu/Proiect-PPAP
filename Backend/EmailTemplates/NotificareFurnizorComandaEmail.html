@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Comandă Nouă</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            padding: 40px 20px;
+            background-color: #f9fafb;
+        }
+
+        .card {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 30px 40px;
+            border-bottom: 1px solid #f3f4f6;
+            text-align: center;
+        }
+
+        .logo-icon {
+            color: #3b82f6;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .logo-text {
+            color: #111827;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .body {
+            padding: 40px;
+        }
+
+        h1 {
+            margin: 0 0 16px 0;
+            color: #111827;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .alert-box {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            color: #1e3a8a;
+            font-size: 14px;
+        }
+
+        p {
+            margin: 0 0 20px 0;
+            color: #4b5563;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background-color: #3b82f6;
+            color: #ffffff !important;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .link-text {
+            color: #3b82f6;
+            word-break: break-all;
+            font-size: 13px;
+        }
+
+        .footer {
+            padding: 20px 40px;
+            background-color: #f9fafb;
+            border-top: 1px solid #f3f4f6;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <span class="logo-icon">▲</span><span class="logo-text">PROIECT</span>
+            </div>
+            <div class="body">
+                <h1>Ai primit o comandă nouă!</h1>
+
+                <p>Salut, <strong>{{NumeFurnizor}}</strong>,</p>
+
+                <div class="alert-box">
+                    Am plasat o comandă nouă cu produse din catalogul tău. Comanda așteaptă să fie procesată și facturată.
+                </div>
+
+                <p>Poți verifica detaliile comenzii direct din platformă, sau apasă pe butonul de mai jos pentru acces rapid.</p>
+
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="{{LinkPanou}}" class="btn">Vezi Panel</a>
+                </div>
+
+                <p style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">Dacă butonul nu funcționează, poți copia și lipi următorul link în browserul tău:</p>
+                <p class="link-text">{{LinkPanou}}</p>
+
+                <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">Îți recomandăm să procesezi comanda cât mai curând posibil pentru a menține un timp bun de livrare.</p>
+            </div>
+            <div class="footer">
+                © {{AnulCurent}} Proiect PPAP. Toate drepturile rezervate.<br>
+                Te rugăm să nu răspunzi la acest email, deoarece adresa este folosită doar pentru trimiterea notificărilor automate.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

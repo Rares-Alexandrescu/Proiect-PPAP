@@ -10,6 +10,7 @@ using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
 using System.Text.RegularExpressions;
+using Backend.Services;
 
 namespace Backend.Helpers
 {
@@ -457,8 +458,41 @@ namespace Backend.Helpers
 
                 return (null, utilizatorDeAdaugat);
             }
+        }
 
-           
+        public static async Task TrimiteNotificareFurnizori(
+            int idComanda,
+            IConfiguration config,
+            IEmailService emailService)
+        {
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var parametri = new DynamicParameters();
+                parametri.Add("@idComanda", idComanda);
+
+                var idFurnizori = await connection.QueryAsync<int>(
+                    "sp_Comanda_GetFurnizorIdPentruNotificare",
+                    parametri,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                List<int> listaIdFurnizori = idFurnizori.ToList();
+
+                foreach (var idFurnizor in listaIdFurnizori)
+                {
+                    var parametriFurnizor = new DynamicParameters();
+                    parametriFurnizor.Add("@idFurnizor", idFurnizor);
+
+                    var furnizor = await connection.QueryFirstOrDefaultAsync<Furnizor>(
+                        "sp_Furnizor_getByID",
+                        parametriFurnizor,
+                        commandType: CommandType.StoredProcedure);
+
+                    await emailService.TrimiteNotificareComandaFurnizor(furnizor.Email_Furnizor,
+                        furnizor.Nume_Furnizor);
+                }
+            }
         }
     }
 }
