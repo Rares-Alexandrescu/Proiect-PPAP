@@ -294,7 +294,7 @@ namespace Backend.Services
 
             string frontendUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:4200";
 
-            string linkPanou = $"{frontendUrl}/admin-furnizor/vezi-facturi"
+            string linkPanou = $"{frontendUrl}/admin-furnizor/vezi-facturi";
             string htmlPersonalizat = htmlBrut
                 .Replace("{{NumeFurnizor}}", numeFurnizor)
                 .Replace("{{LinkPanou}}", linkPanou )

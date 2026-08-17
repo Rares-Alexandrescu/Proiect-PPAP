@@ -33,7 +33,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-//doar acuma local si etc
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermiteAngular", policy =>

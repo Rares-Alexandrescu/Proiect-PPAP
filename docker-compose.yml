@@ -1,0 +1,56 @@
+﻿version: '3.8'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - db
+    volumes:
+      - ./DatabaseScript:/scripts
+    command: >
+      /bin/bash -c "
+      echo 'Așteptăm ca SQL Server să pornească...' &&
+      sleep 50s &&
+      echo 'Încercăm rularea scriptului SQL...' &&
+      /opt/mssql-tools/bin/sqlcmd -S db -U sa -P '${DB_PASSWORD}' -i /scripts/setup.sql
+      "
+
+  api:
+    build: 
+      context: ./Backend 
+      dockerfile: Dockerfile
+    ports:
+      - "5298:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=PPAP_Database;User=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_SECRET_KEY}
+      - Mailtrap__Host=${MAILTRAP_HOST}
+      - Mailtrap__Port=${MAILTRAP_PORT}
+      - Mailtrap__Username=${MAILTRAP_USERNAME}
+      - Mailtrap__Password=${MAILTRAP_PASSWORD}
+      - Mailtrap__FromEmail=${MAILTRAP_FROM_EMAIL}
+      - Mailtrap__FromName=${MAILTRAP_FROM_NAME}
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./ProiectPPAP 
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+
+volumes:
+  sql_data:
