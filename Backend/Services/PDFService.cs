@@ -24,7 +24,7 @@ namespace Backend.Services
         public async Task<string> GenereazaPdfComandaAsync(int idComanda, string numeCompanie, decimal totalGeneral, IEnumerable<dynamic> pieseComandate)
         {
             //sa vedem aici la folderabsolut, sa nu fie o problema in viitor
-            string folderRelativ = _config["PDFSettings:PathFolderSalvarePDF"] ?? "PdfComenziSalvate";
+            string folderRelativ = _config["PDFSettings:PathFolderSalvarePDF"] ?? "PDFSalvate";
             string folderAbsolut = Path.Combine(Directory.GetCurrentDirectory(), folderRelativ);
 
             if (!Directory.Exists(folderAbsolut))
@@ -47,7 +47,7 @@ namespace Backend.Services
 
         public async Task<string> GenereazaPdfFacturaFurnizorAsync(FacturiFurnizor factura, string numeFurnizor, IEnumerable<(Piese Piesa, TotalPiesaFactura Total)> liniiFactura)
         {
-            string folderRelativ = _config["PDFSettings:PathFolderSalvarePDF"] ?? "PdfComenziSalvate";
+            string folderRelativ = _config["PDFSettings:PathFolderSalvarePDF"] ?? "PDFSalvate";
             string folderAbsolut = Path.Combine(Directory.GetCurrentDirectory(), folderRelativ);
 
             if (!Directory.Exists(folderAbsolut))
@@ -70,7 +70,7 @@ namespace Backend.Services
         public async Task<string> GenereazaPdfFacturaCompanieAsync(int idComanda, string numeCompanie, decimal totalGeneral, IEnumerable<dynamic> pieseComandate)
         {
             //sa vedem aici la folderabsolut, sa nu fie o problema in viitor
-            string folderRelativ = _config["PDFSettings:PathFolderSalvarePDF"] ?? "PdfComenziSalvate";
+            string folderRelativ = _config["PDFSettings:PathFolderSalvarePDF"] ?? "PDFSalvate";
             string folderAbsolut = Path.Combine(Directory.GetCurrentDirectory(), folderRelativ);
 
             if (!Directory.Exists(folderAbsolut))

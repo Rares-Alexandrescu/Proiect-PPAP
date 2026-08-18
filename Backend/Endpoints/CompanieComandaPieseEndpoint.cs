@@ -862,6 +862,7 @@ namespace Backend.Endpoints
 
                     if (!File.Exists(caleFizica))
                     {
+                        Console.WriteLine($"[DEBUG] Calea pe care o cauta aplicatia este: {caleFizica}");
                         return Results.NotFound(new { message = "Fisierul nu a fost gasit pe server." });
                     }
 
